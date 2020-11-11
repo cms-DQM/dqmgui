@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.*.swp
+.#*
+#*#
+*~
+.python_packages
+*.sqlite
+*.so
+*.o
+*.log
+bin/
+lib/
+.vscode/
+.DS_Store

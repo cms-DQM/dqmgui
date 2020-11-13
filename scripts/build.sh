@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 CMSSW_VERSION=CMSSW_11_1_0_pre6
 SCRAM_ARCH=slc7_amd64_gcc820
 
@@ -7,8 +7,4 @@ pushd $(scram -a $SCRAM_ARCH list -c $CMSSW_VERSION | tail -1 | sed 's|.* ||')
   export BOOST_ROOT=$(scram tool tag boost BOOST_BASE)
   eval `scram run -sh`
 popd
-gmake all
-
-mkdir -p lib bin
-cp build/lib/lib* lib/
-cp build/bin/* bin/
+gmake $@ all

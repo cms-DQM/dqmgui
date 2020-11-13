@@ -8,3 +8,7 @@ pushd $(scram -a $SCRAM_ARCH list -c $CMSSW_VERSION | tail -1 | sed 's|.* ||')
   eval `scram run -sh`
 popd
 gmake all
+
+mkdir -p lib bin
+cp build/lib/lib* lib/
+cp build/bin/* bin/

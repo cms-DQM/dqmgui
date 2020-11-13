@@ -4,8 +4,6 @@ ROOTLIBS:=-lCore -lRIO -lNet -lHist -lMatrix -lThread -lTree -lMathCore -lGpad -
 INCLUDE=-I. -I$(ROOT_ROOT)/include -I$(BOOST_ROOT)/include
 LIBDIR=-L./build/lib -L$(shell echo $(LD_LIBRARY_PATH) | sed 's|:| -L|g')
 OTHERLIBS:=-ldl -ljpeg -lpng
-DQMRenderPlugins_src:=$(wildcard plugins/*.cc)
-DQMRenderPlugins_obj:=$(addprefix build/objs/, $(addsuffix .o,$(DQMRenderPlugins_src)))
 
 all: lib/renderplugin.so bin/render lib/libDQMRenderPlugins.so
 	@echo All build

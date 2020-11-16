@@ -5,7 +5,7 @@ INCLUDE=-I. -I$(ROOT_ROOT)/include -I$(BOOST_ROOT)/include
 LIBDIR=-L./lib -L$(shell echo $(LD_LIBRARY_PATH) | sed 's|:| -L|g')
 OTHERLIBS:=-ldl -ljpeg -lpng
 
-all: lib/librenderplugin.so bin/render lib/libDQMRenderPlugins.so
+all: bin/render lib/libDQMRenderPlugins.so
 	@echo All build
 
 objs/src/%.cc.o: src/%.cc
@@ -16,13 +16,9 @@ objs/plugins/%.cc.o: plugins/%.cc
 	@mkdir -p $(@D)
 	g++ -c $(CFLAGS) -O3 $(INCLUDE) -o $@ $<
 
-lib/librenderplugin.so: objs/src/DQMRenderPlugin.cc.o
+bin/render:  objs/src/render.cc.o objs/src/DQMRenderPlugin.cc.o
 	@mkdir -p $(@D)
-	g++ --shared -Wl,-E -Wl,-z,defs $(LDFLAGS) $(LIBDIR) $(ROOTLIBS) $(OTHERLIBS) $< -o $@
-
-bin/render: lib/librenderplugin.so objs/src/render.cc.o
-	@mkdir -p $(@D)
-	g++ $(LDFLAGS) $(LIBDIR) $(ROOTLIBS) $(OTHERLIBS) objs/src/render.cc.o -o $@ -lrenderplugin -lstdc++fs
+	g++ $(LDFLAGS) $(LIBDIR) $(ROOTLIBS) $(OTHERLIBS) $? -o $@ -lstdc++fs
 
 lib/libDQMRenderPlugins.so: $(addprefix objs/,$(addsuffix .o,$(wildcard plugins/*.cc)))
 	@mkdir -p $(@D)

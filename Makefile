@@ -16,7 +16,7 @@ objs/plugins/%.cc.o: plugins/%.cc
 	@mkdir -p $(@D)
 	g++ -c $(CFLAGS) -O3 $(INCLUDE) -o $@ $<
 
-bin/render:  objs/src/render.cc.o objs/src/DQMRenderPlugin.cc.o
+bin/render: objs/src/render.cc.o objs/src/DQMRenderPlugin.cc.o
 	@mkdir -p $(@D)
 	g++ $(LDFLAGS) $(LIBDIR) $(ROOTLIBS) $(OTHERLIBS) $? -o $@ -lstdc++fs
 

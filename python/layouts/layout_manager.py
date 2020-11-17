@@ -28,4 +28,6 @@ class LayoutManager:
 
 
 # Name has a default value
-Layout = namedtuple('Layout', ['source', 'destination', 'name'], defaults=['default'])
+Layout = namedtuple('Layout', ['source', 'destination', 'name'])
+# Python3.6 compatible hack to set the defaults:
+Layout.__new__.__defaults__ = ('default',)

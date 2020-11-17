@@ -141,7 +141,11 @@ class GUIImportManager:
 
         # To call the async function, we set up and tear down an event loop just
         # for this one call. The worker is left 'clean', without anything running.
-        return asyncio.run(cls.import_async(fileformat, filename, dataset, run, lumi))
+        # return asyncio.run(cls.import_async(fileformat, filename, dataset, run, lumi))
+        loop = asyncio.new_event_loop()
+        future = loop.run_until_complete(cls.import_async(fileformat, filename, dataset, run, lumi))
+        loop.close()
+        return future
 
 
     # But we need an async function to call async stuff, so here it is.

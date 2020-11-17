@@ -44,7 +44,7 @@ class XRDFile:
     # async-waits for this lock to be released.
     async def __async_call(self, function, *args, **kwargs):
         done = asyncio.Event()
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
         async_result = []
 
         # this must be called from main thread

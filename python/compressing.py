@@ -98,8 +98,6 @@ class GUIBlobCompressor():
     @classmethod
     async def uncompress_infos_blob(cls, infos_blob):
         fstring = cls.normal_format.format[1:]
-        # The following line is required when running on Python 3.6
-        fstring = fstring.decode('ascii')
         # again, this is very fast -- could be in threadpool, but does no really need to.
         buf = zlib.decompress(infos_blob)
         n = len(buf) // cls.normal_format.size

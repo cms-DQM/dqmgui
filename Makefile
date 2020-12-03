@@ -3,7 +3,7 @@ LDFLAGS:=-Wl,-E -Wl,--hash-style=gnu
 ROOTLIBS:=-lCore -lRIO -lNet -lHist -lMatrix -lThread -lTree -lMathCore -lGpad -lGraf3d -lGraf -lPhysics -lPostscript -lASImage
 INCLUDE=-I. -I$(ROOT_ROOT)/include -I$(BOOST_ROOT)/include -I$(PNG_ROOT)/include
 LIBDIR=-L./lib -L$(shell echo $(LD_LIBRARY_PATH) | sed 's|:| -L|g')
-OTHERLIBS:=-ldl -ljpeg -lpng
+OTHERLIBS:=-ldl -ljpeg -lpng15
 
 all: bin/render lib/libDQMRenderPlugins.so
 	@echo All build

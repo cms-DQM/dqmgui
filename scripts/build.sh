@@ -1,11 +1,14 @@
 #!/bin/bash -e
-CMSSW_VERSION=CMSSW_11_1_0_pre6
-SCRAM_ARCH=slc7_amd64_gcc820
+BASE="`dirname $0`"
 
-pushd $(scram -a $SCRAM_ARCH list -c $CMSSW_VERSION | tail -1 | sed 's|.* ||')
+CMSSW_VERSION=$(cat $BASE/cmssw_info | sed -n '2 p')
+SCRAM_ARCH=$(cat $BASE/cmssw_info | sed -n '3 p')
+
+pushd $(scram -a $SCRAM_ARCH list -c $CMSSW_VERSION | tail -1 | sed 's|.* ||') > /dev/null
   export ROOT_ROOT=$(scram tool tag root_interface ROOT_INTERFACE_BASE)
   export BOOST_ROOT=$(scram tool tag boost BOOST_BASE)
   export PNG_ROOT=$(scram tool tag libpng LIBPNG_BASE)
   eval `scram run -sh`
-popd
+popd > /dev/null
+
 gmake $@ all

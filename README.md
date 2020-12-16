@@ -2,10 +2,10 @@
 
 _Note: This is not the production DQMGUI._
 
-This package contains experimental code for a DQMGUI similar to https://cmsweb.cern.ch/dqm/offline/ , but as part of CMSSW.
+This package contains experimental code for a DQMGUI similar to https://cmsweb.cern.ch/dqm/offline/
 
 There are multiple relevant parts:
-- The _render service_ in `bin/render.cc`, extracted from the classic DQMGUI: https://github.com/rovere/dqmgui
+- The _render service_ in `src/render.cc`, extracted from the classic DQMGUI: https://github.com/rovere/dqmgui
 - The _render plugins_ in `plugins/`, traditionally hosted on https://github.com/dmwm/deployment/tree/master/dqmgui/style
 - A storage backend.
 - A web server.
@@ -37,63 +37,47 @@ Bellow is a sequence diagram for explaining this procedure
 
 ## The render service
 
-The histogram rendering using ROOT and the render plugins is done in a separate process in the classic DQMGUI. This package contians a simplified version of this process. `render.cc` compiles into a standalone program, `dqmRender`, that listens on a UNIX socket. A client (e.g. the GUI webserver) can request rendering a histogram there, by sending a request consisting of some metadata (some of which is a relict of the past and not actually used) and an arbitrary number of ROOT objects serialized into a `TBufferFile` buffer: The fisrt is the main object, the remaining ones are reference histograms that will be overlayed in different colors. (Some code for rendering _built-in references_ stored with the main object might remain, but this mode is no longer supported -- in line with CMSSW no longer supporting refrence hisotgrams in the `MonitorElement`.) The response is a PNG-compressed bitmap. All messages use a simple framing format of first sending the length, then the actual data, sometimes nested.
+The histogram rendering using ROOT and the render plugins is done in a separate process in the classic DQMGUI. This package contians a simplified version of this process. `render.cc` compiles into a standalone program, `render`, that listens on a UNIX socket. A client (e.g. the GUI webserver) can request rendering a histogram there, by sending a request consisting of some metadata (some of which is a relict of the past and not actually used) and an arbitrary number of ROOT objects serialized into a `TBufferFile` buffer: The fisrt is the main object, the remaining ones are reference histograms that will be overlayed in different colors. (Some code for rendering _built-in references_ stored with the main object might remain, but this mode is no longer supported -- in line with CMSSW no longer supporting refrence hisotgrams in the `MonitorElement`.) The response is a PNG-compressed bitmap. All messages use a simple framing format of first sending the length, then the actual data, sometimes nested.
 
-A client that implements this protocol is implemented in `python/render.py`.
+A client that implements this protocol is implemented in `python/rendering.py`.
 
-The render process is single-threaded and does not do any IO apart from the UNIX socket. Many of them can be launched in parallel. They might crash now and then (because ROOT), so some  precautions should be taken to restart them if they fail.
+The render process is single-threaded and does not do any IO apart from the UNIX socket. Many of them can be launched in parallel. They might crash now and then (because ROOT), so some precautions should be taken to restart them if they fail. This is all taken into account by the implementation of the rendering protocol provided in this DQM GUI.
 
 Since the `TBufferFile` data does not contain streamers, but we also don't want to repack all data into the latest format before rendering, the renderer has a mechanism to load streamers. This is done by passing a file name with the request, the renderer will simply open this file once (which reads the streamers as a side effect). This should only be done as needed, since it is quite slow (compared to the actual rendering).
 
 ### The render plugins
 
-Render plugins are C++ classes that can modify how histograms are displayed. They are located in the `plugins/` folder, even though they are not EDM plugins. The render plugins are loaded dynamically by the render service (typically on startup, by passing the name of a `.so` with renderplugins to load). We have quite a lot of them, and they are the main reason to keep using this renderer (compared to e.g. switching to JSROOT).
+Render plugins are C++ classes that can modify how histograms are displayed. They are located in the `plugins/` folder. The render plugins are loaded dynamically by the render service (typically on startup, by passing the name of a `.so` with renderplugins to load). We have quite a lot of them, and they are the main reason to keep using this renderer (compared to e.g. switching to JSROOT).
 
 ### Compiling this code
 
-The `scram` `BuildFile`s should do everything. But it is also not too hard to do it without scram, given a working installation of ROOT. There are no dependencies on other parts of CMSSW.
+The renderer and all render plugins can be built by simply running `./scripts/build.sh`. In case of build errors, try cleaning the results of previous builds by running `gmake clean`.
 
-`render.cc` needs ROOT includes and a lot of ROOT libraries for linking, as well as `libpng`, which is a bit picky about versions (`-lpng15` was required here to work). It also needs to be linked dynamically to the render plugin base class so that the plugin registration works.
-
-The render plugins need to register with their base class so that they can be called. This is done using a global variable in `DQMRenderPlugin.cc`. It is located in `src/` to get it compiled into a shared library, that can then share this state between the renderer and the render plugins.
-
-The render plugins are compiled separately in `plugins/` and linked dynamically against `DQMRenderPlugin.cc` (instructions bellow how to compile/link). This results in a new shared library `.so`, which can then be dynamically loaded at runtime in `render.cc` (via `dlopen`), and all the plugins will automatically register. The render plugins are also linked against some other stuff from ROOT that they might need.
-
-There is some hacky code in `render.py` that locates the `.so` with the render plugins and passes it to `render.cc` as a command line argument.
+CMSSW_VERSION and SCRAM_ARCH values that will be used to build and run the code, are located in this file: `scripts/cmssw_info`. Contents of this file can be changed manually to link the DQM GUI to the different CMSSW version.
 
 ## The storage backend
 
-The storage backend is based on legacy, `TDirectory` ROOT files. The code is in `rootstorage.py`. It keeps a SQLite database of metadata, about _samples_ (run/dataset/lumi, effectively _files_, for the legacy format), and _ME lists_, which represent the MEs present in a sample. These are stored compressed to make their size manageable. The ME list is built on first access; this makes it feasible to register all ~80000 files that we have on EOS at the moment as samples.
-
-The storage backend is based on `uproot`, it never uses actual ROOT. To produce the `TBufferFile` format for the renderer, there is some custom byte-level packing code to add the required headers.
+The storage backend is based on legacy (`TDirectory`), DQMIO (`TTree`) and protobuf files. The code is in `python/nanoroot/`, `python/reading/` and `python/protobuf`. It keeps a SQLite database of metadata, about _samples_ (run/dataset/lumi), and _ME lists_, which represent the MEs present in a sample. These are stored compressed to make their size manageable. The ME list is built on first access; this makes it feasible to register all ~80000 files that we have on EOS at the moment as samples.
 
 ## The web server
 
-There is a simple web server in `server.py`. It simply maps the classic DQMGUI API to the matching calls in the storage layer. It also does rendering using the render service.  The request parsing is very bad, so it fails in some cases and probably has lots of security issues.
+The web server is based in `aiohttp`.
 
-The server is _threaded_, which allows it to do some of the IO waiting in parallel. But Python threading is not very efficient, so it limits at around 100 requests/s, which is less than the renderers could handle.
-
-Please install python dependencies before running the code:
-```
-pip3 install -r python/requirements.txt --user
-```
-
-Add python packages to a local directory. This is required for long time deployments because auth to AFS will eventually expire.
+Add python packages to a local directory where the code is deployed:
 ``` bash
 python3 -m pip install -r requirements.txt -t .python_packages
 ```
 
-First compile the out of process renderer and the render plugins:
-```
-./scripts/build.sh
-```
-
-Then, start the server like so:
-```
+The server can be started like this:
+``` bash
 ./scripts/dqmguibackend.sh
 ```
 
-It will listen on `http://localhost:8889` (and you can't just change that, see below), and It will automatically create a DB file `data/directory.sqlite` and populate it using data from EOS. 
+Please run this in order to see the supported arguments and their meaning:
+
+``` bash
+./scripts/dqmguibackend.sh --help
+```
 
 ## File formats
 
@@ -178,9 +162,9 @@ This package contains compiled code from there, which is served from the web ser
 
 ## API documentation
 
-This is the future version of the DQM GUI API and it is preferred for all services over the legacy API.
+This is the new version of the DQM GUI API and it is preferred for all services over the legacy API.
 
-**This API specification is not yet final and is subject to change!!!**
+Most endpoints of the old API syntax are supported on the best effort basis. This section, however, contains the docuemntation of the new API syntax.
 
 #### Samples endpoint
 
@@ -275,6 +259,28 @@ Overlays multiple (or one) histograms and renders an overlay to a PNG.
 `http://localhost:8889/api/v1/render_overlay?obj=archive/316142/StreamExpress/Run2018A-Express-v1/DQMIO/PixelPhase1/EventInfo/reportSummary&obj=archive/316144/StreamExpress/Run2018A-Express-v1/DQMIO/PixelPhase1/EventInfo/reportSummary&w=266&h=200&stats=false&norm=false&errors=true`
 
 Supports `notOlderThan` parameter to bypass the cache.
+
+Other supported parameters:
+
+| Parameter  | Info  |
+|------------|-------|
+| w          | Width of the plot: integer |
+| h          | Height of the plot: integer |
+| stats      | Stat box: `true`/`false` |
+| norm       | Normalization: `true`/`false` |
+| errors     | Error bars: `true`/`false` |
+| drawopts   | ROOT draw options string |
+| xtype      | Linear or log scale: `lin`/`log`. Default is `lin` |
+| ytype      | Linear or log scale: `lin`/`log`. Default is `lin` |
+| ztype      | Linear or log scale: `lin`/`log`. Default is `lin` |
+| xmin       | Min x axis value: integer |
+| xmax       | Max x axis value: integer |
+| ymin       | Min y axis value: integer |
+| ymax       | Max y axis value: integer |
+| zmin       | Min z axis value: integer |
+| zmax       | Max z axis value: integer |
+| ref        | Overlay method: `overlay`, `ratiooverlay` or `stacked`. Default is `overlay`. |
+| reflabel   | Labels to be used in stat box for overlayed plots. You can provide N-1 number of these parameters where N is the number of overlayed plots. |
 
 #### New file registering endpoint
 
@@ -500,8 +506,6 @@ sudo systemctl start hltd
 
 # New GUI P5 instalation
 
-**TO BE UPDATED!!!**
-
 `gotoplaybackfu03`
 
 Run usual cmssw_deploy with --no-build option. Then go to the release and build manually with -k (keep going) option.
@@ -671,5 +675,6 @@ Backend related task list.
 * ~~Add QTest result support to the API~~
 * Hanging/aborted requests don't get logged?
 * Add the alternative of /data/browse to view raw ROOT files if Rucio is not there
-* Fix CMSSW warnings/errors
+* ~Fix CMSSW warnings/errors~
+  * No longer applicable since the GUI will be shipped outside of CMSSW
 * ~~Make sure to zlib uncompress only strings when importing PB files~~

@@ -909,26 +909,26 @@ private:
     // Set only the bounds that were specified, and leave the rest to
     // the natural range.  Unset bounds have NaN as their value.
     if (TAxis *a = obj->GetXaxis()) {
-      if (!(isnan(i.xaxis.min) && isnan(i.xaxis.max))) {
+      if (!(std::isnan(i.xaxis.min) && std::isnan(i.xaxis.max))) {
         xmin = a->GetXmin();
         xmax = a->GetXmax();
-        a->SetRangeUser(isnan(i.xaxis.min) ? xmin : i.xaxis.min, isnan(i.xaxis.max) ? xmax : i.xaxis.max);
+        a->SetRangeUser(std::isnan(i.xaxis.min) ? xmin : i.xaxis.min, std::isnan(i.xaxis.max) ? xmax : i.xaxis.max);
       }
     }
 
     if (TAxis *a = obj->GetYaxis()) {
-      if (!(isnan(i.yaxis.min) && isnan(i.yaxis.max))) {
+      if (!(std::isnan(i.yaxis.min) && std::isnan(i.yaxis.max))) {
         ymin = a->GetXmin();
         ymax = a->GetXmax();
-        a->SetRangeUser(isnan(i.yaxis.min) ? ymin : i.yaxis.min, isnan(i.yaxis.max) ? ymax : i.yaxis.max);
+        a->SetRangeUser(std::isnan(i.yaxis.min) ? ymin : i.yaxis.min, std::isnan(i.yaxis.max) ? ymax : i.yaxis.max);
       }
     }
 
     if (TAxis *a = obj->GetZaxis()) {
-      if (!(isnan(i.zaxis.min) && isnan(i.zaxis.max))) {
+      if (!(std::isnan(i.zaxis.min) && std::isnan(i.zaxis.max))) {
         zmin = a->GetXmin();
         zmax = a->GetXmax();
-        a->SetRangeUser(isnan(i.zaxis.min) ? zmin : i.zaxis.min, isnan(i.zaxis.max) ? zmax : i.zaxis.max);
+        a->SetRangeUser(std::isnan(i.zaxis.min) ? zmin : i.zaxis.min, std::isnan(i.zaxis.max) ? zmax : i.zaxis.max);
       }
     }
   }
@@ -1222,7 +1222,7 @@ private:
         if (h)
           norm = h->GetSumOfWeights();
 
-        if (n == 1 && (!isnan(i.ktest)) && h && norm && ref1 && ref1->GetSumOfWeights()) {
+        if (n == 1 && (!std::isnan(i.ktest)) && h && norm && ref1 && ref1->GetSumOfWeights()) {
           double prob = h->KolmogorovTest(ref1);
           color = prob < i.ktest ? kRed - 4 : kGreen - 3;
           char buffer[14];
@@ -1302,7 +1302,7 @@ private:
     if (TH1 *h = dynamic_cast<TH1 *>(ob)) {
       h->SetMinimum();
       h->SetMaximum();
-      if (isnan(h->Integral()) || isnan(h->GetRMS()) || isnan(h->GetSumOfWeights()))
+      if (std::isnan(h->Integral()) || std::isnan(h->GetRMS()) || std::isnan(h->GetSumOfWeights()))
         unsafe = true;
       
       // This is a workaround to a ROOT bug (ROOT-10882) where a trailing 

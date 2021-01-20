@@ -294,6 +294,8 @@ HTTP request body:
 
 `fileformat` is an integer. Please look at File formats section above for details.
 
+In the DQM Online processing there's no dataset per se, so a placeholder value of `/Global/Online/ALL` is used.
+
 ### API endpoints for dealing with per lumisection data:
 
 #### Archive endpoint

@@ -55,11 +55,9 @@ from helpers import get_absolute_path, parse_run_lumi, getNotOlderThanFromUrl
 from rendering import GUIRenderer
 from data_types import RenderingOptions, MEDescription
 from importing.importing import GUIImportManager
-from layouts.layout_manager import LayoutManager
 
 # Services
 service = GUIService()
-layout_manager = LayoutManager()
 
 
 # ###################################################################################################### #
@@ -175,7 +173,7 @@ async def layouts_v1(request):
 
     name = request.rel_url.query.get('name')
 
-    layouts = layout_manager.get_layouts_by_name(name)
+    layouts = await service.get_layouts_by_name(name)
 
     result = {'data':
         [{'source': x.source, 'destination': x.destination} for x in layouts]

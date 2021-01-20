@@ -237,6 +237,12 @@ class GUIService:
 
 
     @classmethod
+    @logged
+    async def get_layouts_by_name(cls, name):
+        return cls.layouts_manager.get_layouts_by_name(name)
+
+
+    @classmethod
     @alru_cache_timed(maxsize=10, cache_exceptions=False)
     @logged
     async def __get_me_names_list(cls, dataset, run, lumi=0, notOlderThan=None):

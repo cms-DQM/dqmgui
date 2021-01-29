@@ -1,8 +1,8 @@
 # The DQM GUI
 
-_Note: This is not the production DQMGUI._
+_Note: This is not the production DQMGUI yet._
 
-This package contains experimental code for a DQMGUI similar to https://cmsweb.cern.ch/dqm/offline/
+This package contains code for a DQMGUI similar to https://cmsweb.cern.ch/dqm/offline/
 
 There are multiple relevant parts:
 - The _render service_ in `src/render.cc`, extracted from the classic DQMGUI: https://github.com/rovere/dqmgui
@@ -388,6 +388,23 @@ Copy desired file to local storage with a XRD redirector:
 `xrdcp "root://cms-xrd-global.cern.ch//store/data/Run2018B/ZeroBias/DQMIO/12Nov2019_UL2018-v2/100000/0971E5EA-DA92-C249-96BD-1CE58A95C339.root" .`
 
 
+# Running the DQM GUI locally
+
+The following instructions can be used to deploy a local version of the DQM GUI in lxplus:
+
+``` bash
+git clone https://github.com/cms-DQM/dqmgui
+cd dqmgui/
+./scripts/build.sh
+cd python
+python3 -m pip install -r requirements.txt -t .python_packages
+# If xrootd installation fails, it can be installed in a user mode:
+#python3 -m pip install xrootd --user
+cd ../
+./scripts/dqmguibackend.sh -p 8889
+```
+
+
 # Random things
 
 ## Scalar types are stored as such:
@@ -506,7 +523,16 @@ sudo systemctl start hltd
 # Done
 ```
 
-# New GUI P5 instalation
+# Online DQM GUI instalation
+
+DQM GUI code is deployed to the P5 machines by the P5 sysadmins. More details info to come.
+
+If python dependencies of the DQM GUI change, this file must be updated to reflect the changes: https://github.com/cms-sw/cmsdist/blob/IB/CMSSW_11_3_X/master/dqmgui.tmpl#L10
+
+
+
+
+# DQM GUI setup at P5
 
 `gotoplaybackfu03`
 
@@ -547,7 +573,7 @@ Production and playback systems are pretty much the same in terms of DQM GUI int
 
 This section is not about the GUI integration but it's a summary of the gerenal DQM processing pipeline.
 
-Some trminology:
+Some terminology:
 * BU - builder unit. A machine that's responsible for providing input files and hosting output files.
 * FU - filter unit. A machine that's responsible for running DQM online clients.
 
@@ -680,3 +706,16 @@ Backend related task list.
 * ~Fix CMSSW warnings/errors~
   * No longer applicable since the GUI will be shipped outside of CMSSW
 * ~~Make sure to zlib uncompress only strings when importing PB files~~
+* Fix the deadlock after this:
+```
+2021-01-22 18:18:47,949 - INFO - helpers.logged - 47  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 122) [OK 13.8ms]
+2021-01-22 18:18:47,949 - INFO - helpers.logged - 48  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 3) [OK 8.1ms]
+2021-01-22 18:18:47,952 - INFO - helpers.logged - 46  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 0) [OK 3.4ms]
+2021-01-22 18:18:47,986 - INFO - rendering - render: b'/afs/cern.ch/work/a/akirilov/DQMGUI/dqmgui/python/../bin/render: symbol lookup error: /afs/cern.ch/work/a/akirilov/DQMGUI/dqmgui/python/../lib/libDQMRenderPlugins.so: undefined symbol: _ZN7TStringC1ERKSs\n'
+2021-01-22 18:18:48,025 - INFO - helpers.logged - 49  GUIService.__get_filename_fileformat_names_infos('/Global/Online/ALL', 0, 0, 1611335910) [OK 64.1ms]
+2021-01-22 18:18:48,026 - ERROR - rendering - Looks like the renderer died.
+Traceback (most recent call last):
+  File "/afs/cern.ch/work/a/akirilov/DQMGUI/dqmgui/python/rendering.py", line 246, in render
+    errorcode, length = struct.unpack("=ii", error_and_length)
+struct.error: unpack requires a buffer of 8 bytes
+```

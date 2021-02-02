@@ -1,0 +1,108 @@
+#!/bin/bash
+
+##H Usage 1: manage [options] ACTION [ARG] [SECURITY-STRING]
+##H
+##H Available actions:
+##H   help            show this help
+##H   version         get current version of the service
+##H   status          show current service's status
+##H   restart         (re)start the service
+##H   start           (re)start the service
+##H   stop            stop the service
+##H   compile         refresh render plugins
+
+# Always change the directory to make sure correct process can be traced when stopping
+BASEPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; cd ../ ; pwd -P )"
+cd $BASEPATH
+
+start()
+{
+  PORT="8889"
+  if [ -n "$1" ]
+  then
+    PORT=$1
+  fi
+
+  $BASEPATH/scripts/dqmguibackend.sh -p $PORT
+}
+
+stop()
+{
+  # Get DQM GUI that is running from this directory
+  LINES=$(ps awwx | grep $BASEPATH/scripts/../python/app.py | grep -v grep)
+  NR_OF_PROCESSES=$(wc -l <<< "$LINES")
+
+  if [ -z "$LINES" ]; then
+    : # DQM GUI not running, do nothing
+  elif [ $NR_OF_PROCESSES -ne 1 ]; then
+    echo "Found more than one DQM GUI running in the same directory. Don't know which one to stop."
+    echo "$LINES"
+    exit
+  else
+    PID=$(awk '{print $1}' <<< "$LINES")
+    # Kill the process and all its descendant processes
+    pgrep -P $PID | xargs kill -2
+    kill -2 $PID
+  fi
+}
+
+status()
+{
+  # Get DQM GUI that is running from this directory
+  LINES=$(ps awwx | grep $BASEPATH/scripts/../python/app.py | grep -v grep)
+  NR_OF_PROCESSES=$(wc -l <<< "$LINES")
+
+  if [ -z "$LINES" ]; then
+    echo "DQM GUI is not running"
+  elif [ $NR_OF_PROCESSES -ne 1 ]; then
+    echo "Found more than one DQM GUI running in the same directory."
+    echo "$LINES"
+    exit
+  else
+    PID=$(awk '{print $1}' <<< "$LINES")
+    pstree -a $PID
+  fi
+}
+
+compile()
+{
+  $BASEPATH/scripts/build.sh
+}
+
+version()
+{
+  echo "Latest commit:"
+  git log --name-status HEAD^..HEAD
+}
+
+case "$1" in
+  start | restart )
+    stop
+    start $2
+    ;;
+
+  status )
+    status
+    ;;
+
+  stop )
+    stop
+    ;;
+
+  compile )
+    compile
+    ;;
+
+  help )
+    perl -ne '/^##H/ && do { s/^##H ?//; print }' < $0
+    ;;
+
+  version )
+    version
+    ;;
+
+  * )
+    echo "$0: unknown action '$1', please try '$0 help' or documentation." 1>&2
+    exit 1
+    ;;
+esac

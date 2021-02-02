@@ -1,5 +1,5 @@
 #!/bin/bash -e
-BASE="`dirname $0`"
+BASE="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 CMSSW_VERSION=$(cat $BASE/cmssw_info | sed -n '2 p')
 SCRAM_ARCH=$(cat $BASE/cmssw_info | sed -n '3 p')

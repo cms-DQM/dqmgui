@@ -23,7 +23,11 @@ start()
     PORT=$1
   fi
 
-  $BASEPATH/scripts/dqmguibackend.sh -p $PORT
+  # Run in the background and detach from the terminal
+  nohup $BASEPATH/scripts/dqmguibackend.sh -p $PORT &> /dev/null &
+
+  echo "DQM GUI has been started in the background."
+  echo "Log can be found here:" $BASEPATH/data/logs/dqmgui.log
 }
 
 stop()
@@ -41,7 +45,7 @@ stop()
   else
     PID=$(awk '{print $1}' <<< "$LINES")
     # Kill the process and all its descendant processes
-    pgrep -P $PID | xargs kill -2
+    pgrep -P $PID | xargs kill
     kill -2 $PID
   fi
 }
@@ -102,7 +106,7 @@ case "$1" in
     ;;
 
   * )
-    echo "$0: unknown action '$1', please try '$0 help' or documentation." 1>&2
+    echo "$0: unknown action '$1', please try '$0 help' for documentation." 1>&2
     exit 1
     ;;
 esac

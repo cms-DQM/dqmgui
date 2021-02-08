@@ -23,6 +23,14 @@ start()
     PORT=$1
   fi
 
+  # Perform kinit to be able to access EOS
+  export keytab=/afs/cern.ch/user/c/cmsweb/private/conf.prod/wmcore-auth/keytab
+  principal=`klist -k "$keytab" | tail -1 | awk '{print $2}'`
+  kinit $principal -k -t "$keytab" 2>&1 1>& /dev/null
+  if [ $? == 1 ]; then
+    echo "Unable to perform kinit."
+  fi
+
   # Run in the background and detach from the terminal
   nohup $BASEPATH/scripts/dqmguibackend.sh -p $PORT &> /dev/null &
 

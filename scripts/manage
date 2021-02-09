@@ -24,7 +24,7 @@ start()
   fi
 
   # Perform kinit to be able to access EOS
-  export keytab=/afs/cern.ch/user/c/cmsweb/private/conf.prod/wmcore-auth/keytab
+  export keytab=/data/srv/current/auth/wmcore-auth/keytab
   principal=`klist -k "$keytab" | tail -1 | awk '{print $2}'`
   kinit $principal -k -t "$keytab" 2>&1 1>& /dev/null
   if [ $? == 1 ]; then
@@ -46,15 +46,16 @@ stop()
 
   if [ -z "$LINES" ]; then
     : # DQM GUI not running, do nothing
-  elif [ $NR_OF_PROCESSES -ne 1 ]; then
-    echo "Found more than one DQM GUI running in the same directory. Don't know which one to stop."
-    echo "$LINES"
-    exit
   else
-    PID=$(awk '{print $1}' <<< "$LINES")
-    # Kill the process and all its descendant processes
-    pgrep -P $PID | xargs kill
-    kill -2 $PID
+    PIDS=$(awk '{print $1}' <<< "$LINES")
+    # Kill all running GUIs and all its descendant processes
+    for PID in $PIDS
+    do
+      if [ ! -z "$PID" ]; then
+        pgrep -P $PID | xargs kill > /dev/null 2>&1
+        kill -9 $PID > /dev/null 2>&1
+      fi
+    done
   fi
 }
 

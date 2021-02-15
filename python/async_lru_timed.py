@@ -10,7 +10,7 @@ notOlderThan will not be taken into account when creating a key for cache dict.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import OrderedDict
 from functools import _CacheInfo, _make_key, partial, wraps
 
@@ -92,7 +92,7 @@ def alru_cache_timed(
             notOlderThan = fn_kwargs.get('notOlderThan', None)
             notOlderThan = int(notOlderThan) if notOlderThan else None
             if not notOlderThan:
-                notOlderThan = int(datetime.utcnow().timestamp()) - DEFAULT_NOT_OLDER_THAN_SECONDS_DELTA
+                notOlderThan = int(datetime.now(timezone.utc).timestamp()) - DEFAULT_NOT_OLDER_THAN_SECONDS_DELTA
 
             key = _make_key(fn_args, fn_kwargs, typed)
 
@@ -111,7 +111,7 @@ def alru_cache_timed(
             if event_result_ex_time is None:
                 # List items: 
                 # Future to await, already awaited result, exception, UTC timestamp when cached
-                event_result_ex_time = [asyncio.Event(), None, None, int(datetime.utcnow().timestamp())]
+                event_result_ex_time = [asyncio.Event(), None, None, int(datetime.now(timezone.utc).timestamp())]
                 # logically there is a possible race between get above and 
                 # insert here. Make sure there is no `await` in between.
                 wrapped._cache[key] = event_result_ex_time

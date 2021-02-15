@@ -12,10 +12,12 @@ from concurrent.futures.process import BrokenProcessPool
 class Timed():
     """A helper that will measure wall clock time between enter and exit methods."""
 
-    def __init__(self):
+    def __init__(self, message='', quiet=False):
         caller = getframeinfo(stack()[1][0])
         self.filename = os.path.basename(caller.filename)
         self.lineno = caller.lineno
+        self.message = message
+        self.quiet = quiet
 
     def __enter__(self):
         self.start_time = time.time()
@@ -24,7 +26,8 @@ class Timed():
     def __exit__(self, exc_type, exc_val, exc_tb):
         elapsed = time.time() - self.start_time
         elapsed = elapsed * 1000
-        print('%s:%s - %s ms' % (self.filename, self.lineno, elapsed))
+        if not self.quiet:
+            print('%s:%s - %s ms %s' % (self.filename, self.lineno, elapsed, self.message))
 
 # `logged` uses some "task local" variables to track a global request id and
 # keep track of how calls are nested.

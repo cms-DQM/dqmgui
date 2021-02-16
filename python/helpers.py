@@ -1,12 +1,8 @@
 import os
-import sys
 import time
 import logging
 import contextvars
-from collections import namedtuple
 from inspect import getframeinfo, stack
-from concurrent.futures import ProcessPoolExecutor
-from concurrent.futures.process import BrokenProcessPool
 
 
 class Timed():
@@ -37,7 +33,7 @@ logged_depth = contextvars.ContextVar("logged_depth", default=0)
 
 
 def logged(fn):
-    """ A decorator to write timing information to a log. """
+    """A decorator to write timing information to a log."""
     logger = logging.getLogger("helpers.logged")
     async def wrapped(*posargs, **kwargs):
         showargs = [repr(arg) for arg in posargs if isinstance(arg, str) or isinstance(arg, int) or isinstance(arg, tuple)]

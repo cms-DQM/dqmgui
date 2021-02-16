@@ -81,7 +81,7 @@ class GUIImportManager:
     @classmethod
     async def import_blobs(cls, dataset, run, lumi=0):
         """
-        Imports ME list and ME info blobs into the database from a ROOT file.
+        Imports ME list and ME info blobs into the database from a ROOT/PB file.
         It is required to first import the blobs before samples can be used.
         """
 
@@ -174,14 +174,16 @@ class GUIImportManager:
             infos_list = [info for _, info in mes]
 
             # these go straight into GUIDataStore.add_blobs(...), but back in the main process.
+            infos_blob = await cls.compressor.compress_names_list(names_list)
+            names_blob = await cls.compressor.compress_infos_list(infos_list)
+
             blob_descriptions.append({
                 # Compress blobs
-                'names_blob': await cls.compressor.compress_names_list(names_list),
-                'infos_blob': await cls.compressor.compress_infos_list(infos_list),
+                'names_blob': infos_blob,
+                'infos_blob': names_blob,
                 'dataset': dataset,
                 'filename': filename,
                 'run': key[0],
                 'lumi': key[1],
             })
         return samples, blob_descriptions
-        

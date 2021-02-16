@@ -680,21 +680,22 @@ Backend related task list.
 * ~~Use bitwise operators for parsing variants in protobuf~~
 * ~~Add QTests to protobuf output in CMSSW~~
 * Live mode integration
-* Cache invalidation in samples
+  * Protobuf pre importing
+* ~~Cache invalidation in samples~~
 * ~~Move efficiency flag to MEInfo~~
   * It's not worth it as it adds a couple of seconds to import time
 * Clean up Scalar, EfficiencyFlag and QTest to OO hierarchy
 * ~~Speed up linear search over sorted layouts~~
-* Flavours?
-  * The requirements and the need for this feature have to be reviewed
-* Move common ME methods (like DQMCLASSICReader.parse_string_entry) to a separate location
+* ~~Flavours?~~
+  * No need for flavours anymore. Some features are selectively enabled in the frontend.
+* ~~Move common ME methods (like DQMCLASSICReader.parse_string_entry) to a separate location~~
 * Check RelVal files are handled correctly
 * ~~Make sure exceptions are logged to log file (atm the go to stderr)~~
 * ~~Handle crashing import processes (prob. can't restart them, so at least crash the full server and wait for restart)~~
   * ~~Whenever an import process crashes we restart ProcessPoolExecutor and return an error~~
   * We instantiate new process pool on demand to keep things simple and more stable
 * Check handling of XRD access failures (atm 500 response on the request, retry on next request -- might be good enough.)
-* Make logging async
+* ~~Make logging async~~
   * Will probably not increase perf by much, needs measuring
 * ~~Renderer hangs when negative width/height is passed~~
 * ~~Validate samples in registration endpoint~~
@@ -703,7 +704,7 @@ Backend related task list.
 * ~~Add QTest result support to the API~~
 * Hanging/aborted requests don't get logged?
 * Add the alternative of /data/browse to view raw ROOT files if Rucio is not there
-* ~Fix CMSSW warnings/errors~
+* ~~Fix CMSSW warnings/errors~~
   * No longer applicable since the GUI will be shipped outside of CMSSW
 * ~~Make sure to zlib uncompress only strings when importing PB files~~
 * Fix the deadlock after this:
@@ -719,3 +720,16 @@ Traceback (most recent call last):
     errorcode, length = struct.unpack("=ii", error_and_length)
 struct.error: unpack requires a buffer of 8 bytes
 ```
+* ~~Offline GUI importing twice on the first requests.~~
+  * This is solved by extracting `__import_blobs` into a separate cached function.
+
+## URLs that produce errors:
+
+This section contains urls that result in errors. These errors should be fixed.
+
+https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=JetMET&dataset_name=%2FCosmics%2FCommissioning2019-PromptReco-v1%2FDQMIO&run_number=334235&workspaces=Everything&lumi=0
+
+https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=HLT%2FGeneralHLTOffline&dataset_name=%2FCosmics%2FRun2016B-PromptReco-v1%2FDQMIO&run_number=273080&workspaces=Everything&overlay=overlay&lumi=0
+
+https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=HLT%2FGeneralHLTOffline%2FMinimumBias&dataset_name=%2FCosmics%2FRun2016B-PromptReco-v1%2FDQMIO&run_number=273080&workspaces=Everything&overlay=overlay&lumi=0
+

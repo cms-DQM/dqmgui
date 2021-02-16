@@ -154,6 +154,14 @@ class MyFormatReader:
       return ScalarValue(b'', b's', 'Value of the string ME')
 ```
 
+## Caching
+
+Caching is done using the `async_alru_cahce` decorator. More info about how to use and bypass the cache using the API [can be found in this section](#Cache-bypass-and-invalidation).
+
+Only functions declared inside `GUIService` class are allowed to use that cache to ensure that results are not double cached.
+
+It's estimated that 20MB is the upper bound of the size of cached elements if each (of 8) cached function contained a single element. Therefore, we set the cache capacity to 200 for each function. This means that the upper bound of the entire cache size in such case is about 4GB.
+
 ## The HTML frontend
 
 The frontend is developed here: https://github.com/cms-DQM/dqmgui_frontend

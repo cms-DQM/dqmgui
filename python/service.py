@@ -25,7 +25,7 @@ class GUIService:
     layouts_manager = LayoutManager()
 
     @classmethod
-    @alru_cache_timed(maxsize=10, cache_exceptions=False)
+    @alru_cache_timed(maxsize=200, cache_exceptions=False)
     @logged
     async def get_samples(cls, run, dataset, lumi=0, notOlderThan=None):
         if run == '':
@@ -40,7 +40,7 @@ class GUIService:
 
 
     @classmethod
-    @alru_cache_timed(maxsize=10, cache_exceptions=False)
+    @alru_cache_timed(maxsize=200, cache_exceptions=False)
     @logged
     async def get_archive(cls, run, dataset, path, search, lumi=0, notOlderThan=None):
         """
@@ -223,14 +223,14 @@ class GUIService:
 
 
     @classmethod
-    @alru_cache_timed(maxsize=10, cache_exceptions=False)
+    @alru_cache_timed(maxsize=200, cache_exceptions=False)
     @logged
     async def search_dataset_names(cls, search, notOlderThan=None):
         return await cls.store.search_dataset_names(search)
 
 
     @classmethod
-    @alru_cache_timed(maxsize=10, cache_exceptions=False)
+    @alru_cache_timed(maxsize=200, cache_exceptions=False)
     @logged
     async def get_latest_runs(cls, search, notOlderThan=None):
         return await cls.store.get_latest_runs(search)
@@ -243,7 +243,7 @@ class GUIService:
 
 
     @classmethod
-    @alru_cache_timed(maxsize=10, cache_exceptions=False)
+    @alru_cache_timed(maxsize=200, cache_exceptions=False)
     @logged
     async def __get_me_names_list(cls, dataset, run, lumi=0, notOlderThan=None):
         lines = await cls.store.get_me_names_list(dataset, run, lumi)
@@ -259,7 +259,7 @@ class GUIService:
 
 
     @classmethod
-    @alru_cache_timed(maxsize=10, cache_exceptions=False)
+    @alru_cache_timed(maxsize=200, cache_exceptions=False)
     @logged
     async def __get_me_infos_list(cls, dataset, run, lumi=0, notOlderThan=None):
         infos = await cls.store.get_me_infos_list(dataset, run, lumi)
@@ -275,7 +275,7 @@ class GUIService:
 
 
     @classmethod
-    @alru_cache_timed(maxsize=10, cache_exceptions=False)
+    @alru_cache_timed(maxsize=200, cache_exceptions=False)
     @logged
     async def __get_filename_fileformat_names_infos(cls, dataset, run, lumi=0, notOlderThan=None):
         filename_fileformat_names_infos = await cls.store.get_filename_fileformat_names_infos(dataset, run, lumi)
@@ -295,7 +295,7 @@ class GUIService:
 
 
     @classmethod
-    @alru_cache_timed(maxsize=10, cache_exceptions=False)
+    @alru_cache_timed(maxsize=200, cache_exceptions=False)
     @logged
     async def __import_blobs(cls, dataset, run, lumi=0, notOlderThan=None):
         return await cls.import_manager.import_blobs(dataset, run, lumi)

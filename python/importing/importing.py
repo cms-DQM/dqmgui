@@ -88,11 +88,16 @@ class GUIImportManager:
         filename, fileformat = await cls.store.get_sample_file_info(dataset, run, lumi)
         if not filename: # Sample doesn't exist
             return False
+
+        from helpers import PrintTime; PrintTime('Starting slow import...')
         
         # delegate the hard work to a process pool.
         samples, blob_descriptions = await cls.import_in_worker(fileformat, filename, dataset, run, lumi)
 
+        from helpers import PrintTime; PrintTime('Slow import finished.')
+
         await cls.store.register_samples(samples)
+
         for blob_description in blob_descriptions:
             # import_sync prepares everything
             await cls.store.add_blobs(**blob_description)
@@ -186,4 +191,7 @@ class GUIImportManager:
                 'run': key[0],
                 'lumi': key[1],
             })
+
+        return None, None
+
         return samples, blob_descriptions

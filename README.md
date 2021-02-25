@@ -741,3 +741,4 @@ https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=HLT%2FGeneralHL
 
 https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=HLT%2FGeneralHLTOffline%2FMinimumBias&dataset_name=%2FCosmics%2FRun2016B-PromptReco-v1%2FDQMIO&run_number=273080&workspaces=Everything&overlay=overlay&lumi=0
 
+https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=HLT%2FTracking%2FpixelTracks%2FHitEffFromHitPattern&dataset_name=%2FStreamExpress%2FRun2017B-Express-v1%2FDQMIO&run_number=297287&workspaces=Everything&lumi=0

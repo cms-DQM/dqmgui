@@ -48,6 +48,7 @@ class DQMCLASSICReader:
         Possible return types: EfficiencyFlag, ScalarValue, QTest
         """
 
+        # print(string)
         assert string[0] == b'<'[0]
         name = string[1:].split(b'>', 1)[0]
         value = string[1 + len(name)+1:].split(b'<', 1)[0]

@@ -30,44 +30,67 @@ class DQMCLASSICImporter:
         """
 
         buffer = await cls.ioservice.open_url(filename, blockcache=False)
-        tfile = await TFile().load(buffer)
-        result = await cls.list_mes(tfile, run)
+        tfile = TFile().load(buffer)
+        result = cls.list_mes(tfile, run)
 
         return { (run, 0): result }
 
 
     @classmethod
-    async def list_mes(cls, tfile, run):
-        # Remove the folder structure that CMSSW adds
-        run_str = bytes('Run %s' % run, 'utf-8')
-        def normalize(parts):
-            # Assert that a correct run number is being imported
-            if parts[2][:3] == b'Run':
-                assert parts[2] == run_str, 'Imported run (%s) doesn\'t match the number in a ROOT file (%s)' % (parts[2], run_str)
+    def list_mes(cls, tfile, run):
 
-            if len(parts) < 5 or parts[4] != b'Run summary':
-                return b'<broken>' + b'/'.join(parts) + b'/'
-            else:
-                return b'/'.join((parts[3],) + (parts[5:]) + (b'',))
+        # import cProfile, pstats, io
+        # from pstats import SortKey
+        # pr = cProfile.Profile()
+        # pr.enable()
+
+        
+
+        # TODO: optimize this
+        # Remove the folder structure that CMSSW adds
+        #run_str = bytes('Run %s' % run, 'utf-8')
+        # def normalize(parts):
+        #     # Assert that a correct run number is being imported
+        #     if parts[2][:3] == b'Run':
+        #         assert parts[2] == run_str, 'Imported run (%s) doesn\'t match the number in a ROOT file (%s)' % (parts[2], run_str)
+
+        #     if len(parts) < 5 or parts[4] != b'Run summary':
+        #         return b'<broken>' + b'/'.join(parts) + b'/'
+        #     else:
+        #         return b'/'.join((parts[3],) + (parts[5:]) + (b'',))
                 
-        # Only import these types
-        def dqm_classes(name):
-            return name in {
-                b'TH1D',
-                b'TH1F',
-                b'TH1S',
-                b'TH2D',
-                b'TH2F',
-                b'TH2S',
-                b'TH3F',
-                b'TObjString',
-                b'TProfile',
-                b'TProfile2D',
-            }
+        # # Only import these types
+        # def dqm_classes(name):
+        #     return name in {
+        #         b'TH1D',
+        #         b'TH1F',
+        #         b'TH1S',
+        #         b'TH2D',
+        #         b'TH2F',
+        #         b'TH2S',
+        #         b'TH3F',
+        #         b'TObjString',
+        #         b'TProfile',
+        #         b'TProfile2D',
+        #     }
 
         result = []
 
-        async for path, name, class_name, offset in tfile.fulllist(normalize=normalize, classes=dqm_classes):
+        # for path, name, class_name, offset in tfile.fulllist():
+        all_list = tfile.fulllist()
+        print(len(all_list))
+        aaa = 0
+        empty_count = 0
+        for path, name, class_name, offset in all_list:
+            aaa += 1
+            if name == b'':
+                print('empty:', aaa)
+                print(path)
+                print(name)
+                print(class_name)
+                print(offset)
+                empty_count += 1
+                continue
             if cls.__BLACKLIST.search(path):
                 continue
             
@@ -95,6 +118,16 @@ class DQMCLASSICImporter:
 
             # Append an item to a final result list
             result.append(item)
+
+        print('MADE IT!!!!', empty_count)
+
+
+        # pr.disable()
+        # sortby = SortKey.TIME
+        # ps = pstats.Stats(pr).sort_stats(sortby)
+        # ps.print_stats()
+
+
 
         return result
 

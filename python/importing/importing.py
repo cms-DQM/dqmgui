@@ -22,7 +22,7 @@ class GUIImportManager:
     """
 
     __EOSPATH = '/eos/cms/store/group/comm_dqm/DQMGUI_data/Run*/*/R000*/DQM_*.root'
-    __EOSPREFIX = "root://eoscms.cern.ch/"
+    __EOSPREFIX = 'root://eoscms.cern.ch/'
 
     store = GUIDataStore()
     compressor = GUIBlobCompressor()
@@ -47,10 +47,10 @@ class GUIImportManager:
                     files = files[0] + suffix
 
             if isinstance(files, str):
-                print('Listing files for importing, this might take a few minutes...')
+                print('Listing files for registration, this might take a few minutes...')
                 files = glob.glob(files)
             
-            print(f'Found {len(files)} files, importing...')
+            print(f'Found {len(files)} files, registering...')
         
             importer = cls.__pick_importer(FileFormat.DQMCLASSIC)
             samples = []
@@ -88,16 +88,12 @@ class GUIImportManager:
         filename, fileformat = await cls.store.get_sample_file_info(dataset, run, lumi)
         if not filename: # Sample doesn't exist
             return False
-
-        from helpers import PrintTime; PrintTime('Starting slow import...')
         
         # delegate the hard work to a process pool.
         samples, blob_descriptions = await cls.import_in_worker(fileformat, filename, dataset, run, lumi)
 
-        from helpers import PrintTime; PrintTime('Slow import finished.')
-
         await cls.store.register_samples(samples)
-
+        
         for blob_description in blob_descriptions:
             # import_sync prepares everything
             await cls.store.add_blobs(**blob_description)
@@ -191,7 +187,5 @@ class GUIImportManager:
                 'run': key[0],
                 'lumi': key[1],
             })
-
-        return None, None
 
         return samples, blob_descriptions

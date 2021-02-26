@@ -13,3 +13,7 @@ pushd $(scram -a $SCRAM_ARCH list -c $CMSSW_VERSION | tail -1 | sed 's|.* ||') >
 popd > /dev/null
 
 gmake $@ all
+
+# Build Cython modules
+cd $BASE/../python/
+python3 setup_cython.py build_ext --inplace

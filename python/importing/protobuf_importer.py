@@ -1,3 +1,4 @@
+import os
 import asyncio
 from data_types import MEInfo, QTest, ScalarValue
 from reading.reading import DQMCLASSICReader, ProtobufReader
@@ -31,7 +32,37 @@ class ProtobufImporter:
         me_paths = [] 
         me_infos = []
 
-        histo_messages = await cls.protobuf_parser.deserialize_file(filename, uncompress_only_scalars=True)
+        # Check if pre-imported metadata file exists:
+        metadata_filename = filename + '.meta'
+        if os.path.isfile(metadata_filename):
+            # .meta file can be created with this tool: scripts/pb-pre-importer.py
+            # Importing .meta file instead of a full PB file is faster by about a factor of 4
+            with open(metadata_filename, 'rb') as buffer:
+                histo_messages = []
+
+                while True:
+                    message_size = buffer.read(4)
+                    flags = buffer.read(4)
+                    offset = buffer.read(4)
+                    full_pathname_size = buffer.read(4)
+                    streamed_histo_size = buffer.read(4)
+
+                    if b'' in (flags, offset, full_pathname_size, streamed_histo_size):
+                        break
+
+                    message_size = int.from_bytes(message_size, byteorder='little', signed=False)
+                    flags = int.from_bytes(flags, byteorder='little', signed=False)
+                    offset = int.from_bytes(offset, byteorder='little', signed=False)
+                    full_pathname_size = int.from_bytes(full_pathname_size, byteorder='little', signed=False)
+                    streamed_histo_size = int.from_bytes(streamed_histo_size, byteorder='little', signed=False)
+
+                    full_pathname = buffer.read(full_pathname_size)
+                    streamed_histo = buffer.read(streamed_histo_size)
+
+                    histo = ProtobufParser.HistoMessage(full_pathname, streamed_histo_size, streamed_histo, flags, offset, message_size)
+                    histo_messages.append(histo)
+        else:
+            histo_messages = await cls.protobuf_parser.deserialize_file(filename, uncompress_only_scalars=True)
 
         for histo_message in histo_messages:
             me_type = cls.get_me_type(histo_message.flags)

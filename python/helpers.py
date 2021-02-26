@@ -5,6 +5,16 @@ import contextvars
 from inspect import getframeinfo, stack
 
 
+class PrintTime():
+    """A helper that will print the location a of where the constructor was called from and a wall clock time. """
+
+    def __init__(self, message=''):
+        caller = getframeinfo(stack()[1][0])
+        filename = os.path.basename(caller.filename)
+        lineno = caller.lineno
+        print('%s:%s - %s s. %s' % (filename, lineno, time.time(), message))
+
+
 class Timed():
     """A helper that will measure wall clock time between enter and exit methods."""
 

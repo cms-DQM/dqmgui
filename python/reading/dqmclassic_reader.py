@@ -21,8 +21,9 @@ class DQMCLASSICReader:
             return ScalarValue(b'', b'', me_info.value) # TODO: do sth. better.
 
         buffer = await cls.ioservice.open_url(filename)
-        key = await TKey().load(buffer, me_info.seekkey)
-        data = await key.objdata()
+        key = await TKey().load_async(buffer, me_info.seekkey)
+        data = key.objdata()
+        
         if me_info.type == b'QTest':
             return cls.parse_string_entry(key.objname())
         if me_info.type == b'XMLString':
@@ -32,7 +33,7 @@ class DQMCLASSICReader:
         # The buffers in a TKey based file start with the TKey. Since we only 
         # send the object to the renderer, we need to compensate for that using
         # the displacement.
-        displacement = - key.fields.fKeyLen
+        displacement = - key.fields['fKeyLen']
         # metype doubles as root class name here.
         return TBufferFile(obj, me_info.type, displacement)
 

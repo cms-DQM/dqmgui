@@ -5,8 +5,6 @@ import cython
 import struct
 import asyncio
 from collections import namedtuple
-from ioservice import FullFile
-from ioservice cimport FullFile
 
 # Cython imports
 from libc.string cimport memcpy, strcmp
@@ -16,12 +14,6 @@ from libcpp.map cimport map
 from libcpp.utility cimport pair
 from cython.operator cimport dereference, postincrement
 
-# ctypedef vector[StringLocation]* slvp
-# ctypedef pair[unsigned int, Item*] map_item
-
-cdef cppclass RootObject:
-    unsigned int fSeekKey
-    vector[StringLocation]* parts
 
 # These classes allow reading the ROOT contianer structures (TFile, TDirectory, TKey),
 # but not actually decoding ROOT serialized objects.
@@ -41,6 +33,20 @@ cdef cppclass RootObject:
 # starts with a TKey header with some metadata followed by the actual payload object,
 # which may be compressed. There can be gaps between TKeys (deleted objects?).
 
+
+# TODO: rename this struct
+cdef struct FlatRootObjectLocation:
+    unsigned int fSeekKey
+    # THis vector holds StringLocation object that represent 
+    # objname, classname and parts of the path
+    vector[StringLocation]* parts
+
+
+cdef struct StringLocation:
+    unsigned int start
+    unsigned int end
+
+
 # ROOT is big endian and our x86 machines are little endian.
 # This function reverses the order of bytes of an arbitrary size object.
 cdef void swapbytes(void* _object, size_t _size):
@@ -52,12 +58,12 @@ cdef void swapbytes(void* _object, size_t _size):
         swap = start[0]
         start[0] = end[0]
         end[0] = swap
-
         start += 1
         end -= 1
 
 
 # Universal container for fields depending on fVersion
+# Structure from here: https://root.cern.ch/doc/master/classTFile.html
 cdef struct TFileFields:
     char[4] root # 4
     unsigned int fVersion # 4
@@ -112,7 +118,6 @@ cdef int tfile_fields_from_bytes(TFileFields* fields, const unsigned char* c_buf
         fields.fEND = fEND
         fields.fSeekFree = fSeekFree
 
-    
     memcpy(&fields.fNbytesFree, <const void *>&c_buf[offset + 20], 4)
     memcpy(&fields.nfree, <const void *>&c_buf[offset + 24], 4)
     memcpy(&fields.fNbytesName, <const void *>&c_buf[offset + 28], 4)
@@ -145,61 +150,17 @@ cdef int tfile_fields_from_bytes(TFileFields* fields, const unsigned char* c_buf
     return fields_size
 
 
-# def normalize(parts):
-#     # Assert that a correct run number is being imported
-#     if parts[2][:3] == b'Run':
-#         assert parts[2] == run_str, 'Imported run (%s) doesn\'t match the number in a ROOT file (%s)' % (parts[2], run_str)
-
-#     if len(parts) < 5 or parts[4] != b'Run summary':
-#         return b'<broken>' + b'/'.join(parts) + b'/'
-#     else:
-#         return b'/'.join((parts[3],) + (parts[5:]) + (b'',))
-        
-# # Only import these types
-# def dqm_classes(name):
-#     return name in {
-#         b'TH1D',
-#         b'TH1F',
-#         b'TH1S',
-#         b'TH2D',
-#         b'TH2F',
-#         b'TH2S',
-#         b'TH3F',
-#         b'TObjString',
-#         b'TProfile',
-#         b'TProfile2D',
-#     }
-
-
 cdef class TFile:
-    # Structure from here: https://root.cern.ch/doc/master/classTFile.html
-    #Fields = namedtuple("TFileFields", ["root", "fVersion", "fBEGIN", "fEND", "fSeekFree", "fNbytesFree", "nfree", "fNbytesName", "fUnits", "fCompress", "fSeekInfo", "fNbytesInfo", "fUUID_low", "fUUID_high"])
-    #structure_small = struct.Struct(">4sIIIIIIIbIIIQQ")
-    #structure_big   = struct.Struct(">4sIIQQIIIbIQIQQ")
-
-    cdef FullFile buf
+    cdef bytes buf
     cdef const unsigned char* c_buf
     cdef unsigned long long c_buf_size
     cdef TFileFields fields
     cdef bint error
-    # cdef const char* dqm_classes[10]
     cdef dqm_classes
+    cdef vector[FlatRootObjectLocation] vflat
 
-    # def __cinit__(self):
-    #     self.dqm_classes[:] = [
-    #         b'TH1D',
-    #         b'TH1F',
-    #         b'TH1S',
-    #         b'TH2D',
-    #         b'TH2F',
-    #         b'TH2S',
-    #         b'TH3F',
-    #         b'TObjString',
-    #         b'TProfile',
-    #         b'TProfile2D'
-    #     ]
 
-    def __init__(self):
+    def __cinit__(self):
         self.dqm_classes = [
             b'TH1D',
             b'TH1F',
@@ -213,195 +174,92 @@ cdef class TFile:
             b'TProfile2D'
         ]
 
+
     def __dealloc__(self):
-        print('TFile __dealloc__')
-        # free(self.c_buf)
-    
-    # This is a hardcoded list of allowed classes
-    # so we can disable division by zero error checking
-    @cython.cdivision(True)
-    cdef bint keep_class(self, bytes name):
-        # print(name, name in self.dqm_classes)
-        # cdef int len = (int)(sizeof(self.dqm_classes)/sizeof(self.dqm_classes[0]))
-        # for i in range(len):
-        #     if strcmp(self.dqm_classes[i], name) == 0:
-        #         return True
-        # return False
-        return name in self.dqm_classes
-
-    # cdef normalize(self, parts):
-    #     # print(parts)
-    #     return None
+        # TODO: delete all new calls
+        pass
 
 
-    # Default behaviour for fulllist()
-    # TOPATH = lambda parts: b'/'.join(parts) + b'/'
-    # ALLCLASSES = lambda name: True
-
-    # The TFile datastructure is pretty boring, the only thing we really need
-    # is the address of the first TKey, which is actually hardcoded to 100...
-    # We provide the fulllist() method for efficient listing of all objects here.
     def load(self, buf):
-        # import os
-        # import time
-        # print('PID:', os.getpid())
-        # time.sleep(5)
+        """
+        The TFile datastructure is pretty boring, the only thing we really need
+        is the address of the first TKey, which is actually hardcoded to 100...
+        We provide the fulllist() method for efficient listing of all objects here.
+        """
 
-        self.buf = <FullFile>buf
-
-        # print('amost')
-
-        #self.fields = TFile.Fields(*TFile.structure_small.unpack(
-        #    self.buf[0:TFile.structure_small.size]))
-        #if self.fields.fVersion > 1000000:
-        #    self.fields = TFile.Fields(*TFile.structure_big.unpack(
-        #        self.buf[0:TFile.structure_big.size]))
-
-        
-        # self.c_buf_size = len(self.buf)
-        # self.c_buf = <unsigned char*> malloc(self.c_buf_size)
-        # if not self.c_buf:
-        #     raise MemoryError()
-        # cdef const unsigned char[:] view = self.buf[:]
-        # memcpy(self.c_buf, <void*>&view[0], self.c_buf_size)
-
-
-        self.c_buf_size = len(self.buf)
-        cdef const unsigned char[:] view = self.buf[:]
+        self.buf = buf[:]
+        self.c_buf_size = len(buf)
+        cdef const unsigned char[:] view = self.buf
         self.c_buf = <const unsigned char*>&view[0]
-        
-
         cdef int headersize = tfile_fields_from_bytes(&self.fields, <const unsigned char *>&self.c_buf[0])
 
         assert self.fields.root[0:sizeof(self.fields.root)] == b'root'
+
         self.error = False
         return self
-        
+    
+    
     def __repr__(self):
         return f"TFile({self.buf}, fields = {self.fields})"
 
-    # First TKey in the file. They are sequential, use `next` on the key to
-    # get the next key.
+
     cdef TKey first(self):
+        """ 
+        First TKey in the file. They are sequential, use `next` on the key to get the next key. 
+        """
+
         return TKey().load(self.c_buf, self.c_buf_size, self.fields.fBEGIN, self.end())
+
 
     cdef unsigned long long end(self):
         if self.c_buf_size < self.fields.fEND:
             self.error = True
-            print(f"TFile corrupted, fEND ({self.fields.fEND}) behind end-of-file ({len(self.buf)})")
+            print(f"TFile corrupted, fEND ({self.fields.fEND}) behind end-of-file ({self.c_buf_size)})")
             return self.c_buf_size
         return self.fields.fEND
 
 
-
-
-    # cdef dircache # contains tuples of bytes
-    # cdef normalizedcache # contains strings
-
-    # cdef multimap[unsigned int, Item*] main_map
-
-    
-
-
     cdef normalize(self, parts):
+        """ Normalized dirname for each dir identified by its fSeekKey """
+
         if len(parts) < 5 or parts[4] != b'Run summary':
             return b'<broken>' + b'/'.join(parts) + b'/'
         else:
             return b'/'.join((parts[3],) + (parts[5:]) + (b'',))
-    
-    # normalized dirname for each dir identified by its fSeekKey
-    cdef void normalized(self, unsigned int fSeekKey, vector[StringLocation]* parts):
-        # if fSeekKey in self.normalizedcache:
-        #     return
-        self.fullname(fSeekKey, parts)
-        # res = self.normalize(parts)
-        # res = parts2
-        # self.normalizedcache[fSeekKey] = None
-        # return res
 
 
-    # recursive list of path fragments with caching, indexed by fSeekPdir
     cdef void fullname(self, unsigned int fSeekKey, vector[StringLocation]* parts):
-        # fast path if in cache
-        # if fSeekKey in self.dircache:
-        #     return
+        """ Recursive list of path fragments with caching, indexed by fSeekPdir """
 
-        # it = self.main_map.find(fSeekKey)
-        # if it != self.main_map.end():
-        #     # Copy array
-        #     second = dereference(it).second
-        #     for i in range(2, second.parts.size()):
-        #         parts.push_back(second.parts[0][i])
-
-            # return
-
-
-        # else load the TKey...
         cdef TKey k = TKey().load(self.c_buf, self.c_buf_size, fSeekKey)
         cdef unsigned int parent = k.fields.fSeekPdir
-        # ... and recurse to its parent.
-        # res = self.fullname(parent) + (k.objname(),)
-
-        # res = self.fullname(parent) + [ k.objname_location ]
 
         if parent == 0:
             parts.push_back(k.objname_location)
             return
         
+        # Recurse to its parent till parent == 0
         self.fullname(parent, parts)
         parts.push_back(k.objname_location)
-
-        
-        # self.dircache[fSeekKey] = None
-        # return res
         
 
-    # Returns an async generator producing (path, name, class, offset) tuples.
-    # The paths are normalized with the `normalize` callback, the classes 
-    # filtered with the `classes` callback.
-    # Use `async for` to iterate this.
     def fulllist(self):
-        # self.dircache = dict() 
-        # self.dircache[0] = []
-        # self.normalizedcache = dict()
-
-
-        # self.vflat = new vector[RootObject*]()
-        # cdef vector[RootObject*]* vflat
-
-        cdef vector[RootObject] vflat
-
-        result = []
-        cdef TKey key = self.first()
-        # cdef const char* c
-        # cdef TKey k
-
-        # cdef struct Item:
-        #     unsigned int fSeekKey
-        #     vector[StringLocation] parts
+        """
+        Returns a python list of (path, name, class, offset) tuples.
+        The paths are normalized and the classes are filtered acoarding 
+        to the requirements of the DMQ GUI.
+        """
         
-        # cdef Item* main_item
-
-        # cdef vector[StringLocation]* parts
-        cdef RootObject root_object
+        cdef TKey key = self.first()
+        cdef FlatRootObjectLocation root_object
 
         while key:
-            c = key.classname()
-            if self.keep_class(c) == True:
-                # main_item = new Item()
-                # main_item.fSeekKey = key.fSeekKey
-                # main_item.parts = new vector[StringLocation]()
-
-                # main_item.parts.push_back(key.objname_location)
-                # main_item.parts.push_back(key.classname_location)
-                # self.main_map.insert(map_item(key.fields.fSeekPdir, main_item))
-                
-                # root_object = new RootObject()
+            if key.classname() in self.dqm_classes:
                 root_object.fSeekKey = key.fields.fSeekKey
                 root_object.parts = new vector[StringLocation]()
                 root_object.parts.push_back(key.objname_location)
                 root_object.parts.push_back(key.classname_location)
-                vflat.push_back(root_object)
+                self.vflat.push_back(root_object)
 
                 self.fullname(key.fields.fSeekPdir, root_object.parts)
                 
@@ -409,71 +267,29 @@ cdef class TFile:
             if key.error:
                 self.error = True
             key = n
-
-        print('Done', vflat.size())
-
-        # cdef map[unsigned int, Item*].iterator it = self.main_map.begin()
-        # cdef Item* second
-        # cdef vector[StringLocation].iterator vec_it
-
-        # objname = self.c_buf[self.classname_location.start : self.classname_location.end]
-
         
-        # Should be 899504 keys and 717702 objects kept of them after keep_class
-        
-        
-        for i in range(vflat.size()):
-            fSeekKey = vflat[i].fSeekKey
-
-            # print(vflat[i].parts.size())
-            # print(vflat[i].parts[0][0].start)
-            # print(vflat[i].parts[0][1].start)
-
-            # print(vflat[i].parts[0][0].end)
-            # print(vflat[i].parts[0][1].end)
-
-            # print(self.c_buf[vflat[i].parts[0][0].start : vflat[i].parts[0][0].end])
+        # Now write the results to a Python list
+        result = []
+        for i in range(self.vflat.size()):
+            fSeekKey = self.vflat[i].fSeekKey
 
             # First two items are objname and classname
-            objname = <bytes> self.c_buf[vflat[i].parts[0][0].start : vflat[i].parts[0][0].end]
-            classname = <bytes> self.c_buf[vflat[i].parts[0][1].start : vflat[i].parts[0][1].end]
+            objname = <bytes> self.c_buf[self.vflat[i].parts[0][0].start : self.vflat[i].parts[0][0].end]
+            classname = <bytes> self.c_buf[self.vflat[i].parts[0][1].start : self.vflat[i].parts[0][1].end]
 
+            # The rest of the items represent the path of the object
             path = ()
-            for j in range(2, vflat[i].parts.size()):
-                path += (<bytes> self.c_buf[vflat[i].parts[0][j].start : vflat[i].parts[0][j].end], )
+            for j in range(2, self.vflat[i].parts.size()):
+                path += (<bytes> self.c_buf[self.vflat[i].parts[0][j].start : self.vflat[i].parts[0][j].end], )
             path = self.normalize(path)
 
-
             result.append((path, objname, classname, fSeekKey))
-
-        # while it != self.main_map.end():
-            # second = dereference(it).second
-            # fSeekKey = second.fSeekKey
-
-            # First two items are objname and classname
-            
-            # objname = <bytes> self.c_buf[second.parts[0][0].start : second.parts[0][0].end]
-            # classname = <bytes> self.c_buf[second.parts[0][1].start : second.parts[0][1].end]
-
-
-            # path = ()
-            # for i in range(2, second.parts.size()):
-            #     # print(type(dereference(it).second.parts[0]))
-            #     # print(dereference(it).second.parts[0][i])
-
-            #     path += (<bytes> self.c_buf[second.parts[0][i].start : second.parts[0][i].end], )
-            
-            # path = self.normalize(path)
-
-                
-            # result.append((path, objname, classname, fSeekKey))
-            # postincrement(it)
-        
         
         return result
 
 
-# Universal container for fields depending on fVersion
+# Universal container for fields depending on fVersion.
+# Structure also here: https://root.cern.ch/doc/master/classTFile.html 
 cdef struct TKeyFields:
     int fNbytes # 4
     unsigned short fVersion # 2
@@ -531,52 +347,71 @@ cdef int tkey_fields_from_bytes(TKeyFields* fields, const unsigned char* c_buf):
     return fields_size
 
 
-cdef struct StringLocation:
-    unsigned int start
-    unsigned int end
-
-
 cdef class TKey:
-    # Structure also here: https://root.cern.ch/doc/master/classTFile.html
-    #Fields = namedtuple("TKeyFields", ["fNbytes", "fVersion", "fObjLen", "fDatime", "fKeyLen", "fCycle", "fSeekKey", "fSeekPdir"])
-    #structure_small = struct.Struct(">iHIIHHII")
-    #structure_big   = struct.Struct(">iHIIHHQQ")
-    #sizefield = struct.Struct(">i")
     compressedheader = struct.Struct("2sBBBBBBB")
 
-    # This value represents the sum of lengths 
-    # of individual fields in TKeyFields
+    # These values represents the sum of lengths 
+    # of individual fields in TKeyFields, depending 
+    # on the file version
     cdef int KEY_FIELDS_SMALL_LENGTH
+    cdef int KEY_FIELDS_BIG_LENGTH
 
-    cdef FullFile buf
     cdef const unsigned char* c_buf
     cdef unsigned long long c_buf_size
     cdef unsigned long long end
     cdef public unsigned int fSeekKey
     cdef public TKeyFields fields
-
+    cdef public bint error
     cdef StringLocation classname_location
     cdef StringLocation objname_location
     cdef StringLocation objtitle_location
 
-    # cdef bytes __classname
-    # cdef bytes __objname
-    # cdef bytes __objtitle
+    cdef bytes data
 
-    cdef public bint error
 
     def __cinit__(self):
         self.KEY_FIELDS_SMALL_LENGTH = 26
+        self.KEY_FIELDS_BIG_LENGTH = 34
 
-    # Decode key at offset `fSeekKey` in `buf`. `end` can be the file end
-    # address if it is less than the buffer end.
+
+    async def load_async(self, buf, fSeekKey):
+        """
+        This is an async version of load method. This is not used when importing!
+        This coroutine reads minimal number of bytes required to render a specific histogram.
+        `buf` has to be of type `BlockCachedFile`.
+        """
+
+        # Loading the amount of data required for big fields will also work for small fields
+        self.data = await buf[fSeekKey : fSeekKey + self.KEY_FIELDS_BIG_LENGTH]
+        headersize = tkey_fields_from_bytes(&self.fields, self.data)
+
+        # Load all bytes associated with this ROOT object
+        self.data += await buf[fSeekKey + self.KEY_FIELDS_BIG_LENGTH : fSeekKey + self.fields.fNbytes]
+
+        # Setting this to 0 because we async load only the bytes for this object
+        self.fSeekKey = 0
+
+        self.c_buf_size = self.fields.fNbytes
+        cdef const unsigned char[:] view = self.data
+        self.c_buf = <const unsigned char*>&view[0]
+
+        self.classname_location = self.__readstrloc(self.fSeekKey + headersize)
+        self.objname_location = self.__readstrloc(self.classname_location.end)
+        self.objtitle_location = self.__readstrloc(self.objname_location.end)
+
+        return self
+
+
     cdef TKey load(self, const unsigned char* c_buf, unsigned long long c_buf_size, unsigned int fSeekKey, unsigned long long end=0):
-        # self.buf = buf
+        """
+        Decode key at offset `fSeekKey` in `buf`. `end` can be the file end
+        address if it is less than the buffer end.
+        """
+
         self.end = end if end != 0 else c_buf_size
         self.fSeekKey = fSeekKey
-        self.c_buf_size = c_buf_size
-
         self.c_buf = c_buf
+        self.c_buf_size = c_buf_size
         cdef int headersize = tkey_fields_from_bytes(&self.fields, <const unsigned char *>&self.c_buf[self.fSeekKey])
 
         assert self.fields.fSeekKey == self.fSeekKey, f"{self} is corrupted!"
@@ -584,19 +419,10 @@ cdef class TKey:
         # The TKey struct is followed by three strings: class, object name, object title.
         # These consume the sest of the space of the key, unitl, fKeyLen.
         # Read them here eagerly to avoid making to many async read requests later.
-        # namebuf = <const unsigned char*>&self.c_buf[self.fSeekKey + headersize]
-
-        # self.__classname, pos = self.__readstr(namebuf, 0)
-        # self.__objname, pos = self.__readstr(namebuf, pos)
-        # self.__objtitle, pos = self.__readstr(namebuf, pos)
 
         self.classname_location = self.__readstrloc(self.fSeekKey + headersize)
         self.objname_location = self.__readstrloc(self.classname_location.end)
         self.objtitle_location = self.__readstrloc(self.objname_location.end)
-
-        # self.__classname = self.c_buf[classname_out.start:classname_out.end]
-        # self.__objname = self.c_buf[objname_out.start:objname_out.end]
-        # self.__objtitle = self.c_buf[objtitle_out.start:objtitle_out.end]
 
         self.error = False
         return self
@@ -604,7 +430,7 @@ cdef class TKey:
 
     cdef StringLocation __readstrloc(self, unsigned int pos):
         cdef int size = self.c_buf[pos]
-
+        
         if size == 255: # solution for when length does not fit one byte
             memcpy(&size, <const void *>&self.c_buf[pos+1], 4)
             swapbytes(&size, sizeof(size))
@@ -618,35 +444,24 @@ cdef class TKey:
         return out
 
 
-    # cdef ReadStringOutput __readstr(self, const unsigned char* c_buf, int pos):
-    #     cdef int size = c_buf[pos]
-    #     if size == 255: # solution for when length does not fit one byte
-    #         memcpy(&size, <const void *>&c_buf[pos+1], 4)
-    #         swapbytes(&size, sizeof(size))
-    #         pos += 4
-        
-    #     cdef int nextpos = pos + size + 1
-    #     cdef ReadStringOutput out
-    #     out.string = c_buf[pos+1:nextpos]
-    #     out.nextpos = nextpos
-    #     return out
-
     def __repr__(self):
         return f"TKey({self.fSeekKey}, fields = {self.fields})"
 
-    # Read the TKey following this key. According to the documentation these
-    # should be one after the other in the file, but in practice there are
-    # sometimes gaps (resized/deleted objects?), which are skipped here.
+    
     cdef TKey next(self):
+        """
+        Read the TKey following this key. According to the documentation these
+        should be one after the other in the file, but in practice there are
+        sometimes gaps (resized/deleted objects?), which are skipped here.
+        """
+
         cdef unsigned long long offset = self.fields.fSeekKey + self.fields.fNbytes
         cdef int size
         cdef TKey k
         
-        # print(TKey.structure_small.size)
         while (offset + self.KEY_FIELDS_SMALL_LENGTH) < self.end:
             # It seems that a negative length indicates an unused block of that size. Skip it.
             # The number of such blocks matches nfree in the TFile.
-            # size, = TKey.sizefield.unpack(self.buf[offset:offset+4])
             
             memcpy(&size, <const void *>&self.c_buf[offset], 4)
             swapbytes(&size, sizeof(size))
@@ -659,60 +474,66 @@ cdef class TKey:
             return k
         return None
 
-    # Parse the three strings in the TKey (classname, objname, objtitle)
+    
     cdef bytes classname(self):
-        # return self.__classname
         return self.c_buf[self.classname_location.start : self.classname_location.end]
 
-    cdef bytes objname(self):
-        # return self.__objname
+
+    # This is called from the outside, so it can't be cdef
+    def objname(self):
         return self.c_buf[self.objname_location.start : self.objname_location.end]
+
 
     cdef bytes objtitle(self):
         return self.c_buf[self.objtitle_location.start : self.objtitle_location.end]
-    
+
+
     cdef bint compressed(self):
         return <unsigned int>(self.fields.fNbytes - self.fields.fKeyLen) != self.fields.fObjLen
 
-    # Return and potentially decompress object data.
-    # Compression is done in thread pool since it could take more time.
+
     def objdata(self):
-        start = self.fields.fSeekKey + self.fields.fKeyLen
-        end = self.fields.fSeekKey + self.fields.fNbytes
+        """
+        Return and potentially decompress object data.
+        Compression is done in thread pool since it could take more time.
+        """
+
+        start = self.fSeekKey + self.fields.fKeyLen
+        end = self.fSeekKey + self.fields.fNbytes
+
         if not self.compressed():
             return self.c_buf[start:end]
         else:
             def decompress(buf, start, end):
                 out = []
                 while start < end:
-                     # Thanks uproot!
-                     algo, method, c1, c2, c3, u1, u2, u3 = TKey.compressedheader.unpack(
-                         buf[start : start + TKey.compressedheader.size])
-                     compressedbytes = c1 + (c2 << 8) + (c3 << 16)
-                     uncompressedbytes = u1 + (u2 << 8) + (u3 << 16)
-                     start += TKey.compressedheader.size
-                     assert algo == b'ZL', "Only Zlib compression supported, not " #+ repr(comp)
-                     uncomp =  zlib.decompress(buf[start:start+compressedbytes])
-                     out.append(uncomp)
-                     assert len(uncomp) == uncompressedbytes
-                     start += compressedbytes
+                    # Thanks uproot!
+                    algo, method, c1, c2, c3, u1, u2, u3 = TKey.compressedheader.unpack(
+                        buf[start : start + TKey.compressedheader.size])
+                    
+                    compressedbytes = c1 + (c2 << 8) + (c3 << 16)
+                    uncompressedbytes = u1 + (u2 << 8) + (u3 << 16)
+                    start += TKey.compressedheader.size
+                    assert algo == b'ZL', "Only Zlib compression supported, not " #+ repr(comp)
+                    uncomp =  zlib.decompress(buf[start:start+compressedbytes])
+                    out.append(uncomp)
+                    assert len(uncomp) == uncompressedbytes
+                    start += compressedbytes
                 return b''.join(out)
+
             buf = self.c_buf[start:end]
-            #return await asyncio.get_event_loop().run_in_executor(None, decompress, buf, 0, end-start)
             return decompress(buf, 0, end-start)
 
-    # Each key (except the root) has a parent directory.
-    # This creates a new TKey pointing there.
-    def parent(self):
-        if self.fields.fSeekPdir == 0:
-            return None
-        return TKey().load(self.c_buf, self.c_buf_size, self.fields.fSeekPdir, self.end)
+    # # Each key (except the root) has a parent directory.
+    # # This creates a new TKey pointing there.
+    # def parent(self):
+    #     if self.fields.fSeekPdir == 0:
+    #         return None
+    #     return TKey().load(self.c_buf, self.c_buf_size, self.fields.fSeekPdir, self.end)
 
-    # Derive the full path of an object by recursing up the parents.
-    # slow, primarily for debugging.
-    def fullname(self):
-        parent = self.parent()
-        parentname = parent.fullname() if parent else b''
-        return b"%s/%s" % (parentname, self.objname())
-
-
+    # # Derive the full path of an object by recursing up the parents.
+    # # slow, primarily for debugging.
+    # def fullname(self):
+    #     parent = self.parent()
+    #     parentname = parent.fullname() if parent else b''
+    #     return b"%s/%s" % (parentname, self.objname())

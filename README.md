@@ -70,13 +70,13 @@ python3 -m pip install -r requirements.txt -t .python_packages
 
 The server can be started like this:
 ``` bash
-./scripts/dqmguibackend.sh
+./scripts/dqmgui.sh
 ```
 
 Please run this in order to see the supported arguments and their meaning:
 
 ``` bash
-./scripts/dqmguibackend.sh --help
+./scripts/dqmgui.sh --help
 ```
 
 ## File formats
@@ -409,7 +409,7 @@ python3 -m pip install -r requirements.txt -t .python_packages
 # If xrootd installation fails, it can be installed in a user mode:
 #python3 -m pip install xrootd --user
 cd ../
-./scripts/dqmguibackend.sh -p 8889
+./scripts/dqmgui.sh -p 8889
 ```
 
 

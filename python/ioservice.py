@@ -1,9 +1,9 @@
 import os
 import asyncio
 from async_lru import alru_cache
-
 from helpers import logged
 from nanoroot.io import XRDFile
+from concurrent.futures import ThreadPoolExecutor
 
 
 class IOService:
@@ -12,10 +12,11 @@ class IOService:
     CONNECTIONS = 100    # maximum number of open connections
     OPENTIMEOUT = 20     # maximum time to wait while opening file (seconds)
     MAXOPENTIME = 60     # maximum time that a connection stays open (seconds)
+    EOSPREFIX = 'root://eoscms.cern.ch/'
 
     
     @classmethod
-    async def open_url(cls, url, blockcache=True):
+    async def open_url(cls, url, blockcache=True, xrootd=True):
         """
         Create a file handle for local or remote file `url`.
 
@@ -23,8 +24,14 @@ class IOService:
         mechanism, else the full file will be read to memory in a local buffer.
         This can be useful for indexing, where we don't want to pollute the
         global cache with lots of blocks that are never read again.
+
+        If `xrootd` is False, it simply reads the entire file from the 
+        filesystem. Getting the contents of the file then are non async.
         """
-        if blockcache:
+
+        if not xrootd:
+            f = FullFilesystemFile(url, cls.EOSPREFIX)
+        elif blockcache:
             f = BlockCachedFile(url, cls.BLOCKSIZE)
         else:
             f = FullFile(url, timeout = cls.OPENTIMEOUT)
@@ -187,3 +194,33 @@ class FullFile(AsyncBufferBase):
 
     def __repr__(self):
         return f"FullFile(url={repr(self.url)})"
+
+
+class FullFilesystemFile():
+    """Reads the entire binary file from a filesystem into a `buf` variable."""
+
+    def __init__(self, url, eosprefix):
+        self.url = url
+        if self.url.startswith(eosprefix):
+            self.url = self.url[len(eosprefix):]
+
+
+    async def preload(self):
+        def read(url):
+            with open(url, 'rb') as f:
+                return f.read()
+
+        with ThreadPoolExecutor(1) as executor:
+            self.buf = await asyncio.get_event_loop().run_in_executor(executor, read, self.url)
+
+
+    def __len__(self):
+        return len(self.buf)
+
+
+    def __getitem__(self, idx):
+        return self.buf[idx]
+
+
+    def __repr__(self):
+        return f"FullFilesystemFile(url={repr(self.url)})"

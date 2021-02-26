@@ -5,7 +5,7 @@ _|    _|  _|  _|_|    _|  _|  _|      _|  _|_|  _|    _|    _|
 _|    _|  _|    _|    _|      _|      _|    _|  _|    _|    _|    
 _|_|_|      _|_|  _|  _|      _|        _|_|_|    _|_|    _|_|_|  
 
-This is an entry point to the DQM GUI application. It can be started like this: dqmguibackend.sh
+This is an entry point to the DQM GUI application. It can be started like this: dqmgui.sh
 
 This file configures and initializes aiohttp web server and all DQM GUI services. 
 Responsibilities of the endpoint methods here are to parse input parameters, call 

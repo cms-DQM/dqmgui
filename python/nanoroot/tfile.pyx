@@ -17,9 +17,9 @@ from libcpp.utility cimport pair
 from cython.operator cimport dereference, postincrement
 
 # ctypedef vector[StringLocation]* slvp
-ctypedef pair[unsigned int, Item*] map_item
+# ctypedef pair[unsigned int, Item*] map_item
 
-cdef cppclass Item:
+cdef cppclass RootObject:
     unsigned int fSeekKey
     vector[StringLocation]* parts
 
@@ -182,10 +182,25 @@ cdef class TFile:
     cdef unsigned long long c_buf_size
     cdef TFileFields fields
     cdef bint error
-    cdef const char* dqm_classes[10]
+    # cdef const char* dqm_classes[10]
+    cdef dqm_classes
 
-    def __cinit__(self):
-        self.dqm_classes[:] = [
+    # def __cinit__(self):
+    #     self.dqm_classes[:] = [
+    #         b'TH1D',
+    #         b'TH1F',
+    #         b'TH1S',
+    #         b'TH2D',
+    #         b'TH2F',
+    #         b'TH2S',
+    #         b'TH3F',
+    #         b'TObjString',
+    #         b'TProfile',
+    #         b'TProfile2D'
+    #     ]
+
+    def __init__(self):
+        self.dqm_classes = [
             b'TH1D',
             b'TH1F',
             b'TH1S',
@@ -205,12 +220,14 @@ cdef class TFile:
     # This is a hardcoded list of allowed classes
     # so we can disable division by zero error checking
     @cython.cdivision(True)
-    cdef bint keep_class(self, const char* name):
-        cdef int len = (int)(sizeof(self.dqm_classes)/sizeof(self.dqm_classes[0]))
-        for i in range(len):
-            if strcmp(self.dqm_classes[i], name) == 0:
-                return True
-        return False
+    cdef bint keep_class(self, bytes name):
+        # print(name, name in self.dqm_classes)
+        # cdef int len = (int)(sizeof(self.dqm_classes)/sizeof(self.dqm_classes[0]))
+        # for i in range(len):
+        #     if strcmp(self.dqm_classes[i], name) == 0:
+        #         return True
+        # return False
+        return name in self.dqm_classes
 
     # cdef normalize(self, parts):
     #     # print(parts)
@@ -278,9 +295,29 @@ cdef class TFile:
 
 
 
-    cdef dircache # contains tuples of bytes
-    cdef normalizedcache # contains strings
+    # cdef dircache # contains tuples of bytes
+    # cdef normalizedcache # contains strings
 
+    # cdef multimap[unsigned int, Item*] main_map
+
+    
+
+
+    cdef normalize(self, parts):
+        if len(parts) < 5 or parts[4] != b'Run summary':
+            return b'<broken>' + b'/'.join(parts) + b'/'
+        else:
+            return b'/'.join((parts[3],) + (parts[5:]) + (b'',))
+    
+    # normalized dirname for each dir identified by its fSeekKey
+    cdef void normalized(self, unsigned int fSeekKey, vector[StringLocation]* parts):
+        # if fSeekKey in self.normalizedcache:
+        #     return
+        self.fullname(fSeekKey, parts)
+        # res = self.normalize(parts)
+        # res = parts2
+        # self.normalizedcache[fSeekKey] = None
+        # return res
 
 
     # recursive list of path fragments with caching, indexed by fSeekPdir
@@ -288,6 +325,16 @@ cdef class TFile:
         # fast path if in cache
         # if fSeekKey in self.dircache:
         #     return
+
+        # it = self.main_map.find(fSeekKey)
+        # if it != self.main_map.end():
+        #     # Copy array
+        #     second = dereference(it).second
+        #     for i in range(2, second.parts.size()):
+        #         parts.push_back(second.parts[0][i])
+
+            # return
+
 
         # else load the TKey...
         cdef TKey k = TKey().load(self.c_buf, self.c_buf_size, fSeekKey)
@@ -307,32 +354,22 @@ cdef class TFile:
         
         # self.dircache[fSeekKey] = None
         # return res
-
-    cdef normalize(self, parts):
-        if len(parts) < 5 or parts[4] != b'Run summary':
-            return b'<broken>' + b'/'.join(parts) + b'/'
-        else:
-            return b'/'.join((parts[3],) + (parts[5:]) + (b'',))
-    
-    # normalized dirname for each dir identified by its fSeekKey
-    cdef void normalized(self, unsigned int fSeekKey, vector[StringLocation]* parts):
-        # if fSeekKey in self.normalizedcache:
-        #     return
-        self.fullname(fSeekKey, parts)
-        # res = self.normalize(parts)
-        # res = parts2
-        # self.normalizedcache[fSeekKey] = None
-        # return res
-    
+        
 
     # Returns an async generator producing (path, name, class, offset) tuples.
     # The paths are normalized with the `normalize` callback, the classes 
     # filtered with the `classes` callback.
     # Use `async for` to iterate this.
     def fulllist(self):
-        self.dircache = dict() 
-        self.dircache[0] = []
-        self.normalizedcache = dict()
+        # self.dircache = dict() 
+        # self.dircache[0] = []
+        # self.normalizedcache = dict()
+
+
+        # self.vflat = new vector[RootObject*]()
+        # cdef vector[RootObject*]* vflat
+
+        cdef vector[RootObject] vflat
 
         result = []
         cdef TKey key = self.first()
@@ -342,67 +379,97 @@ cdef class TFile:
         # cdef struct Item:
         #     unsigned int fSeekKey
         #     vector[StringLocation] parts
+        
+        # cdef Item* main_item
 
-
-        cdef map[unsigned int, Item*] main_map
-        cdef Item* main_item
+        # cdef vector[StringLocation]* parts
+        cdef RootObject root_object
 
         while key:
             c = key.classname()
             if self.keep_class(c) == True:
-                main_item = new Item()
-                main_item.fSeekKey = key.fSeekKey
-                main_item.parts = new vector[StringLocation]()
-                # main_vector = new vector[StringLocation]()
+                # main_item = new Item()
+                # main_item.fSeekKey = key.fSeekKey
+                # main_item.parts = new vector[StringLocation]()
 
-                main_item.parts.push_back(key.objname_location)
-                main_item.parts.push_back(key.classname_location)
-                main_map.insert(map_item(key.fields.fSeekPdir, main_item))
-
-                self.normalized(key.fields.fSeekPdir, main_item.parts)
-
+                # main_item.parts.push_back(key.objname_location)
+                # main_item.parts.push_back(key.classname_location)
+                # self.main_map.insert(map_item(key.fields.fSeekPdir, main_item))
                 
-                # result.append( (self.normalized(key.fields.fSeekPdir), key.objname_location, key.classname_location, key.fSeekKey) )
+                # root_object = new RootObject()
+                root_object.fSeekKey = key.fields.fSeekKey
+                root_object.parts = new vector[StringLocation]()
+                root_object.parts.push_back(key.objname_location)
+                root_object.parts.push_back(key.classname_location)
+                vflat.push_back(root_object)
+
+                self.fullname(key.fields.fSeekPdir, root_object.parts)
+                
             n = key.next()
             if key.error:
                 self.error = True
             key = n
-        print('Done', main_map.size())
 
-        cdef map[unsigned int, Item*].iterator it = main_map.begin()
-        cdef Item* second
+        print('Done', vflat.size())
+
+        # cdef map[unsigned int, Item*].iterator it = self.main_map.begin()
+        # cdef Item* second
         # cdef vector[StringLocation].iterator vec_it
 
         # objname = self.c_buf[self.classname_location.start : self.classname_location.end]
-        
-        
 
-        while it != main_map.end():
-            second = dereference(it).second
-            fSeekKey = second.fSeekKey
+        
+        # Should be 899504 keys and 717702 objects kept of them after keep_class
+        
+        
+        for i in range(vflat.size()):
+            fSeekKey = vflat[i].fSeekKey
+
+            # print(vflat[i].parts.size())
+            # print(vflat[i].parts[0][0].start)
+            # print(vflat[i].parts[0][1].start)
+
+            # print(vflat[i].parts[0][0].end)
+            # print(vflat[i].parts[0][1].end)
+
+            # print(self.c_buf[vflat[i].parts[0][0].start : vflat[i].parts[0][0].end])
+
+            # First two items are objname and classname
+            objname = <bytes> self.c_buf[vflat[i].parts[0][0].start : vflat[i].parts[0][0].end]
+            classname = <bytes> self.c_buf[vflat[i].parts[0][1].start : vflat[i].parts[0][1].end]
+
+            path = ()
+            for j in range(2, vflat[i].parts.size()):
+                path += (<bytes> self.c_buf[vflat[i].parts[0][j].start : vflat[i].parts[0][j].end], )
+            path = self.normalize(path)
+
+
+            result.append((path, objname, classname, fSeekKey))
+
+        # while it != self.main_map.end():
+            # second = dereference(it).second
+            # fSeekKey = second.fSeekKey
 
             # First two items are objname and classname
             
-            objname = <bytes> self.c_buf[second.parts[0][0].start : second.parts[0][0].end]
-            classname = <bytes> self.c_buf[second.parts[0][1].start : second.parts[0][1].end]
+            # objname = <bytes> self.c_buf[second.parts[0][0].start : second.parts[0][0].end]
+            # classname = <bytes> self.c_buf[second.parts[0][1].start : second.parts[0][1].end]
 
 
-            path = ()
-            for i in range(2, second.parts.size()):
-                # print(type(dereference(it).second.parts[0]))
-                # print(dereference(it).second.parts[0][i])
+            # path = ()
+            # for i in range(2, second.parts.size()):
+            #     # print(type(dereference(it).second.parts[0]))
+            #     # print(dereference(it).second.parts[0][i])
 
-                path += (<bytes> self.c_buf[second.parts[0][i].start : second.parts[0][i].end], )
+            #     path += (<bytes> self.c_buf[second.parts[0][i].start : second.parts[0][i].end], )
             
-            path = self.normalize(path)
+            # path = self.normalize(path)
 
                 
-            result.append((path, objname, classname, fSeekKey))
-            postincrement(it)
+            # result.append((path, objname, classname, fSeekKey))
+            # postincrement(it)
         
         
-
-        print(result[:10])
         return result
 
 
@@ -537,6 +604,7 @@ cdef class TKey:
 
     cdef StringLocation __readstrloc(self, unsigned int pos):
         cdef int size = self.c_buf[pos]
+
         if size == 255: # solution for when length does not fit one byte
             memcpy(&size, <const void *>&self.c_buf[pos+1], 4)
             swapbytes(&size, sizeof(size))
@@ -546,6 +614,7 @@ cdef class TKey:
         cdef StringLocation out
         out.start = pos+1
         out.end = nextpos
+
         return out
 
 

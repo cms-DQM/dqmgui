@@ -3,16 +3,13 @@
 import zlib
 import cython
 import struct
-import asyncio
-from collections import namedtuple
 
 # Cython imports
-from libc.string cimport memcpy, strcmp
-from libc.stdlib cimport malloc, free
+from libc.string cimport memcpy
 from libcpp.vector cimport vector
 from libcpp.map cimport map
 from libcpp.utility cimport pair
-from cython.operator cimport dereference, postincrement
+from cython.operator cimport dereference
 
 
 # These classes allow reading the ROOT contianer structures (TFile, TDirectory, TKey),
@@ -34,17 +31,23 @@ from cython.operator cimport dereference, postincrement
 # which may be compressed. There can be gaps between TKeys (deleted objects?).
 
 
-# TODO: rename this struct
 cdef struct FlatRootObjectLocation:
     unsigned int fSeekKey
-    # THis vector holds StringLocation object that represent 
-    # objname, classname and parts of the path
+    # This vector holds StringLocation objects that identify 
+    # strings forming a path of the ROOT object inside `c_buf` buffer. 
+    # First two elements in this array are not part of the path and 
+    # they represent objname and classname strings. All remaining 
+    # elements represent the path.
     vector[StringLocation]* parts
 
 
 cdef struct StringLocation:
     unsigned int start
     unsigned int end
+
+
+ctypedef vector[StringLocation]* strlptr
+ctypedef pair[unsigned long long, strlptr] cachepair
 
 
 # ROOT is big endian and our x86 machines are little endian.
@@ -158,6 +161,7 @@ cdef class TFile:
     cdef bint error
     cdef dqm_classes
     cdef vector[FlatRootObjectLocation] vflat
+    cdef map[unsigned long long, strlptr] cachemap
 
 
     def __cinit__(self):
@@ -176,8 +180,9 @@ cdef class TFile:
 
 
     def __dealloc__(self):
-        # TODO: delete all new calls
-        pass
+        # Delete all new calls
+        for i in range(self.vflat.size()):
+            del self.vflat[i].parts
 
 
     def load(self, buf):
@@ -219,17 +224,16 @@ cdef class TFile:
         return self.fields.fEND
 
 
-    cdef normalize(self, parts):
-        """ Normalized dirname for each dir identified by its fSeekKey """
-
-        if len(parts) < 5 or parts[4] != b'Run summary':
-            return b'<broken>' + b'/'.join(parts) + b'/'
-        else:
-            return b'/'.join((parts[3],) + (parts[5:]) + (b'',))
-
-
     cdef void fullname(self, unsigned int fSeekKey, vector[StringLocation]* parts):
         """ Recursive list of path fragments with caching, indexed by fSeekPdir """
+
+        # Check if this directory was already seen. 
+        # If it was, just copy the path elements over and return.
+        # cdef map[unsigned long long, strlptr].iterator it = self.cachemap.find(fSeekKey)
+        # if it != self.cachemap.end():
+        #     for i in range(2, dereference(it).second.size()):
+        #         parts.push_back(dereference(it).second[0][i])
+        #     return
 
         cdef TKey k = TKey().load(self.c_buf, self.c_buf_size, fSeekKey)
         cdef unsigned int parent = k.fields.fSeekPdir
@@ -261,7 +265,11 @@ cdef class TFile:
                 root_object.parts.push_back(key.classname_location)
                 self.vflat.push_back(root_object)
 
+                # Recursively traverse till parent object and fill in path parts
                 self.fullname(key.fields.fSeekPdir, root_object.parts)
+
+                # Add to cache
+                self.cachemap.insert(cachepair(key.fields.fSeekPdir, root_object.parts))
                 
             n = key.next()
             if key.error:
@@ -277,13 +285,17 @@ cdef class TFile:
             objname = <bytes> self.c_buf[self.vflat[i].parts[0][0].start : self.vflat[i].parts[0][0].end]
             classname = <bytes> self.c_buf[self.vflat[i].parts[0][1].start : self.vflat[i].parts[0][1].end]
 
-            # The rest of the items represent the path of the object
-            path = ()
-            for j in range(2, self.vflat[i].parts.size()):
-                path += (<bytes> self.c_buf[self.vflat[i].parts[0][j].start : self.vflat[i].parts[0][j].end], )
-            path = self.normalize(path)
-
-            result.append((path, objname, classname, fSeekKey))
+            # The rest of the items represent the path items (directories) of the object.
+            # We first check if the path represents a valid DQM object.
+            # Valid DQM object path structure is the following: 
+            # filename.root/DQMData/Run XXXXXX/subsystem/Run summary/<arbitrary folder structure based on booking calls in CMSSW>
+            # If the path doesn't conform to this structure, it has to be discarded and not shown in the DQM GUI.
+            if self.vflat[i].parts.size() > 6 and self.c_buf[self.vflat[i].parts[0][6].start : self.vflat[i].parts[0][6].end] == b'Run summary':
+                path = <bytes> self.c_buf[self.vflat[i].parts[0][5].start : self.vflat[i].parts[0][5].end] + b'/'
+                for j in range(7, self.vflat[i].parts.size()):
+                    path += <bytes> self.c_buf[self.vflat[i].parts[0][j].start : self.vflat[i].parts[0][j].end] + b'/'
+                
+                result.append((path, objname, classname, fSeekKey))
         
         return result
 

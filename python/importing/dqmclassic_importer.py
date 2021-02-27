@@ -37,11 +37,12 @@ class DQMCLASSICImporter:
     @classmethod
     def list_mes(cls, tfile, run):
         result = []
+        
         fulllist = tfile.fulllist()
         for path, name, class_name, offset in fulllist:
             if cls.__BLACKLIST.search(path):
                 continue
-            
+
             if class_name == b'TObjString':
                 parsed = DQMCLASSICReader.parse_string_entry(name)
                 if isinstance(parsed, EfficiencyFlag):

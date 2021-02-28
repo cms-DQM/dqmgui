@@ -126,7 +126,6 @@ class GUIImportManager:
         This function will call `import_sync` using a process pool.
         """
 
-        # TODO: Semaphore here to not open too many workers at once?
         async with cls.semaphore:
             with ProcessPoolExecutor(1) as executor:
                 return await asyncio.get_event_loop().run_in_executor(executor,

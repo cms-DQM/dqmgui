@@ -735,10 +735,4 @@ struct.error: unpack requires a buffer of 8 bytes
 
 This section contains urls that result in errors. These errors should be fixed.
 
-https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=JetMET&dataset_name=%2FCosmics%2FCommissioning2019-PromptReco-v1%2FDQMIO&run_number=334235&workspaces=Everything&lumi=0
-
-https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=HLT%2FGeneralHLTOffline&dataset_name=%2FCosmics%2FRun2016B-PromptReco-v1%2FDQMIO&run_number=273080&workspaces=Everything&overlay=overlay&lumi=0
-
-https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=HLT%2FGeneralHLTOffline%2FMinimumBias&dataset_name=%2FCosmics%2FRun2016B-PromptReco-v1%2FDQMIO&run_number=273080&workspaces=Everything&overlay=overlay&lumi=0
-
-https://cmsweb-testbed.cern.ch/dqm/offline-test-new/?folder_path=HLT%2FTracking%2FpixelTracks%2FHitEffFromHitPattern&dataset_name=%2FStreamExpress%2FRun2017B-Express-v1%2FDQMIO&run_number=297287&workspaces=Everything&lumi=0
+All known issues were fixed by changing the `CFLAGS` in the Makefile.

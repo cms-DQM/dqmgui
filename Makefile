@@ -1,4 +1,4 @@
-CFLAGS:=--std=c++1z -O2 -fPIC -DGNU_GCC -D_GNU_SOURCE -D_GLIBCXX_USE_CXX11_ABI=0 -DBOOST_DISABLE_ASSERTS
+CFLAGS:=-D_GNU_SOURCE -DWITHOUT_CMS_FRAMEWORK=1 -D__STDC_LIMIT_MACROS -U__DEPRECATED -fPIC -g -O2 -W -Wall -Wno-long-long -std=c++17
 LDFLAGS:=-Wl,-E -Wl,--hash-style=gnu
 ROOTLIBS:=-lCore -lRIO -lNet -lHist -lMatrix -lThread -lTree -lMathCore -lGpad -lGraf3d -lGraf -lPhysics -lPostscript -lASImage
 INCLUDE=-I. -I$(ROOT_ROOT)/include -I$(BOOST_ROOT)/include -I$(PNG_ROOT)/include -I$(LIBJPEG_TURBO_ROOT)/include

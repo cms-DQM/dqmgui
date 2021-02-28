@@ -18,8 +18,6 @@ from cython.operator cimport dereference
 # as well as fewer dependencies.
 # Everything is designed around a buffer like that supports indexing to get bytes. 
 # Reading from the buffer is rather lazy and copying data is avoided as long as possible.
-# This library supports asyncio; that is another reason for its existence. To acheive
-# that, many methods are async, and the buffers have an *async* [...:...] operator.
 
 # The basic structures to read a ROOT file: TFile and TKey.
 # We don't actually need TDirectory, since the directory structure can be inferred
@@ -430,7 +428,6 @@ cdef class TKey:
 
         # The TKey struct is followed by three strings: class, object name, object title.
         # These consume the sest of the space of the key, unitl, fKeyLen.
-        # Read them here eagerly to avoid making to many async read requests later.
 
         self.classname_location = self.__readstrloc(self.fSeekKey + headersize)
         self.objname_location = self.__readstrloc(self.classname_location.end)

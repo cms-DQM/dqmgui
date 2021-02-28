@@ -13,3 +13,6 @@ bin/
 lib/
 .vscode/
 .DS_Store
+# Code compiled by Cython:
+python/nanoroot/*.c
+python/nanoroot/*.cpp

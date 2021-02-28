@@ -27,6 +27,8 @@ class GUIImportManager:
     store = GUIDataStore()
     compressor = GUIBlobCompressor()
 
+    semaphore = asyncio.Semaphore(100)
+
     @classmethod
     async def initialize(cls, files=__EOSPATH):
         """
@@ -125,9 +127,10 @@ class GUIImportManager:
         """
 
         # TODO: Semaphore here to not open too many workers at once?
-        with ProcessPoolExecutor(1) as executor:
-            return await asyncio.get_event_loop().run_in_executor(executor,
-                cls.import_sync, fileformat, filename, dataset, run, lumi)
+        async with cls.semaphore:
+            with ProcessPoolExecutor(1) as executor:
+                return await asyncio.get_event_loop().run_in_executor(executor,
+                    cls.import_sync, fileformat, filename, dataset, run, lumi)
 
 
     @classmethod
@@ -187,5 +190,7 @@ class GUIImportManager:
                 'run': key[0],
                 'lumi': key[1],
             })
+
+        return None, None
 
         return samples, blob_descriptions

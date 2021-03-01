@@ -250,7 +250,7 @@ class GUIService:
 
         if lines == None:
             # Import and retry
-            success = await cls.__import_blobs(dataset, run, lumi)
+            success = await cls.__import_blobs(dataset, run, lumi, notOlderThan=notOlderThan)
             if success: 
                 # Retry
                 lines = await cls.store.get_me_names_list(dataset, run, lumi)
@@ -266,7 +266,7 @@ class GUIService:
 
         if infos == None:
             # Import and retry
-            success = await cls.__import_blobs(dataset, run, lumi)
+            success = await cls.__import_blobs(dataset, run, lumi, notOlderThan=notOlderThan)
             if success:
                 # Retry
                 infos = await cls.store.get_me_infos_list(dataset, run, lumi)
@@ -282,7 +282,7 @@ class GUIService:
 
         if not all(filename_fileformat_names_infos):
             # Import and retry
-            success = await cls.__import_blobs(dataset, run, lumi)
+            success = await cls.__import_blobs(dataset, run, lumi, notOlderThan=notOlderThan)
             if success:
                 # Retry
                 filename_fileformat_names_infos = await cls.store.get_filename_fileformat_names_infos(dataset, run, lumi)

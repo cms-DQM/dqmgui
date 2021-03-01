@@ -190,6 +190,4 @@ class GUIImportManager:
                 'lumi': key[1],
             })
 
-        return None, None
-
         return samples, blob_descriptions

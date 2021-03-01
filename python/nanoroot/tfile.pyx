@@ -227,11 +227,11 @@ cdef class TFile:
 
         # Check if this directory was already seen. 
         # If it was, just copy the path elements over and return.
-        # cdef map[unsigned long long, strlptr].iterator it = self.cachemap.find(fSeekKey)
-        # if it != self.cachemap.end():
-        #     for i in range(2, dereference(it).second.size()):
-        #         parts.push_back(dereference(it).second[0][i])
-        #     return
+        cdef map[unsigned long long, strlptr].iterator it = self.cachemap.find(fSeekKey)
+        if it != self.cachemap.end():
+            for i in range(2, dereference(it).second.size()):
+                parts.push_back(dereference(it).second[0][i])
+            return
 
         cdef TKey k = TKey().load(self.c_buf, self.c_buf_size, fSeekKey)
         cdef unsigned int parent = k.fields.fSeekPdir

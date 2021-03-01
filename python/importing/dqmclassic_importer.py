@@ -11,7 +11,7 @@ class DQMCLASSICImporter:
     # Don't import these (known obsolete/broken stuff)
     # The notorious SiStrip bad component workflow creates are varying number of MEs
     # for each run. We just hardcode-ban them here to help the deduplication
-    __BLACKLIST = re.compile(b'By Lumi Section |/Reference/|BadModuleList')
+    __BLACKLIST = re.compile(b'BadModuleList')
 
     ioservice = IOService()
 

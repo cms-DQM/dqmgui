@@ -6,6 +6,7 @@ extensions = [
     Extension("nanoroot.tbufferfile", ["nanoroot/tbufferfile.pyx"]),
     Extension("nanoroot.tfile", ["nanoroot/tfile.pyx"]),
     Extension("nanoroot.ttree", ["nanoroot/ttree.pyx"]),
+    Extension("protobuf.protobuf_parser", ["protobuf/protobuf_parser.pyx"]),
 ]
 
 compiler_directives = { "language_level": 3 }

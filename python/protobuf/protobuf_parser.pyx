@@ -1,11 +1,16 @@
 
 import os
 import zlib
-from ioservice import IOService
 from collections import namedtuple
 
 
-class ProtobufParser:
+# This struct stores a wire type and a field number. Those two values make up a key.
+cdef struct PBKey:
+    unsigned char wire_type
+    unsigned char field_number
+
+
+cdef class ProtobufParser:
     """
     Protocol buffers is binary serialization format from Google. Python library for deserializing protobuf 
     encoded messages exist, however, it doesn't support partial reads - if we want to get just a single 
@@ -80,17 +85,24 @@ class ProtobufParser:
     HistoMessage = namedtuple('HistoMessage', ['full_pathname', 'size', 'streamed_histo', 'flags', 'offset', 'message_size'])
 
     # Wire type tells us the length of the value and instructions on how to read it
-    WIRE_TYPE_LENGTHS = { 0: 'variant', 1: 8, 2: 'length-delimited', 3: 0, 4: 0, 5: 4 }
+    cdef WIRE_TYPE_LENGTHS
 
     # Wire types that are suppored by protobuf format.
     # If we encounter a wire type that is not from this list, we are doing something wrong or the file is corrupted.
-    WIRE_TYPES = WIRE_TYPE_LENGTHS.keys()
+    cdef WIRE_TYPES
+
+    cdef bytes buf
+    cdef const unsigned char* c_buf
+    cdef unsigned int c_buf_size
+    cdef unsigned int c_buf_position
+
     
-    ioservice = IOService()
+    def __cinit__(self):
+        self.WIRE_TYPE_LENGTHS = { 0: 'variant', 1: 8, 2: 'length-delimited', 3: 0, 4: 0, 5: 4 }
+        self.WIRE_TYPES = self.WIRE_TYPE_LENGTHS.keys()
 
 
-    @classmethod
-    async def deserialize_file(cls, filename, uncompress_only_scalars=False):
+    def deserialize_file(self, buf, bint uncompress_only_scalars=False):
         """
         Parses non-gzipped protobuf file and returns a list of HistoMessage tuples.
         If uncompress_only_scalars is True, binary data of actual histograms will be uncompressed
@@ -100,60 +112,83 @@ class ProtobufParser:
         at except when a histogram is a scalar. This cuts down the time of importing by a factor of 3.
         """
 
-        histos = []
+        self.buf = buf[:]
+        self.c_buf_size = len(buf)
+        self.c_buf_position = 0
+        cdef const unsigned char[:] view = self.buf
+        self.c_buf = <const unsigned char*>&view[0]
 
-        buffer = await cls.ioservice.open_url(filename, blockcache=False)
-        while True:
-            field_number, wire_type = await cls.read_field_number_and_wire_type(buffer)
+        cdef PBKey key
+        cdef int message_size
+
+        histos = []
+        while self.c_buf_position < self.c_buf_size:
+            key = self.read_field_number_and_wire_type()
             
-            if field_number == 1 and wire_type == 2:
+            if key.field_number == 1 and key.wire_type == 2:
                 # Found a value of the repeated Histo field, parse it!
-                message_size = await cls.read_variant_value(buffer)
-                histo = await cls.read_histo_message(buffer, message_size, uncompress_only_scalars)
+                message_size = self.read_variant_value()
+                histo = self.read_histo_message(message_size, uncompress_only_scalars)
                 histos.append(histo)
             else:
-                await cls.consume_unknown_field(buffer, wire_type)
-
-            # Break out if file is over
-            if await buffer.peek(1) == b'':
-                break
+                self.consume_unknown_field(key.wire_type)
 
         return histos
 
 
-    @classmethod
-    async def read_histo_message(cls, buffer, message_size, uncompress_only_scalars=False):
+    async def read_histo_message_async(self, buf, offset, message_size):
+        """ This is not used for importing. This is only used for rendering a single ME. """
+
+        # Preload the buffer in an async way. Everything else is sync.
+        self.buf = await buf[offset : offset + message_size]
+        self.c_buf_size = message_size
+        self.c_buf_position = 0
+        cdef const unsigned char[:] view = self.buf
+        self.c_buf = <const unsigned char*>&view[0]
+
+        return self.read_histo_message(message_size, uncompress_only_scalars=False)
+
+
+    cdef read_histo_message(self, int message_size, bint uncompress_only_scalars=False):
         """Read Histo message and parse its fields"""
 
         # Values that will be returned in HistoMessage tuple
-        full_pathname = ''
-        size = 0
+        full_pathname = b''
+        cdef int size = 0
         streamed_histo = None
-        flags = 0
-        offset = buffer.seek(0, os.SEEK_CUR)
+        cdef int flags = 0
+        cdef unsigned int offset = self.c_buf_position
 
-        buffer = AsyncBufferView(buffer, message_size)
-        histo = {}
+        cdef unsigned int end = self.c_buf_position + message_size
+        cdef PBKey key
+        cdef bint flags_read = False
+        cdef int streamed_histo_size = 0
 
-        while True:
-            field_number, wire_type = await cls.read_field_number_and_wire_type(buffer)
+        while self.c_buf_position < end:
+            key = self.read_field_number_and_wire_type()
 
-            if field_number == 1 and wire_type == 2:
-                full_pathname = await cls.read_length_delimited_value(buffer)
-            elif field_number == 2 and wire_type == 0:
-                size = await cls.read_variant_value(buffer)
-            elif field_number == 3 and wire_type == 2:
-                streamed_histo = await cls.read_length_delimited_value(buffer)
-            elif field_number == 4 and wire_type == 0:
-                flags = await cls.read_variant_value(buffer)
+            if key.field_number == 1 and key.wire_type == 2:
+                full_pathname = self.read_length_delimited_value()
+            elif key.field_number == 2 and key.wire_type == 0:
+                size = self.read_variant_value()
+            elif key.field_number == 3 and key.wire_type == 2:
+                # If uncompress_only_scalars is set, we're importing a sample.
+                # In such case, if we're sure that the ME that we're reading is of scalar type,
+                # we skip reading it altogether to save bytes allocations.
+                if uncompress_only_scalars and flags_read and (flags & 255) in (1, 2, 3):
+                    streamed_histo_size = self.read_variant_value()
+                    self.c_buf_position += streamed_histo_size
+                    streamed_histo = None
+                else:
+                    streamed_histo = self.read_length_delimited_value()
+            elif key.field_number == 4 and key.wire_type == 0:
+                flags = self.read_variant_value()
+                flags_read = True
             else:
-                await cls.consume_unknown_field(buffer, wire_type)
+                self.consume_unknown_field(key.wire_type)
 
-            if await buffer.peek(1) == b'':
-                break
-
-        type_byte = flags & 255
-        is_scalar = type_byte in (1, 2, 3)
+        cdef int type_byte = flags & 255
+        cdef bint is_scalar = type_byte in (1, 2, 3)
         if (uncompress_only_scalars and is_scalar) or not uncompress_only_scalars:
             try:
                 streamed_histo = zlib.decompress(streamed_histo)
@@ -162,11 +197,10 @@ class ProtobufParser:
                 print(streamed_histo)
                 print(full_pathname)
 
-        return cls.HistoMessage(full_pathname, size, streamed_histo, flags, offset, message_size)
+        return self.HistoMessage(full_pathname, size, streamed_histo, flags, offset, message_size)
 
 
-    @classmethod
-    async def read_variant_value(cls, buffer):
+    cdef int read_variant_value(self):
         """
         Variants are variable length integers. Their wire type is 0.
         We read one byte at a time and check the most significant bit (msb) of each byte.
@@ -200,12 +234,15 @@ class ProtobufParser:
         Or 300 in decimal.
         """
 
-        value = 0
-        number_of_bytes = 0
-        msb = 1 # We read bytes one by one until most significant bit is 0.
+        cdef int value = 0
+        cdef int number_of_bytes = 0
+        cdef int msb = 1 # We read bytes one by one until most significant bit is 0.
+
+        cdef unsigned char data
+
         while msb == 1:
-            byte = await buffer.read(1)
-            data = int.from_bytes(byte, byteorder='little', signed=False)
+            data = self.c_buf[self.c_buf_position]
+            self.c_buf_position += 1
             msb = (data >> 7) & 1
 
             # Set msb to 0:
@@ -218,8 +255,7 @@ class ProtobufParser:
         return value
 
 
-    @classmethod
-    async def read_length_delimited_value(cls, buffer):
+    cdef bytes read_length_delimited_value(self):
         """
         Length-delimited value is an arbitrary length blob (string, bytes or embedded message). Its wire type is 2.
         Length-delimited value consists of two parts: a variant denoting it's length followed by a blob of that length.
@@ -228,102 +264,40 @@ class ProtobufParser:
         from the stream.
         """
 
-        size = await cls.read_variant_value(buffer)
-        value = await buffer.read(size)
+        cdef int size = self.read_variant_value()
+        cdef bytes value = <bytes> self.c_buf[self.c_buf_position : self.c_buf_position + size]
+        self.c_buf_position += size
         return value
 
 
-    @classmethod
-    async def read_field_number_and_wire_type(cls, buffer):
+    cdef PBKey read_field_number_and_wire_type(self):
         """
         Wire type is encoded in the last (least significant) 3 bits of a variant.
         Field number is encoded in all other preceding bits.
         """
 
-        variant = await cls.read_variant_value(buffer)
+        cdef int variant = self.read_variant_value()
 
-        field_number = variant >> 3 # will drop last 3 bits
-        wire_type = variant & 0b111 # will get last 3 bits
+        cdef PBKey key
+        key.field_number = variant >> 3 # will drop last 3 bits
+        key.wire_type = variant & 0b111 # will get last 3 bits
 
-        assert wire_type in cls.WIRE_TYPES, 'Incorrect wire_type: %s' % wire_type
+        assert key.wire_type in self.WIRE_TYPES, 'Incorrect wire_type: %s' % key.wire_type
 
-        return field_number, wire_type
+        return key
 
 
-    @classmethod
-    async def consume_unknown_field(cls, buffer, wire_type):
+    cdef void consume_unknown_field(self, unsigned char wire_type):
         """If we encounter a field number that we don't know how to or don't want to deserialize, we seek through it."""
+        
+        cdef int message_length
 
-        size = cls.WIRE_TYPE_LENGTHS[wire_type]
+        size = self.WIRE_TYPE_LENGTHS[wire_type]
         if isinstance(size, int):
-            buffer.seek(size, os.SEEK_CUR)
+            self.c_buf_position += size
         elif size == 'variant':
             # We have to actually read and inspect msb of every byte to know when to stop reading
-            await cls.read_variant_value(buffer)
+            self.read_variant_value()
         elif size == 'length-delimited':
-            message_length = await cls.read_variant_value(buffer)
-            buffer.seek(message_length, os.SEEK_CUR)
-
-
-class AsyncBufferView:
-    """
-    Provides an async view of an async buffer. 
-    Will return b'' when view_size is exceeded even if the underlying buffer is still not over.
-    """
-
-    def __init__(self, buffer, view_size):
-        self.buffer = buffer
-        self.view_size = view_size
-        self.position = 0
-        self.underlying_buffer_position = buffer.seek(0, os.SEEK_CUR)
-
-
-    def seek(self, offset, whence=os.SEEK_SET):
-        """
-        Changes current position pointer.
-        os.SEEK_SET or 0 - start of the stream (the default); offset should be zero or positive
-        os.SEEK_CUR or 1 - current stream position; offset may be negative
-        """
-
-        if whence == os.SEEK_SET:
-            self.position = offset
-            self.underlying_buffer_position = self.buffer.seek(self.underlying_buffer_position + offset, os.SEEK_SET)
-        elif whence == os.SEEK_CUR:
-            self.position += offset
-            self.underlying_buffer_position = self.buffer.seek(offset, os.SEEK_CUR)
-
-        return self.position
-
-
-    async def peek(self, size):
-        """Return bytes from the stream without advancing the position."""
-        
-        size, eof = self.__get_size_safe(size)
-        data = await self.buffer.peek(size)
-        return data + b'' if eof else data
-    
-
-    async def read(self, size):
-        """Read up to size bytes from the object and return them."""
-
-        size, eof = self.__get_size_safe(size)
-        data = await self.buffer.read(size)
-        self.position += size
-        return data + b'' if eof else data
-
-
-    def __get_size_safe(self, requested_size):
-        """
-        Returns how many bytes we can read without exceeding view size. 
-        If second value is True, b'' has to be returned.
-        """
-
-        eof = False
-        size = requested_size
-
-        # Make sure we don't exceed the view size
-        if self.position + size > self.view_size:
-            size = self.view_size - self.position
-            eof = True
-
-        return (size, eof)
+            message_length = self.read_variant_value()
+            self.c_buf_position += message_length

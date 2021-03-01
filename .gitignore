@@ -16,3 +16,7 @@ lib/
 # Code compiled by Cython:
 python/nanoroot/*.c
 python/nanoroot/*.cpp
+python/nanoroot/*.html
+python/protobuf/*.c
+python/protobuf/*.cpp
+python/protobuf/*.html

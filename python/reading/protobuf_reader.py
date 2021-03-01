@@ -1,5 +1,4 @@
 import os
-import asyncio
 from ioservice import IOService
 from data_types import ScalarValue
 from nanoroot.tbufferfile import TBufferFile
@@ -22,9 +21,8 @@ class ProtobufReader:
         if me_info.value != None:
             return ScalarValue(b'', b'', me_info.value) # TODO: do sth. better.
 
-        buffer = await cls.ioservice.open_url(filename, True)
-        buffer.seek(me_info.offset, os.SEEK_CUR)
-        histo_message = await cls.protobuf_parser.read_histo_message(buffer, me_info.size)
+        buffer = await cls.ioservice.open_url(filename, blockcache=True)
+        histo_message = await cls.protobuf_parser.read_histo_message_async(buffer, me_info.offset, me_info.size)
 
         if me_info.type == b'String':
             string_value = cls.get_tobjstring_content(histo_message.full_pathname, histo_message.streamed_histo)

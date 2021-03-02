@@ -79,6 +79,8 @@ Please run this in order to see the supported arguments and their meaning:
 ./scripts/dqmgui.sh --help
 ```
 
+Log file of the web server by default is located here: `data/logs/dqmgui.log`
+
 ## File formats
 
 Currently there are three supported file formats:

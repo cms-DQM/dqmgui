@@ -93,10 +93,22 @@ There will most probably be a format for online/live data streaming.
 
 Format in the code is expressed as FileFormat enum.
 
-## Adding new file format importer
+## Importing
+
+All 3 different file formats are being imported on demand. That means that samples are imported whenever they are first requested by the user. That's why a very first access to a sample is a little bit slower than the consecutive requests. The process of importing is described in more detail bellow:
 
 `GUIImportManager` is responsible for importing blobs containing ME information into the database.
 There are two types of blobs: `names_blob` and `infos_blob`. `names_blob` is `\n` separated, alphabetically ordered list of normalized full ME paths. All strings are represented as python3 binary strings. `infos_blob` contains a list MEInfo objects in exactly the same order as `infos_blob`. So in order to find out more information about a monitor element, we have to binary search for it in a sorted `names_blob` and access `MEInfo` from `infos_blob` at the same index. `get_rendered_image()` function in `GUIService` does this. Blobs are stored in the database compressed. `GUIBlobCompressor` service is responsible for compressing them for storage and uncompressing them for usage in the program.
+
+### Usage of Cython for on-demand-importing
+
+Cython is a compiler that allows us to add explicit type information to Python variables. It then proceeds to compile the annotated Python code to C/C++. Compiled binary is then used during the runtime. More info about Cython can be found here: https://cython.org/
+
+We use this tool to dramatically improve the performance on-demand-importing. Up to now, only Legacy DQM (1) and Protobuf (3) importers were converted to Cython. Converting the importer of DQMIO TTree (2) file format is a natural next step.
+
+Cythonised versions of Python code are available here: `python/nanoroot/*.pyx` and here `python/protobuf/protobuf_parser.pyx`.
+
+## Adding new file format importer
 
 In order to add new importer you have to do three things:
 
@@ -689,8 +701,8 @@ Backend related task list.
 * ~~Protobuf make parser async~~
 * ~~Use bitwise operators for parsing variants in protobuf~~
 * ~~Add QTests to protobuf output in CMSSW~~
-* Live mode integration
-  * Protobuf pre importing
+* ~~Live mode integration~~
+  * Protobuf pre importing: the performance issue has been solved by using Cython.
 * ~~Cache invalidation in samples~~
 * ~~Move efficiency flag to MEInfo~~
   * It's not worth it as it adds a couple of seconds to import time
@@ -704,9 +716,10 @@ Backend related task list.
 * ~~Handle crashing import processes (prob. can't restart them, so at least crash the full server and wait for restart)~~
   * ~~Whenever an import process crashes we restart ProcessPoolExecutor and return an error~~
   * We instantiate new process pool on demand to keep things simple and more stable
-* Check handling of XRD access failures (atm 500 response on the request, retry on next request -- might be good enough.)
+* ~~Check handling of XRD access failures (atm 500 response on the request, retry on next request -- might be good enough.)~~
+  * Given that input files are either in EOS or on a disk in P5, we don't need to use XRD anymore. We still use it for partial reads when rendering but this could be changed by using `mmap` directly.
 * ~~Make logging async~~
-  * Will probably not increase perf by much, needs measuring
+  * ~~Will probably not increase perf by much, needs measuring~~
 * ~~Renderer hangs when negative width/height is passed~~
 * ~~Validate samples in registration endpoint~~
 * ~~Add timeout when interacting with the renderer~~
@@ -714,10 +727,12 @@ Backend related task list.
 * ~~Add QTest result support to the API~~
 * Hanging/aborted requests don't get logged?
 * Add the alternative of /data/browse to view raw ROOT files if Rucio is not there
+  * Might still be useful but files are either on EOS or on a disk at P5 so all files are accessible anyways.
 * ~~Fix CMSSW warnings/errors~~
   * No longer applicable since the GUI will be shipped outside of CMSSW
 * ~~Make sure to zlib uncompress only strings when importing PB files~~
 * Fix the deadlock after this:
+  * The root cause of this has already been eliminated but the deadlock might still occur on multiple renderer crashes.
 ```
 2021-01-22 18:18:47,949 - INFO - helpers.logged - 47  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 122) [OK 13.8ms]
 2021-01-22 18:18:47,949 - INFO - helpers.logged - 48  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 3) [OK 8.1ms]
@@ -738,3 +753,46 @@ struct.error: unpack requires a buffer of 8 bytes
 This section contains urls that result in errors. These errors should be fixed.
 
 All known issues were fixed by changing the `CFLAGS` in the Makefile.
+
+# A plan for the future
+
+Pretty much all features that we wanted to provide with the new DQM GUI are already present and working. The work, however, is not quite complete yet. There are certain integration related aspects that are time consuming and still need some attention. In this section I provide a list of all such features with descriptions and explanations of why they're required.
+
+## The code
+
+### Cython
+
+First and foremost, we most definitely need to Cythonise the only remaining DQMIO TTree based file importer to speed up the process of importing per lumisection data. More information about Cython can be found above, in this document. 
+
+Part of the `nanoroot` framework has already been Cythonised (to speed up DQM Legacy file importing) and this introduced breaking changes to the code that's responsible for DQMIO importing as well. That's why it's very important to address this issue as soon as possible.
+
+A small caveat: all other Cythonised importers read the entire content of the file to memory and proceed with CPU bound importing routine. DQMIO files, however, contain data from multiple lumisections. This makes reading the entire content of the file to memory unnecessary. I would suggest to perform a (hopefully) quick async pre-importing procedure that determines what sections of the file contain the data that's being imported and proceeding to read only those sections. This may or may not actually work - it needs more careful exploration of the `python/nanoroot/ttree.pyx` code and potentially some experimentation. AS a last resort, reading the entire file to memory is a bit wasteful but will surely work.
+
+### P5 Sound alarm
+
+The old DQM GUI has a couple of daemons for managing DQM sound alarms in the controll room of the CMS experiment:
+
+https://github.com/cms-DQM/dqmgui_prod/blob/index128/bin/visDQMSoundAlarmDaemon
+https://github.com/cms-DQM/dqmgui_prod/blob/index128/bin/visDQMSoundAlarmManager
+
+The functionality of those daemons could be easily integrated into the core of the new DQM GUI, without a need to run them as separate processes.
+
+### Layouts
+
+We still need to port the layouts of the old DQM GUI over. This procedure is conceptually straightforward. The layouts of the old DQM GUI can be found here: https://github.com/dmwm/deployment/tree/master/dqmgui/layouts
+
+An example on how to use the layout mechanism in the new DQM GUI can be found here: `python/layouts/summary_layouts.py`
+
+## Deployment
+
+### Online
+
+We have already successfully integrated the new DQM GUI as part of CMSSW into our P5 machines. However, it is very beneficial to decouple the DQM GUI form CMSSW software suite. To make this happen, we have to find a way get the code that is in the master branch of this very repository over to our P5 machines, including the Python dependencies listed here: `python/requirements.txt`. 
+
+A close collaboration with P5 system administrators will ensure the smoothness of this integration process!
+
+Most of the current Online setup can be reused - we only need to change the way the code and python dependencies of the new DQM GUI are delivered to our network restricted P5 machines. A detailed description of the current P5 setup can be found [here](#Integration-into-the-Online-system).
+
+### Offline
+
+We host the new DQM GUI services in CMSWEB. The deployment procedure is already agreed upon with the CMSWEB administrator. There might be a long term benifit of migrating the services to run on Kubernetes container orchestration system. CMSWEB has support for this infrastructure.

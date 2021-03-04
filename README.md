@@ -108,6 +108,8 @@ We use this tool to dramatically improve the performance on-demand-importing. Up
 
 Cythonised versions of Python code are available here: `python/nanoroot/*.pyx` and here `python/protobuf/protobuf_parser.pyx`.
 
+In order for changes to Cython files to be visible, we need to rebuild the project: `./scripts/build.sh`
+
 ## Adding new file format importer
 
 In order to add new importer you have to do three things:
@@ -827,3 +829,15 @@ We still need to make sure that the DQM Offline data coming from `Reco`, `ReReco
 * The DQM team
   * We handle the `PR tests` and the way data is uploaded to the GUI ourselves
   * The code that performs the upload (and needs changing) is located here: https://github.com/cms-sw/cmssw/blob/master/DQMServices/FileIO/scripts/compareDQMOutput.py#L86-L99
+
+## Selecting the CMSSW version to build against
+
+### Online
+
+The build process in the Online is done by us. This means that we have to check what is the current CMSSW version used (`/dqmdata/dqm_cmssw/current_production` or `/dqmdata/dqm_cmssw/current_playback`). Once we know the current version, we can put its name `CMSSW_VERSION` and `SCRAM_ARCH` to this file: https://github.com/cms-DQM/dqmgui/blob/master/scripts/cmssw_info and rebuild. 
+
+This check needs to be running in a cron job (every 10 seconds?) to ensure that the DQM GUI is always built against the current CMSSW version.
+
+### Offline
+
+We can't change the content of files in the Offline ourselves, so we need to make a PR to change the `CMSSW_VERSION` and `SCRAM_ARCH` in this file: https://github.com/cms-DQM/dqmgui/blob/master/scripts/cmssw_info and ask CMSWEB administrator to redeploy the DQM GUI.

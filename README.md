@@ -768,16 +768,16 @@ First and foremost, we most definitely need to Cythonise the only remaining DQMI
 
 Part of the `nanoroot` framework has already been Cythonised (to speed up DQM Legacy file importing) and this introduced breaking changes to the code that's responsible for DQMIO importing as well. That's why it's very important to address this issue as soon as possible.
 
-A small caveat: all other Cythonised importers read the entire content of the file to memory and proceed with CPU bound importing routine. DQMIO files, however, contain data from multiple lumisections. This makes reading the entire content of the file to memory unnecessary. I would suggest to perform a (hopefully) quick async pre-importing procedure that determines what sections of the file contain the data that's being imported and proceeding to read only those sections. This may or may not actually work - it needs more careful exploration of the `python/nanoroot/ttree.pyx` code and potentially some experimentation. AS a last resort, reading the entire file to memory is a bit wasteful but will surely work.
+A small caveat: all other Cythonised importers read the entire content of the file to memory and proceed with CPU bound importing routine. DQMIO files, however, contain data from multiple lumisections. This makes reading the entire content of the file to memory unnecessary. I would suggest to perform a (hopefully) quick async pre-importing procedure that determines what sections of the file contain the data that's being imported and proceeding to read only those sections. This may or may not actually work - it needs more careful exploration of the `python/nanoroot/ttree.pyx` code and potentially some experimentation. As a last resort, reading the entire file to memory is a bit wasteful but will surely work.
 
 ### P5 Sound alarm
 
-The old DQM GUI has a couple of daemons for managing DQM sound alarms in the controll room of the CMS experiment:
+The old DQM GUI has a couple of daemons for managing DQM sound alarms in the control room of the CMS experiment:
 
-https://github.com/cms-DQM/dqmgui_prod/blob/index128/bin/visDQMSoundAlarmDaemon
-https://github.com/cms-DQM/dqmgui_prod/blob/index128/bin/visDQMSoundAlarmManager
+* https://github.com/cms-DQM/dqmgui_prod/blob/index128/bin/visDQMSoundAlarmDaemon
+* https://github.com/cms-DQM/dqmgui_prod/blob/index128/bin/visDQMSoundAlarmManager
 
-The functionality of those daemons could be easily integrated into the core of the new DQM GUI, without a need to run them as separate processes.
+The functionality of those daemons could be easily integrated into the core of the new DQM GUI, without having to run them as separate programs. Running at least one separate process for periodic error checking will still probably be unavoidable.
 
 ### Layouts
 
@@ -789,7 +789,7 @@ An example on how to use the layout mechanism in the new DQM GUI can be found he
 
 ### Online
 
-We have already successfully integrated the new DQM GUI as part of CMSSW into our P5 machines. However, it is very beneficial to decouple the DQM GUI form CMSSW software suite. To make this happen, we have to find a way get the code that is in the master branch of this very repository over to our P5 machines, including the Python dependencies listed here: `python/requirements.txt`. 
+We have already successfully integrated the new DQM GUI as part of CMSSW into our P5 machines. However, it is very beneficial to decouple the DQM GUI form CMSSW software suite. To make this happen, we have to find a way get the code that is in the master branch of this very repository over to our P5 machines, including the Python dependencies that are listed here: `python/requirements.txt`. 
 
 A close collaboration with P5 system administrators will ensure the smoothness of this integration process!
 
@@ -797,7 +797,7 @@ Most of the current Online setup can be reused - we only need to change the way 
 
 ### Offline
 
-We host the new DQM GUI services in CMSWEB. The deployment procedure is already agreed upon with the CMSWEB administrator. There might be a long term benifit of migrating the services to run on Kubernetes container orchestration system. CMSWEB has support for this infrastructure.
+Just like before, we host the new DQM GUI services in CMSWEB. The deployment procedure is already agreed upon with the CMSWEB administrator. There might be a long term benefit of migrating the services to run on Kubernetes container orchestration system. CMSWEB has support for this infrastructure. True benefits of containerization has to be explored further and validated before any decision to move to that direction is made. The architecture of the new DQM GUI can relatively easily be adapted to work in horizontally scaled workloads.
 
 ## Integration
 
@@ -813,17 +813,17 @@ Having 200TB of storage will ensure that we can fit all previously accumulated D
 
 ### Online storage
 
-ROOT files generated in Online DQM processing are stored here: `/data/dqmgui/files/`. We have 1.3T of storage available for this purpose. We will eventually fill this volume so mounting a little bit bigger disks is crucial for us in order to ensure that we never lose any Online archive data.
+ROOT files generated in the Online DQM processing are stored here: `/data/dqmgui/files/`. We have 1.3T of storage available for this purpose. We will eventually fill this volume so mounting a little bit bigger disks is crucial for us in order to ensure that we never lose any Online archive data.
 
 ### Receiving the data
 
-The problem of propagating DQM Online data to the new DQM GUIs has already been solved and the solution is described in detail in this document.
+The problem of propagating DQM Online data to the new DQM GUIs has already been solved by using PB (Protobuf) files and a detailed description of this solution is provided in this document.
 
 We still need to make sure that the DQM Offline data coming from `Reco`, `ReReco`, `RelVal`, `MC Validation` and `Github PR tests` can find its way to the new DQM GUIs. The process of registering new files in the new DQM GUI is conceptually straightforward: ROOT files have to be copied over to EOS, and a `register` HTTP endpoint has to be called to notify the GUIs about the presence of these new files. This procedure is also described in detail in this very document. This issue is time consuming because we (the DQM team) mostly do not control the process of uploading Offline DQM files to the GUIs - it's in the hands of the teams that are responsible for the processing itself. The teams that we need to collaborate with on this issue are the following:
 
 * CMS Computing
   * They handle `Reco` and `ReReco` jobs
-  * We have already requested the necessary changes to be done: https://github.com/dmwm/WMCore/issues/10287
+  * We have already requested the necessary changes to be made: https://github.com/dmwm/WMCore/issues/10287
 * PPD MCM team
   * They are responsible for `RelVal` and `MC validation` jobs
 * The DQM team
@@ -832,16 +832,16 @@ We still need to make sure that the DQM Offline data coming from `Reco`, `ReReco
 
 #### Temporary solution
 
-While we wait for Computing and MCM to change their tools to support the new file registration procedure, we could add a new daemon here: https://github.com/cms-DQM/dqmgui_prod/tree/index128/bin that will periodically check for newly uploaded ROOT files to the old DQM GUIs and forward them to the new DQM GUIs. This process has to be resilient to ensure stability because ROOT files are deleted from the old DQM GUI after a while.
+While we wait for Computing and MCM to change their tools to support the new file registration procedure, we could add a new daemon here: https://github.com/cms-DQM/dqmgui_prod/tree/index128/bin that will periodically check for newly uploaded ROOT files to the old DQM GUIs and forward them to the new DQM GUIs. This process has to be resilient to ensure stability and prevent file loss because ROOT files are deleted from the old DQM GUI after a while.
 
 ## Selecting the CMSSW version to build against
 
 ### Online
 
-The build process in the Online is done by us. This means that we have to check what is the current CMSSW version used (`/dqmdata/dqm_cmssw/current_production` or `/dqmdata/dqm_cmssw/current_playback`). Once we know the current version, we can put its name `CMSSW_VERSION` and `SCRAM_ARCH` to this file: https://github.com/cms-DQM/dqmgui/blob/master/scripts/cmssw_info and rebuild. 
+The build process in the Online is done by us. This means that we have to check what is the current CMSSW version used (`/dqmdata/dqm_cmssw/current_production` or `/dqmdata/dqm_cmssw/current_playback`). Once we know the current version, we can put its name `CMSSW_VERSION` and `SCRAM_ARCH` to this file: https://github.com/cms-DQM/dqmgui/blob/master/scripts/cmssw_info and rebuild. A PR is not needed - we can change to content of the file directly in the P5 machine!
 
-This check needs to be running in a cron job (every 10 seconds?) to ensure that the DQM GUI is always built against the current CMSSW version.
+This check needs to be running in a cron job (every 10 seconds?) to ensure that the DQM GUI is always built against the current CMSSW release. A smooth transition to a freshly built DQM GUI also needs to be ensured to avoid any downtime.
 
 ### Offline
 
-We can't change the content of files in the Offline ourselves, so we need to make a PR to change the `CMSSW_VERSION` and `SCRAM_ARCH` in this file: https://github.com/cms-DQM/dqmgui/blob/master/scripts/cmssw_info and ask CMSWEB administrator to redeploy the DQM GUI.
+We can't change the content of files in the CMSWEB managed Offline machines ourselves, so we need to make a PR to change the `CMSSW_VERSION` and `SCRAM_ARCH` in this file: https://github.com/cms-DQM/dqmgui/blob/master/scripts/cmssw_info and ask CMSWEB administrator to redeploy the DQM GUIs. This item is here just for reference - no more effort is needed to get this to work.

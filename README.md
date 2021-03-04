@@ -796,3 +796,34 @@ Most of the current Online setup can be reused - we only need to change the way 
 ### Offline
 
 We host the new DQM GUI services in CMSWEB. The deployment procedure is already agreed upon with the CMSWEB administrator. There might be a long term benifit of migrating the services to run on Kubernetes container orchestration system. CMSWEB has support for this infrastructure.
+
+## Integration
+
+### EOS storage
+
+All Offline DQM ROOT files has to be stored in EOS in order for the new GUIs to be able to access them. We estimate that **all** DQM Legacy per run ROOT files (since the beginning of CMS) add up to about 100TB. The problem is that we currently have only about 20TB of storage available for us in EOS. I'd suggest to approach the problem in these steps:
+
+* Request 200TB of storage in EOS
+* Retrieve all old ROOT files from magnetic tape storage and copy them over to the newly allocated EOS space
+* Configure the new DQM GUI to automatically search for ROOT files in the new location: https://github.com/cms-DQM/dqmgui/blob/master/python/importing/importing.py#L24
+
+Having 200TB of storage will ensure that we can fit all previously accumulated DQM data as well as all new files from future data taking, for many years to come.
+
+### Online storage
+
+ROOT files generated in Online DQM processing are stored here: `/data/dqmgui/files/`. We have 1.3T of storage available for this purpose. We will eventually fill this volume so mounting a little bit bigger disks is crucial for us in order to ensure that we never lose any Online archive data.
+
+### Receiving the data
+
+The problem of propagating DQM Online data to the new DQM GUIs has already been solved and the solution is described in detail in this document.
+
+We still need to make sure that the DQM Offline data coming from `Reco`, `ReReco`, `RelVal`, `MC Validation` and `Github PR tests` can find its way to the new DQM GUIs. The process of registering new files in the new DQM GUI is conceptually straightforward: ROOT files have to be copied over to EOS, and a `register` HTTP endpoint has to be called to notify the GUIs about the presence of these new files. This procedure is also described in detail in this very document. This issue is time consuming because we (the DQM team) mostly do not control the process of uploading Offline DQM files to the GUIs - it's in the hands of the teams that are responsible for the processing itself. The teams that we need to collaborate with on this issue are the following:
+
+* CMS Computing
+  * They handle `Reco` and `ReReco` jobs
+  * We have already requested the necessary changes to be done: https://github.com/dmwm/WMCore/issues/10287
+* PPD MCM team
+  * They are responsible for `RelVal` and `MC validation` jobs
+* The DQM team
+  * We handle the `PR tests` and the way data is uploaded to the GUI ourselves
+  * The code that performs the upload (and needs changing) is located here: https://github.com/cms-sw/cmssw/blob/master/DQMServices/FileIO/scripts/compareDQMOutput.py#L86-L99

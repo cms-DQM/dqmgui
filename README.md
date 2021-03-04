@@ -830,6 +830,10 @@ We still need to make sure that the DQM Offline data coming from `Reco`, `ReReco
   * We handle the `PR tests` and the way data is uploaded to the GUI ourselves
   * The code that performs the upload (and needs changing) is located here: https://github.com/cms-sw/cmssw/blob/master/DQMServices/FileIO/scripts/compareDQMOutput.py#L86-L99
 
+#### Temporary solution
+
+While we wait for Computing and MCM to change their tools to support the new file registration procedure, we could add a new daemon here: https://github.com/cms-DQM/dqmgui_prod/tree/index128/bin that will periodically check for newly uploaded ROOT files to the old DQM GUIs and forward them to the new DQM GUIs. This process has to be resilient to ensure stability because ROOT files are deleted from the old DQM GUI after a while.
+
 ## Selecting the CMSSW version to build against
 
 ### Online

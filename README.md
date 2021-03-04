@@ -51,13 +51,13 @@ Render plugins are C++ classes that can modify how histograms are displayed. The
 
 ### Compiling this code
 
-The renderer and all render plugins can be built by simply running `./scripts/build.sh`. In case of build errors, try cleaning the results of previous builds by running `gmake clean`.
+The renderer, all render plugins and Cython code can be built by simply running `./scripts/build.sh`. In case of build errors, try cleaning the results of previous builds by running `gmake clean`.
 
-CMSSW_VERSION and SCRAM_ARCH values that will be used to build and run the code, are located in this file: `scripts/cmssw_info`. Contents of this file can be changed manually to link the DQM GUI to the different CMSSW version.
+`CMSSW_VERSION` and `SCRAM_ARCH` values that will be used to build and run the code, are located in this file: `scripts/cmssw_info`. Contents of this file can be changed manually to link the DQM GUI to the different CMSSW version.
 
 ## The storage backend
 
-The storage backend is based on legacy (`TDirectory`), DQMIO (`TTree`) and protobuf files. The code is in `python/nanoroot/`, `python/reading/` and `python/protobuf`. It keeps a SQLite database of metadata, about _samples_ (run/dataset/lumi), and _ME lists_, which represent the MEs present in a sample. These are stored compressed to make their size manageable. The ME list is built on first access; this makes it feasible to register all ~80000 files that we have on EOS at the moment as samples.
+The storage backend is based on legacy (`TDirectory`), DQMIO (`TTree`) and protobuf files. The code is in `python/nanoroot/`, `python/reading/` and `python/protobuf`. It keeps a SQLite database of metadata, about _samples_ (run/dataset/lumi), and _ME lists_, which represent the MEs present in a sample. These are stored compressed to make their size manageable. The ME list is built on first access (on demand importing); this makes it feasible to register all ~80000 files that we have on EOS at the moment as samples.
 
 ## The web server
 
@@ -174,7 +174,7 @@ class MyFormatReader:
 
 Caching is done using the `async_alru_cahce` decorator. More info about how to use and bypass the cache using the API [can be found in this section](#Cache-bypass-and-invalidation).
 
-Only functions declared inside `GUIService` class are allowed to use that cache to ensure that results are not double cached.
+Only functions declared inside `GUIService` class are allowed to use that cache to ensure that results are not cached more than once.
 
 It's estimated that 20MB is the upper bound of the size of cached elements if each (of 8) cached function contained a single element. Therefore, we set the cache capacity to 200 for each function. This means that the upper bound of the entire cache size in such case is about 4GB.
 
@@ -182,7 +182,7 @@ It's estimated that 20MB is the upper bound of the size of cached elements if ea
 
 The frontend is developed here: https://github.com/cms-DQM/dqmgui_frontend
 
-This package contains compiled code from there, which is served from the web server to get a working GUI. It is hardcoded to `localhost:8889`, so you can't easily change the port number in the server.
+This package contains compiled code from there, which is served from the web server to get a working GUI.
 
 ## API documentation
 
@@ -444,6 +444,8 @@ We want to have two search fields (dataset and run) and a toggle switch. If togg
 
 # Protocol buffers
 
+This is here just for reference - we only use custom PB deserialization code.
+
 ``` bash
 cd DQMServices/DQMGUI/python/
 cp ../../Core/src/ROOTFilePB.proto protobuf/
@@ -552,8 +554,6 @@ sudo systemctl start hltd
 DQM GUI code is deployed to the P5 machines by the P5 sysadmins. More details info to come.
 
 If python dependencies of the DQM GUI change, this file must be updated to reflect the changes: https://github.com/cms-sw/cmsdist/blob/IB/CMSSW_11_3_X/master/dqmgui.tmpl#L10
-
-
 
 
 # DQM GUI setup at P5

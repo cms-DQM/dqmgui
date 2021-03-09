@@ -51,7 +51,7 @@ from logging.handlers import TimedRotatingFileHandler
 
 from service import GUIService
 from storage import GUIDataStore
-from helpers import get_absolute_path, parse_run_lumi, getNotOlderThanFromUrl
+from helpers import get_absolute_path, parse_run_lumi, getNotOlderThanFromUrl, JSONSerializeTuple
 from rendering import GUIRenderer
 from data_types import RenderingOptions, MEDescription
 from importing.importing import GUIImportManager
@@ -67,6 +67,8 @@ service = GUIService()
 async def index(request):
     return web.FileResponse(get_absolute_path('../frontend/index.html'))
 
+async def overlayPlotsWithDifferentNames(request):
+    return web.FileResponse(get_absolute_path('../frontend/plotsLocalOverlay/index.html'))
 
 @getNotOlderThanFromUrl
 async def samples_legacy(request, notOlderThan):
@@ -157,13 +159,7 @@ async def archive_v1(request, notOlderThan):
 
     result = {'data': []}
     result['data'].extend({'subdir': name, 'me_count': me_count} for name, me_count in data.dirs)
-    result['data'].extend({
-        'name': name,
-        'path': path,
-        'layout': layout,
-        'qtstatuses': [x for x in qteststatuses]
-        } for (name, path, layout, qteststatuses) in data.objs)
-
+    result['data'].extend(JSONSerializeTuple(item) for item in data.objs)
     return web.json_response(result)
 
 
@@ -416,6 +412,7 @@ def config_and_start_webserver(port):
     # Version 1 API routes
     app.add_routes([web.get('/api/v1/samples', samples_v1),
                     web.get('/api/v1/layouts', layouts_v1),
+                    web.get('/plotsLocalOverlay/', overlayPlotsWithDifferentNames),
                     web.get(r'/api/v1/archive/{run}/{path:.+}', archive_v1),
                     web.get(r'/api/v1/render/{run}/{path:.+}', render_v1),
                     web.get('/api/v1/render_overlay', render_overlay_v1),

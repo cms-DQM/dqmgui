@@ -14,7 +14,7 @@ from rendering import GUIRenderer
 from importing.importing import GUIImportManager
 from data_types import Sample, RootDir, RootObj, RootDirContent, RenderingInfo, FileFormat, SampleFull
 
-from layouts.layout_manager import LayoutManager
+from layouts.layout_manager import LayoutManager, LayoutScope
 
 
 class GUIService:
@@ -102,7 +102,8 @@ class GUIService:
         # Layouts will be filtered against the search regex on their destination name.
         # Non existant sources will still be attempted to be displayed resulting in 
         # 'ME not found' string to be rendered.
-        for layout in cls.layouts_manager.get_layouts():
+        scope = LayoutScope.ONLINE if dataset == '/Global/Online/ALL' else LayoutScope.OFFLINE
+        for layout in cls.layouts_manager.get_layouts(scope):
             # Check if ME name starts with requested path
             if layout.destination[:len(path)] == path:
                 names = layout.destination[len(path):].split('/')
@@ -114,7 +115,7 @@ class GUIService:
 
                 if is_file:
                     qteststatuses = tuple(me_infos[x].qteststatus for x in binary_search_qtests(me_names, bytes(layout.source, 'utf-8')))
-                    objs.add(RootObj(name=segment, path=layout.source, layout=layout.name, qteststatuses=qteststatuses))
+                    objs.add(RootObj(name=segment, path=layout.source, layout=layout, qteststatuses=qteststatuses))
                 else:
                     dirs[segment] += 1
 
@@ -239,7 +240,8 @@ class GUIService:
     @classmethod
     @logged
     async def get_layouts_by_name(cls, name):
-        return cls.layouts_manager.get_layouts_by_name(name)
+        # TODO: It's probably better to add an API argument to choose the scope
+        return cls.layouts_manager.get_layouts_by_name(name, scope=LayoutScope.BOTH)
 
 
     @classmethod

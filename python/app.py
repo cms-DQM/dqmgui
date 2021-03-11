@@ -160,7 +160,10 @@ async def archive_v1(request, notOlderThan):
     result['data'].extend({
         'name': name,
         'path': path,
-        'layout': layout,
+        'layout': { 
+            'name': layout.name, 
+            'draw': {k:v for k, v in layout.draw._asdict().items() if v is not None} 
+        } if layout != None else None,
         'qtstatuses': [x for x in qteststatuses]
         } for (name, path, layout, qteststatuses) in data.objs)
 

@@ -157,15 +157,18 @@ async def archive_v1(request, notOlderThan):
 
     result = {'data': []}
     result['data'].extend({'subdir': name, 'me_count': me_count} for name, me_count in data.dirs)
-    result['data'].extend({
-        'name': name,
-        'path': path,
-        'layout': { 
-            'name': layout.name, 
-            'draw': {k:v for k, v in layout.draw._asdict().items() if v is not None} 
-        } if layout != None else None,
-        'qtstatuses': [x for x in qteststatuses]
-        } for (name, path, layout, qteststatuses) in data.objs)
+
+    for (name, path, layout, qteststatuses) in data.objs:
+        obj = {
+            'name': name,
+            'path': path,
+            'layout': layout.name if layout != None else None
+        }
+        if layout != None:
+            obj['draw'] = { k:v for k, v in layout.draw._asdict().items() if v is not None }
+            obj['overlays'] = layout.overlays
+        obj['qtstatuses'] = [x for x in qteststatuses]
+        result['data'].append(obj)
 
     return web.json_response(result)
 

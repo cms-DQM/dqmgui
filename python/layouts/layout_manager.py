@@ -8,8 +8,8 @@ class LayoutScope(Enum):
     BOTH = 3
 
 
-def register_layout(source, destination, name='default', draw=None, scope=LayoutScope.BOTH):
-    LayoutManager.add_layout(Layout(source, destination, name, draw), scope)
+def register_layout(source, destination, name='default', draw=None, overlays=None, scope=LayoutScope.BOTH):
+    LayoutManager.add_layout(Layout(source, destination, name, draw, overlays), scope)
 
 
 def adapt_and_register(dqmitems, scope=LayoutScope.BOTH):
@@ -24,7 +24,8 @@ def adapt_and_register(dqmitems, scope=LayoutScope.BOTH):
                 source = item['path']
                 destination = os.path.join(dir, plot_name)
                 draw = Draw(**item['draw']) if 'draw' in item else Draw()
-                register_layout(source, destination, name, draw, scope)
+                overlays = tuple(item['overlays']) if 'overlays' in item else tuple()
+                register_layout(source, destination, name, draw, overlays, scope)
 
 
 class LayoutManager:
@@ -68,7 +69,7 @@ class LayoutManager:
 
 
 # Name has a default value
-Layout = namedtuple('Layout', ['source', 'destination', 'name', 'draw'])
+Layout = namedtuple('Layout', ['source', 'destination', 'name', 'draw', 'overlays'])
 # Python3.6 compatible hack to set the defaults:
 Layout.__new__.__defaults__ = ('default',)
 

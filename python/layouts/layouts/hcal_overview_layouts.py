@@ -158,4 +158,4 @@ hcaloverviewlayout(dqmitems,"1729 - Temporary HF Timing Study Plots",
                      'description':"Normalized HFM Signal Shape passing timing study requirements (pass minbias trigger, 20<maxenergy<100, 2<=maxtime<=5)"}],
                    )
 
-adapt_and_register(dqmitems, scope=LayoutScope.BOTH)
+adapt_and_register(dqmitems, scope=LayoutScope.ALL)

@@ -59,4 +59,4 @@ l1toverviewlayout(dqmitems,"11 Integ HF Triggers vs LS",
 l1toverviewlayout(dqmitems,"12 Integ BSCOR and BPTX",
     [{'path': "L1T/L1TScalersSCAL/Level1TriggerRates/AlgorithmRates/Integral_AlgoBit_124", 'description': "Integrated BSCOR and BPTX. For more information please click <a href=\"https://twiki.cern.ch/twiki/bin/view/CMS/TriggerShiftHLTGuide\">here</a>."}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.BOTH)
+adapt_and_register(dqmitems, scope=LayoutScope.ALL)

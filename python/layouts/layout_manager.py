@@ -5,22 +5,19 @@ from collections import namedtuple
 class LayoutScope(Enum):
     ONLINE = 1
     OFFLINE = 2
-    BOTH = 3
+    RELVAL = 3
+    ALL = 4
 
 
-# Name has a default value
 Layout = namedtuple('Layout', ['source', 'destination', 'name', 'draw', 'overlays'])
-# Python3.6 compatible hack to set the defaults:
-Layout.__new__.__defaults__ = ('default',)
-
 Draw = namedtuple('Draw', ['withref', 'xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax', 'xtype', 'ytype', 'ztype', 'drawopts'], defaults=(None,) * 11)
 
 
-def register_layout(source, destination, name='default', draw=Draw(), overlays=tuple(), scope=LayoutScope.BOTH):
+def register_layout(source, destination, name='default', draw=Draw(), overlays=tuple(), scope=LayoutScope.ALL):
     LayoutManager.add_layout(Layout(source, destination, name, draw, overlays), scope)
 
 
-def adapt_and_register(dqmitems, scope=LayoutScope.BOTH):
+def adapt_and_register(dqmitems, scope=LayoutScope.ALL):
     """ Adapt the layout structure from the old DQM GUI to the new one. """
 
     for key in dqmitems.keys():
@@ -41,27 +38,32 @@ def adapt_and_register(dqmitems, scope=LayoutScope.BOTH):
 class LayoutManager:
     __layouts_online = []
     __layouts_offline = []
+    __layouts_relval = []
 
 
     @classmethod
     def get_layouts(cls, scope):
         result = []
-        if scope == LayoutScope.ONLINE or scope == LayoutScope.BOTH:
+        if scope == LayoutScope.ONLINE or scope == LayoutScope.ALL:
             result += cls.__layouts_online
-        if scope == LayoutScope.OFFLINE or scope == LayoutScope.BOTH:
+        if scope == LayoutScope.OFFLINE or scope == LayoutScope.ALL:
             result += cls.__layouts_offline
+        if scope == LayoutScope.RELVAL or scope == LayoutScope.ALL:
+            result += cls.__layouts_relval
         return result
 
 
     @classmethod
-    def add_layout(cls, layout, scope=LayoutScope.BOTH):
+    def add_layout(cls, layout, scope=LayoutScope.ALL):
         if not layout or not layout.source or not layout.destination or not layout.name:
             raise Exception('source, destination and name has to be provided for the layout.')
 
-        if scope == LayoutScope.ONLINE or scope == LayoutScope.BOTH:
+        if scope == LayoutScope.ONLINE or scope == LayoutScope.ALL:
             cls.__layouts_online.append(layout)
-        if scope == LayoutScope.OFFLINE or scope == LayoutScope.BOTH:
+        if scope == LayoutScope.OFFLINE or scope == LayoutScope.ALL:
             cls.__layouts_offline.append(layout)
+        if scope == LayoutScope.RELVAL or scope == LayoutScope.ALL:
+            cls.__layouts_relval.append(layout)
 
 
     @classmethod
@@ -70,9 +72,11 @@ class LayoutManager:
         if not name:
             return []
         
-        if scope == LayoutScope.ONLINE or scope == LayoutScope.BOTH:
+        if scope == LayoutScope.ONLINE or scope == LayoutScope.ALL:
             result += cls.__layouts_online
-        if scope == LayoutScope.OFFLINE or scope == LayoutScope.BOTH:
+        if scope == LayoutScope.OFFLINE or scope == LayoutScope.ALL:
             result += cls.__layouts_offline
+        if scope == LayoutScope.RELVAL or scope == LayoutScope.ALL:
+            result += cls.__layouts_relval
 
         return [x for x in result if x.name == name]

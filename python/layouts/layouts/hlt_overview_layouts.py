@@ -39,4 +39,4 @@ hltoverviewlayout(dqmitems,"10 Group_4_paths_count_LS",
 hltoverviewlayout(dqmitems,"11 Group_-1_paths_count_LS",
     [{'path': "HLT/FourVector/PathsSummary/HLT LS/Group_-1_paths_count_LS", 'description': "Show the number of events passing HLT paths which are subdivided in groups of 20 vs. LS (2D histogram) . For more information please click <a href=\"https://twiki.cern.ch/twiki/bin/view/CMS/TriggerShiftHLTGuide\">here</a>."}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.BOTH)
+adapt_and_register(dqmitems, scope=LayoutScope.ALL)

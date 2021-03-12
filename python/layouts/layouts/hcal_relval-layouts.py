@@ -108,4 +108,4 @@ hcalnoiseratesDlayout(dqmitems, 'DataLayouts/Hcal/RBX/04 RBX energy (GeV)',[{'pa
 
 
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

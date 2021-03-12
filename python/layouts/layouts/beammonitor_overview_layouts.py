@@ -38,4 +38,4 @@ bmoverviewlayout(dqmitems, "10 - Pixel-Vertices: Z0 vs. Lumisection",
                  [{ 'path': "BeamPixel/muZ vs lumi",
                     'description': "Beam spot Z0 from pixel-vertices"}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.BOTH)
+adapt_and_register(dqmitems, scope=LayoutScope.ALL)

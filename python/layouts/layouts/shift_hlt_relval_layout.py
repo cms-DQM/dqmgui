@@ -342,4 +342,4 @@ def trigvalqcd(i, p, *rows): i["00 Shift/HLT/QCD/" + p] = rows
 #trigvallayout(dqmitems,"HLT Histograms",
 #    [{'path': "HLT/", 'description': "Trigger efficiency . For more information please click <a href=\"https:\">here</a>."}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

@@ -155,4 +155,4 @@ hcalnoiseratesDlayout(dqmitems, 'MCLayouts/Hcal/RBX/03 RBX number of hits',[{'pa
 hcalnoiseratesDlayout(dqmitems, 'MCLayouts/Hcal/RBX/04 RBX energy (GeV)',[{'path' : 'HcalNoiseRatesD/HcalNoiseRatesTask/hRBXEnergy'}])
 
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

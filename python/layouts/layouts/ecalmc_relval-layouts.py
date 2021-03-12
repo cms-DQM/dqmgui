@@ -293,4 +293,4 @@ ecallayout(dqmitems, 'MCLayouts/Ecal/02 Rec Hits/78 EcalRecHitsTask Endcap RecSi
 ecallayout(dqmitems, 'MCLayouts/Ecal/02 Rec Hits/79 EcalRecHitsTask Endcap RecSimHit Ratio Flag=7',[{'path': 'EcalRecHitsV/EcalRecHitsTask/EcalRecHitsTask Endcap RecSimHit Ratio Flag=7'}])
 ecallayout(dqmitems, 'MCLayouts/Ecal/02 Rec Hits/80 EcalRecHitsTask Endcap RecSimHit Ratio vs SimHit Flag=5 6',[{'path': 'EcalRecHitsV/EcalRecHitsTask/EcalRecHitsTask Endcap RecSimHit Ratio vs SimHit Flag=5 6'}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

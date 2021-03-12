@@ -177,4 +177,4 @@ smpHLTlayouts(dqmitems, workDir+"SingleJet/00 - Instructions",
 smpHLTlayouts(dqmitems, workDir+"SingleJet/JetMET_TriggerRate",
         [{'path': "HLT/JetMET/TriggerSummary/JetMET_TriggerRate", 'description':""}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

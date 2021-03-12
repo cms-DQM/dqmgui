@@ -102,7 +102,13 @@ class GUIService:
         # Layouts will be filtered against the search regex on their destination name.
         # Non existant sources will still be attempted to be displayed resulting in 
         # 'ME not found' string to be rendered.
-        scope = LayoutScope.ONLINE if dataset == '/Global/Online/ALL' else LayoutScope.OFFLINE
+        
+        scope = LayoutScope.OFFLINE
+        if dataset == '/Global/Online/ALL':
+            scope = LayoutScope.ONLINE
+        elif 'relval' in dataset.lower():
+            scope = LayoutScope.RELVAL
+
         for layout in cls.layouts_manager.get_layouts(scope):
             # Check if ME name starts with requested path
             if layout.destination[:len(path)] == path:
@@ -241,7 +247,7 @@ class GUIService:
     @logged
     async def get_layouts_by_name(cls, name):
         # TODO: It's probably better to add an API argument to choose the scope
-        return cls.layouts_manager.get_layouts_by_name(name, scope=LayoutScope.BOTH)
+        return cls.layouts_manager.get_layouts_by_name(name, scope=LayoutScope.ALL)
 
 
     @classmethod

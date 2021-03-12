@@ -153,4 +153,4 @@ trackervalidationlayout(dqmitems, "13 - PXEndcap OnTk Clusters Size",
                          {'path':"PixelPhase1/Tracks/PXForward/size_PXDisk_+3",
                           'description': ""}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

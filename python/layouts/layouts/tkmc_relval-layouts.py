@@ -54,4 +54,4 @@ trackervalidationlayout(dqmitems, "05 - TrackingRecHits",
                          {'path':"Tracking/TrackingRecHits/Strip/TEC/Adc_rphi_layer2tec",
                           'description': ""}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

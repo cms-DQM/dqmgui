@@ -4679,4 +4679,4 @@ trigvalhiggsHtaunu(dqmitems,"Tau global Efficiencies ",
 ###---- QCD selection goes here: ----
 #def trigvalqcd(i, p, *rows): i["HLT//Preselection" + p] = rows
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

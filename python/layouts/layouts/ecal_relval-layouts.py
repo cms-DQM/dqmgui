@@ -29,4 +29,4 @@ ecallayout(dqmitems, 'DataLayouts/Ecal/22 Super Cluster Size (Basic Clusters)',[
 ecallayout(dqmitems, 'DataLayouts/Ecal/23 Super Cluster Seed SwissCross',[{'path': 'EcalBarrel/EBRecoSummary/superClusters_EB_E1oE4'}])
 ecallayout(dqmitems, 'DataLayouts/Ecal/24 Preshower Planes Energy',[{'path': 'EcalPreshower/ESRecoSummary/esClusters_energy_plane1'}, {'path': 'EcalPreshower/ESRecoSummary/esClusters_energy_plane2'}],[{'path': 'EcalPreshower/ESRecoSummary/esClusters_energy_ratio'}])
 
-adapt_and_register(dqmitems, scope=LayoutScope.ONLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

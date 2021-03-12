@@ -76,4 +76,4 @@ shiftpflowlayout(dqmitems, "04 - Jet Pt Resolution distribution - Endcap",
     'description': "Pt resolution for jets in Endcap", 'draw': { 'withref': "no" }}
   ])
 
-adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)
+adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

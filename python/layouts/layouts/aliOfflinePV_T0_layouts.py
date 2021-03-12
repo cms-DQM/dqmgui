@@ -84,5 +84,4 @@ aliOfflinePVLayout(dqmitems, "03 - Impact parameters projections (pT>10 GeV)",
                       }])
 
 
-
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

@@ -42,22 +42,27 @@ if __name__ == '__main__':
         fut.result()
     # Now we should be safe.
 
-import asyncio
-import logging
-import argparse
+    # Import things only when in the main process.
+    # This ensures that layouts are not registered in the fork.
+    import asyncio
+    import logging
+    import argparse
 
-from aiohttp import web, WSCloseCode
-from logging.handlers import TimedRotatingFileHandler
+    from aiohttp import web
+    from logging.handlers import TimedRotatingFileHandler
 
-from service import GUIService
-from storage import GUIDataStore
-from helpers import get_absolute_path, parse_run_lumi, getNotOlderThanFromUrl
-from rendering import GUIRenderer
-from data_types import RenderingOptions, MEDescription
-from importing.importing import GUIImportManager
+    from service import GUIService
+    from storage import GUIDataStore
+    from helpers import parse_run_lumi
+    from rendering import GUIRenderer
+    from data_types import RenderingOptions, MEDescription
+    from importing.importing import GUIImportManager
 
-# Services
-service = GUIService()
+    # Services
+    service = GUIService()
+
+# This is needed for the decorators
+from helpers import getNotOlderThanFromUrl
 
 
 # ###################################################################################################### #

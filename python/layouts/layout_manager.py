@@ -8,7 +8,15 @@ class LayoutScope(Enum):
     BOTH = 3
 
 
-def register_layout(source, destination, name='default', draw=None, overlays=None, scope=LayoutScope.BOTH):
+# Name has a default value
+Layout = namedtuple('Layout', ['source', 'destination', 'name', 'draw', 'overlays'])
+# Python3.6 compatible hack to set the defaults:
+Layout.__new__.__defaults__ = ('default',)
+
+Draw = namedtuple('Draw', ['withref', 'xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax', 'xtype', 'ytype', 'ztype', 'drawopts'], defaults=(None,) * 11)
+
+
+def register_layout(source, destination, name='default', draw=Draw(), overlays=tuple(), scope=LayoutScope.BOTH):
     LayoutManager.add_layout(Layout(source, destination, name, draw, overlays), scope)
 
 
@@ -20,6 +28,8 @@ def adapt_and_register(dqmitems, scope=LayoutScope.BOTH):
         name = os.path.basename(key)
         for items in dqmitems[key]:
             for item in items:
+                if item == None or 'path' not in item:
+                    continue
                 plot_name = os.path.basename(item['path'])
                 source = item['path']
                 destination = os.path.join(dir, plot_name)
@@ -66,11 +76,3 @@ class LayoutManager:
             result += cls.__layouts_offline
 
         return [x for x in result if x.name == name]
-
-
-# Name has a default value
-Layout = namedtuple('Layout', ['source', 'destination', 'name', 'draw', 'overlays'])
-# Python3.6 compatible hack to set the defaults:
-Layout.__new__.__defaults__ = ('default',)
-
-Draw = namedtuple('Draw', ['withref', 'xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax', 'xtype', 'ytype', 'ztype', 'drawopts'], defaults=(None,) * 11)

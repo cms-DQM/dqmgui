@@ -9,12 +9,13 @@ class LayoutScope(Enum):
     ALL = 4
 
 
-Layout = namedtuple('Layout', ['source', 'destination', 'name', 'draw', 'overlays'])
-Draw = namedtuple('Draw', ['withref', 'xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax', 'xtype', 'ytype', 'ztype', 'drawopts'], defaults=(None,) * 11)
+Layout = namedtuple('Layout', ['source', 'destination', 'name', 'draw', 'overlays', 'description'])
+Draw = namedtuple('Draw', ['xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax', 'xtype', 'ytype', 'ztype', 'drawopts'])
+Draw.__new__.__defaults__ = (None,) * len(Draw._fields)
 
 
-def register_layout(source, destination, name='default', draw=Draw(), overlays=tuple(), scope=LayoutScope.ALL):
-    LayoutManager.add_layout(Layout(source, destination, name, draw, overlays), scope)
+def register_layout(source, destination, name='default', draw=Draw(), overlays=tuple(), description='', scope=LayoutScope.ALL):
+    LayoutManager.add_layout(Layout(source, destination, name, draw, overlays, description), scope)
 
 
 def adapt_and_register(dqmitems, scope=LayoutScope.ALL):
@@ -30,9 +31,11 @@ def adapt_and_register(dqmitems, scope=LayoutScope.ALL):
                 plot_name = os.path.basename(item['path'])
                 source = item['path']
                 destination = os.path.join(dir, plot_name)
-                draw = Draw(**item['draw']) if 'draw' in item else Draw()
+                # Allow only items that are declared in the fields of namedtuple
+                draw = Draw(** {k:v for k,v in item['draw'].items() if k in Draw._fields}) if 'draw' in item else Draw()
                 overlays = tuple(item['overlays']) if 'overlays' in item else tuple()
-                register_layout(source, destination, name, draw, overlays, scope)
+                description = item['description'] if 'description' in item else ''
+                register_layout(source, destination, name, draw, overlays, description, scope)
 
 
 class LayoutManager:

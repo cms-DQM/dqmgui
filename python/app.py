@@ -170,8 +170,9 @@ async def archive_v1(request, notOlderThan):
             'layout': layout.name if layout != None else None
         }
         if layout != None:
-            obj['draw'] = { k:v for k, v in layout.draw._asdict().items() if v is not None }
+            obj['draw'] = { k:v for k, v in zip(layout.draw._fields, layout.draw) if v is not None }
             obj['overlays'] = layout.overlays
+            obj['description'] = layout.description
         obj['qtstatuses'] = [x for x in qteststatuses]
         result['data'].append(obj)
 

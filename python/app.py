@@ -133,12 +133,19 @@ async def archive_legacy(request, notOlderThan):
 
     result = {'contents': []}
     result['contents'].extend({'subdir': name, 'me_count': me_count} for name, me_count in data.dirs)
-    result['contents'].extend({
-        'obj': name,
-        'path': path,
-        'layout': layout,
-        'qresults': [{'status': x} for x in qteststatuses]
-        } for (name, path, layout, qteststatuses) in data.objs)
+
+    for (name, path, layout, qteststatuses) in data.objs:
+        obj = {
+            'name': name,
+            'path': path,
+            'layout': layout.name if layout != None else None
+        }
+        if layout != None:
+            obj['draw'] = { k:v for k, v in zip(layout.draw._fields, layout.draw) if v is not None }
+            obj['overlays'] = layout.overlays
+            obj['description'] = layout.description
+        obj['qtstatuses'] = [x for x in qteststatuses]
+        result['contents'].append(obj)
 
     return web.json_response(result)
 

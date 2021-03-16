@@ -9,7 +9,7 @@ from collections import defaultdict
 from async_lru_timed import alru_cache_timed
 
 from storage import GUIDataStore
-from helpers import get_api_error, binary_search, binary_search_qtests, logged
+from helpers import get_api_error, binary_search, binary_search_qtests, binary_search_me_names, logged
 from rendering import GUIRenderer
 from importing.importing import GUIImportManager
 from data_types import Sample, RootDir, RootObj, RootDirContent, RenderingInfo, FileFormat, SampleFull
@@ -77,7 +77,9 @@ class GUIService:
         except:
             regex = None
 
-        for me_name in me_names:
+        # Use binary search to find the index of a first ME name that starts with `path_binary`
+        first_index = binary_search_me_names(me_names, path_binary)
+        for me_name in me_names[first_index:]:
             # Check if ME name starts with requested path
             if me_name[:len(path_binary)] == path_binary:
                 names = me_name[len(path_binary):].split(b'/')
@@ -97,6 +99,8 @@ class GUIService:
                     objs.add(RootObj(name=segment, path=path + segment, layout=None, qteststatuses=qteststatuses))
                 else:
                     dirs[segment] += 1
+            else:
+                break
 
         # Add MEs from layouts
         # Layouts will be filtered against the search regex on their destination name.

@@ -175,6 +175,45 @@ def binary_search_qtests(me_names, me_path):
     return result
 
 
+def binary_search_me_names(me_names, me_path_prefix):
+    """
+    Binary search implementation. me_names array has to be an array of binary
+    strings containing ME names.
+    Returns an index of a first ME name that starts with the provided prefix. 
+    ME names are sorted by default by the importer so a linear scan until the prefix 
+    changes will yield all ME names that start with a given prefix.
+    Returns -1 if an ME with a provided prefix doesn't exist.
+    """
+
+    first = 0
+    last = len(me_names) - 1
+    index = -1
+    prefix_length = len(me_path_prefix)
+
+    while first <= last:
+        mid = (first + last)//2
+
+        if me_names[mid][:prefix_length] == me_path_prefix:
+            index = mid
+            break
+        else:
+            if me_path_prefix < me_names[mid][:prefix_length]:
+                last = mid - 1
+            else:
+                first = mid + 1
+
+    if index == -1:
+        return -1
+
+    # Found an index, now go backwards linearly until the prefix changes
+    while index > 0:
+        if me_names[index-1][:prefix_length] != me_path_prefix:
+            break
+        index -= 1
+
+    return index
+
+
 def parse_run_lumi(runlumi):
     """
     Run/lumi pair is passed to the API in this format: run:lumi

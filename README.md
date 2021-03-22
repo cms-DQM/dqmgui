@@ -178,6 +178,10 @@ Only functions declared inside `GUIService` class are allowed to use that cache 
 
 It's estimated that 20MB is the upper bound of the size of cached elements if each (of 8) cached function contained a single element. Therefore, we set the cache capacity to 200 for each function. This means that the upper bound of the entire cache size in such case is about 4GB.
 
+## Rate limiting
+
+The only feature that is rate limited at the moment is an __on demand importing__. If other features need to be rate limited, simply raise `TooManyRequestsException` exception and make sure it bubbles up all the way to the `aiohttp` middleware defined in `app.py`.
+
 ## The HTML frontend
 
 The frontend is developed here: https://github.com/cms-DQM/dqmgui_frontend

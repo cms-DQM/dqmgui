@@ -55,7 +55,7 @@ if __name__ == '__main__':
     from storage import GUIDataStore
     from helpers import parse_run_lumi
     from rendering import GUIRenderer
-    from data_types import RenderingOptions, MEDescription
+    from data_types import RenderingOptions, MEDescription, TooManyRequestsException
     from importing.importing import GUIImportManager
 
     # Services
@@ -63,6 +63,7 @@ if __name__ == '__main__':
 
 # This is needed for the decorators
 from helpers import getNotOlderThanFromUrl
+from aiohttp.web import middleware
 
 
 # ###################################################################################################### #
@@ -399,6 +400,19 @@ async def latest_runs(request, notOlderThan):
 
 
 # ###################################################################################################### #
+# ================================== Server middleware configuration =================================== #
+# ###################################################################################################### #
+
+@middleware
+async def exception_handler_middleware(request, handler):
+    try:
+        resp = await handler(request)
+        return resp
+    except TooManyRequestsException:
+        return web.json_response({'error': 'The server is under a heavy load at the moment, please try again later.'}, status=429)
+
+
+# ###################################################################################################### #
 # ==================== Server configuration, initialization/destruction of services ==================== #
 # ###################################################################################################### #
 
@@ -422,6 +436,7 @@ async def on_shutdown(app):
 def config_and_start_webserver(port):
     app = web.Application(middlewares=[
         web.normalize_path_middleware(append_slash=True, merge_slashes=True),
+        exception_handler_middleware,
     ])
 
 

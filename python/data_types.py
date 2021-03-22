@@ -210,3 +210,8 @@ class RenderingOptions:
             spec = spec[:-1]
 
         return spec
+
+
+class TooManyRequestsException(Exception):
+    ''' Raise this exception whenever load to the server becomes too big. '''
+    pass

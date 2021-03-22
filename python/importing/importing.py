@@ -6,7 +6,7 @@ from concurrent.futures import ProcessPoolExecutor
 
 from helpers import logged
 from storage import GUIDataStore
-from data_types import FileFormat, SampleFull
+from data_types import FileFormat, SampleFull, TooManyRequestsException
 from compressing import GUIBlobCompressor
 
 from importing.dqmio_importer import DQMIOImporter
@@ -125,6 +125,12 @@ class GUIImportManager:
         """
         This function will call `import_sync` using a process pool.
         """
+
+        if cls.semaphore.locked():
+            # It takes very long to handle all 100 imports in parallel.
+            # If it happens, just rate limit the user. It is most probably an 
+            # erroneous tool requesting to import everything in an endless loop.
+            raise TooManyRequestsException()
 
         async with cls.semaphore:
             with ProcessPoolExecutor(1) as executor:

@@ -9,7 +9,8 @@
 ##H   restart         (re)start the service
 ##H   start           (re)start the service
 ##H   stop            stop the service
-##H   build           refresh render plugins and build Cython modules
+##H   build           build render plugins and build Cython modules
+##H   rebuild         rebuild render plugins and build Cython modules
 
 # Always change the directory to make sure correct process can be traced when stopping
 BASEPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; cd ../ ; pwd -P )"
@@ -82,6 +83,12 @@ build()
   $BASEPATH/scripts/build.sh
 }
 
+rebuild()
+{
+  gmake clean
+  $BASEPATH/scripts/build.sh
+}
+
 version()
 {
   echo "Latest commit:"
@@ -104,6 +111,10 @@ case "$1" in
 
   build )
     build
+    ;;
+
+  rebuild )
+    rebuild
     ;;
 
   help )

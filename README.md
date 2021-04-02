@@ -760,6 +760,67 @@ This section contains urls that result in errors. These errors should be fixed.
 
 All known issues were fixed by changing the `CFLAGS` in the Makefile.
 
+# Performance stress test
+
+In order to ensure that the new DQM GUI meets its performance requirements, a thorough stress test was performed by firing many concurrent HTTP requests and measuring the time it takes for the new DQM GUI to respond to them.
+
+## Details about the service under test
+
+* Code that was tested is packaged under a `1.0.12` release: https://github.com/cms-DQM/dqmgui/releases/tag/1.0.12
+* Latest commit that is in the test: `71394e9670fc5ff1603c25bbbbdd34b910bcd0a1`
+* Service that was being tested: https://cmsweb-testbed.cern.ch/dqm/offline-test-new/
+* The DQM GUI was configured to use all `~10TB` of data that was available at the DQM EOS location at the time of testing.
+  * Having that said, the performance of the DQM GUI **does not** depend on the amount of the data!!! The performance depends on the number of concurrent requests the GUI has to deal with. And the sole purpose of this stress test is to provide an upper bound of that.
+* Machine the service under test is running on: `vocms0731`
+* Memory available in the machine: `16GB`
+* CPU cores available in the machine: `8`
+
+**Important note:** a production machine where the new DQM GUI will eventually be running has `64GB` of memory and `16` CPU cores!!! This can potentially lead to improved performance.
+
+## Details about the test
+
+A custom stress testing tool was used to perform the test: https://github.com/cms-DQM/dqmgui/blob/master/scripts/stress-test.py
+
+It was used in this configuration on the same machine where the GUI under test is running (`vocms0731`):
+
+```bash
+# Go to CMSSW and run cmsenv to get the required packages
+/data/srv/newDQMGUI/dqmgui/scripts/stress-test.py -i /afs/cern.ch/user/a/akirilov/public/new-dqmgui-stress-test/urls.txt -r 350
+```
+
+This script randomly samples 350 requests from a given text file every second and makes 35 concurrent requests to the DQM GUI every 100 milliseconds. A text file that was used for the test `/afs/cern.ch/user/a/akirilov/public/new-dqmgui-stress-test/urls.txt` contains a little over 6 million valid DQM GUI API URLs, spanning 100 dataset/run combinations. All those dataset/run combinations used in the test can be found here: `/afs/cern.ch/user/a/akirilov/public/new-dqmgui-stress-test/samples.txt`.
+
+## What do we compare against?
+
+Log files containing access times of the old DQM GUI are available since the very first version of the predecessor tool. We used those log files to make a histogram that shows the number of requests the old DQM GUI had to serve per minute.
+
+![Old DQM GUI requests per minute](data/etc/old-gui-perf-plot.png)
+
+Y axis of this plot represents the number of requests and the X axis represents minutes, sorted by the number of requests, in a descending order.
+
+The first (left most) data point is a clear outlier and we discard it from our comparison for the following reasons:
+
+* These >30000 requests per minutes were caused by a bug in an old version of HDQM tool that got into an uncontrolled infinite loop
+* HDQM has already been replaced in the meantime and the new version gets the ROOT files straight from EOS - the DQM GUI is no longer used by the HDQM at all
+* The new DQM GUI doesn't even support the direct file downloads that those >30000 requests were. This feature is redundant given that all files are available in EOS
+* ROOT file downloads are I/O and not CPU bound operations while other requests are mostly CPU bound. Including >30000 I/O bound requests into our test would be completely unfair.
+
+### Target request rate
+
+Given the reasoning above, the most amount of load that the DQM GUI has ever had since the beginning of CMS, is ~15000 requests per minute. 15000 requests per minutes equals to 250 requests per second. 
+
+If we can show that the new DQM GUI can withstand that, we can conclude that performance under concurrent load of an entire collaboration is not an issue for the successor.
+
+## The results
+
+The test described above unveiled that the new DQM GUI running on a significantly weaker hardware was not only bale to match but also to surpass the target request rate by about `30%`!!!
+
+The plot below shows the average number of requests successfully served by the new DQM GUI **per second**:
+
+![New DQM GUI requests per second](data/etc/new-gui-perf-plot.png)
+
+As we can see, the average plateaus at about 320 requests per second. The new GUI can stably serve this number of requests and be perfectly usable at the same time.
+
 # A plan for the future
 
 Pretty much all features that we wanted to provide with the new DQM GUI are already present and working. The work, however, is not quite complete yet. There are certain integration related aspects that are time consuming and still need some attention. In this section I provide a list of all such features with descriptions and explanations of why they're required.

@@ -821,6 +821,12 @@ The plot below shows the average number of requests successfully served by the n
 
 As we can see, the average plateaus at about 320 requests per second. The new GUI can stably serve this number of requests and be perfectly usable at the same time.
 
+## Final remarks
+
+The new DQM GUI response times reported above are measured after the on demand importing has already been performed.
+
+On demand importing slows down a little bit (to about 5 seconds per sample) while the new DQM GUI is being bombarded by many parallel requests. This doesn't have a significant hit on the user experience and is subject to improve when running on a production machine with 2 times the amount of CPU cores.
+
 # A plan for the future
 
 Pretty much all features that we wanted to provide with the new DQM GUI are already present and working. The work, however, is not quite complete yet. There are certain integration related aspects that are time consuming and still need some attention. In this section I provide a list of all such features with descriptions and explanations of why they're required.

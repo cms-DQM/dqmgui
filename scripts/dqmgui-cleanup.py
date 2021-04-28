@@ -60,7 +60,6 @@ def start(directory, cmsswSymlink, threshold, lower_threshold):
                 # remove oldest files of latest run
                 files = allPBFiles[newestRun]
                 files.sort(key=lambda x: os.path.getmtime(x))
-                print( files )
 
                 freed_space = 0
                 for file in files:

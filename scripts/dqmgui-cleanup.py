@@ -17,7 +17,6 @@ def get_disk_info( directory ):
 
 def start(directory, cmsswSymlink, threshold, lower_threshold) :
     print('Starting to watch directory: %s' % directory)
-
     while True:
         time.sleep(10)
         try:
@@ -64,7 +63,7 @@ def start(directory, cmsswSymlink, threshold, lower_threshold) :
                     for file in files:
                         try:
                             fsize = os.path.getsize( file )/(1024*1024)
-                            print('dqmgui-cleanup.py: removing %s' % file)
+                            print('dqmgui-cleanup.py: removing %s %.1f Mb from %.1f Mb' % (file, fsize, used_space - freed_space))
                             os.remove(file)
                             freed_space += fsize
                         except: pass
@@ -91,8 +90,8 @@ if __name__ == '__main__':
         it restarts the DQM GUI from the updated CMSSW release.''')
     parser.add_argument('-d', '--directory', default='/data/dqmgui/files/pb/', help='Directory from which PB files will be deleted.')
     parser.add_argument('-c', '--cmsswSymlink', default='/dqmdata/dqm_cmssw/current_production/src/', help='Symbolic link to the current CMSSW release.')
-    parser.add_argument('-t', '--threshold', default=0.90, help='Maximum fraction of used space in disk; exceeding .pb files will be removed.')
-    parser.add_argument('-l', '--lower_threshold', default=0.80, help='Target fraction of used space in disk; will try to clean up up to this fraction.')
+    parser.add_argument('-t', '--threshold', default=0.90, type=float,  help='Maximum fraction of used space in disk; exceeding .pb files will be removed.')
+    parser.add_argument('-l', '--lower_threshold', default=0.80, type=float, help='Target fraction of used space in disk; will try to clean up up to this fraction.')
     args = parser.parse_args()
 
     start(args.directory, args.cmsswSymlink, args.threshold, args.lower_threshold)

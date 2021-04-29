@@ -15,7 +15,7 @@ def get_disk_info( directory ):
         return line.split()
     return None
 
-def start(directory, cmsswSymlink, threshold, lower_threshold) :
+def start(directory, cmsswSymlink, threshold, lower_threshold, life_time) :
     print('Starting to watch directory: %s' % directory)
     while True:
         time.sleep(10)
@@ -57,10 +57,14 @@ def start(directory, cmsswSymlink, threshold, lower_threshold) :
 
                     # remove oldest files of latest run
                     files = allPBFiles[newestRun]
-                    files.sort(key=lambda x: os.path.getmtime(x))
-
+                    files = [ (f, os.path.getmtime(f)) for f in files ]
+                    files.sort( key=lambda x: x[1] )
+                    local_time = time.time()
                     freed_space = 0
-                    for file in files:
+                    for item in files:
+                        file, file_time = item[0], item[1]
+                        # do not delete files younger than `life_time` minutes [0]
+                        if (local_time - file_time) < life_time * 60 : break
                         try:
                             fsize = os.path.getsize( file )/(1024*1024)
                             print('dqmgui-cleanup.py: removing %s %.1f Mb from %.1f Mb' % (file, fsize, used_space - freed_space))
@@ -92,9 +96,15 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--cmsswSymlink', default='/dqmdata/dqm_cmssw/current_production/src/', help='Symbolic link to the current CMSSW release.')
     parser.add_argument('-t', '--threshold', default=0.90, type=float,  help='Maximum fraction of used space in disk; exceeding .pb files will be removed.')
     parser.add_argument('-l', '--lower_threshold', default=0.80, type=float, help='Target fraction of used space in disk; will try to clean up up to this fraction.')
+    parser.add_argument('--life_time', default=10, type=int, help='Minimum life time values of .pb files before deletion, in Minutes')
     args = parser.parse_args()
 
-    start(args.directory, args.cmsswSymlink, args.threshold, args.lower_threshold)
+    start(args.directory, args.cmsswSymlink, args.threshold, args.lower_threshold, args.life_time)
 
+"""
+[0] a.kirilovas : ``protobuf (PB) files are only used for the live mode of the DQM GUI. The reason why we need to store multiple of them is related to on-demand-importing and caching features of the DQM GUI application. We have configured the system to bypass the cache and perform an on-demand-import (which is slow) every 20 seconds in order to keep the live mode actually live. Deleting newer than 20 second old PB files would result in unavailable data for the users and should be avoided at all costs. Your solution to the problem looks sound and I expect it to be working flawlessly for quite some time in the future! However, it's very important to note that the same disk (1.3T) is also used to store ROOT file that contain DQM GUI online archive data which we have to provide for all runs that happened in the past. This means that ROOT files should remain there, basically forever. I'm concerned about the time when the disk will eventually fill up to 90% (upper threshold in your code) of its capacity by the untouchable ROOT files and every additional PB file will be deleted as soon as it gets transferred to the GUI, resulting in online live mode being completely broken even though we would still have a moderate 130GB to spare. Having that said, I'd suggest to keep latest 10 minutes worth of PB files of a latest run and delete the rest. Also, making sure that we always keep at least, say 10, PB files of a latest run is a reasonable additional rule, I think. Following what I've outlined above, it would totally suffice to just keep latest 20 seconds worth of PB files because that's how long it takes for us to reset the cache, but I'm afraid of a corner case, when files will make it to the GUI disk but will fail to be registered for some reason (or the registration will take longer than expected). So 10 minutes is an arbitrary safety margin - feel free to adjust those numbers to what you think is reasonable. I hope I cleared things up a bit''
+
+[1] For the debugging you can populate random file like : head -c 100M </dev/urandom > run341343_DQMLive_concat_b25f7ad9934658ca42f93f07407b372f.pb
+"""
 
 

@@ -59,7 +59,7 @@ def start(directory, cmsswSymlink, threshold, lower_threshold, life_time) :
                     files = allPBFiles[newestRun]
                     files = [ (f, os.path.getmtime(f)) for f in files ]
                     files.sort( key=lambda x: x[1] )
-                    local_time = time.time()
+                    local_time = files[-1][1]
                     freed_space = 0
                     for item in files:
                         file, file_time = item[0], item[1]

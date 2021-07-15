@@ -14,27 +14,27 @@ python3 -m pip install contextvars==2.4 -t .python_packages
 python3 -m pip install Cython --install-option="--no-cython-compile" -t .python_packages
 python3 -m pip install setuptools -t .python_packages
 
-wget 'https://github.com/cms-DQM/dqmgui/archive/refs/tags/1.0.14.tar.gz'
+wget 'https://github.com/cms-DQM/dqmgui/archive/refs/tags/1.0.15.tar.gz'
 
 # moving python pacakeges to DQM GUI dir
-tar -xzvf 1.0.14.tar.gz
-mv .python_packages  dqmgui-1.0.14/python/
-tar -czvf 1.0.14.tar.gz dqmgui-1.0.14
+tar -xzvf 1.0.15.tar.gz
+mv .python_packages  dqmgui-1.0.15/python/
+tar -czvf 1.0.15.tar.gz dqmgui-1.0.15
 mkdir dqmgui
-mv 1.0.14.tar.gz dqmgui
+mv 1.0.15.tar.gz dqmgui
 #cleaning dir
-rm -rf dqmgui-1.0.14
+rm -rf dqmgui-1.0.15
 
 
 cat > dqmgui-lib.spec <<EOF
 Name: DQM_GUI
 Version: 1.0.0
-Release: 1.0.14
+Release: 1.0.15
 Summary: DQM GUI software
 License: gpl
 Group: Core DQM
 Packager: Ernesta Petraityte
-Source0: 1.0.14.tar.gz
+Source0: 1.0.15.tar.gz
 %define _tmppath %{getenv:PWD}/dqmgui_rpm
 BuildRoot:  %{_tmppath}
 BuildArch: x86_64
@@ -57,9 +57,9 @@ tar -C %{getenv:PWD}  -c dqmgui  | tar -xC \$RPM_BUILD_ROOT
 #### extracting tar, moving older release to old_release folder
 
 cd /dqmgui
-tar -xzvf 1.0.14.tar.gz
-mv ./dqmgui-1.0.14/* .
-rm -rf ./dqmgui-1.0.14
+tar -xzvf 1.0.15.tar.gz
+mv ./dqmgui-1.0.15/* .
+rm -rf ./dqmgui-1.0.15
 
 # if [ -d "/dqmgui/old_releases" ]
 # then 
@@ -68,7 +68,7 @@ rm -rf ./dqmgui-1.0.14
 #     exec mkdir old_releases
 # fi
 
-# mv ./1.0.14.tar.gz ./old_releases/
+# mv ./1.0.15.tar.gz ./old_releases/
 
 ## witting correct CMSSW release version to cmssw_info file
 HOST=\$(hostname)

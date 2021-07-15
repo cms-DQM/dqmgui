@@ -1,8 +1,7 @@
 #!/bin/bash -e
-BASE="`dirname $0`"
 
-CMSSW_VERSION=$(cat $BASE/cmssw_info | sed -n '2 p')
-SCRAM_ARCH=$(cat $BASE/cmssw_info | sed -n '3 p')
+CMSSW_VERSION=$(cat /dqmgui/scripts/cmssw_info | sed -n '2 p')
+SCRAM_ARCH=$(cat /dqmgui/scripts/cmssw_info | sed -n '3 p')
 
 pushd $(scram -a $SCRAM_ARCH list -c $CMSSW_VERSION | tail -1 | sed 's|.* ||') > /dev/null
   export ROOT_ROOT=$(scram tool tag root_interface ROOT_INTERFACE_BASE)
@@ -15,5 +14,5 @@ popd > /dev/null
 gmake $@ all
 
 # Build Cython modules
-cd $BASE/../python/
+cd /dqmgui/python/
 python3 setup_cython.py build_ext --inplace

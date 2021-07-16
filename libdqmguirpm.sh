@@ -3,9 +3,26 @@
 BUILD_ARCH=x86_64
 TOPDIR=$PWD
 
-#Check python version
+#Chech is release version is provided
+echo $1
+if [[ -z "$1" ]];
+then
+    echo "Please provide DQM GUI version; tags can be found here: https://github.com/cms-DQM/dqmgui/tags"
+    exit
+fi
 
- #pip install dependecies
+DQM_GUI_RELEASE_VERSION=$1
+
+#Check python version
+if [[ "$(python3 -V)" =~ "Python 3" ]];
+then
+    echo "Python 3 is installed"
+else
+    echo "Error: Python 3 is not installed"
+    exit
+fi
+
+#pip install dependecies
 
 python3 -m pip install aiohttp==3.6.2  -t .python_packages
 python3 -m pip install aiosqlite==0.13.0  -t .python_packages
@@ -14,27 +31,27 @@ python3 -m pip install contextvars==2.4 -t .python_packages
 python3 -m pip install Cython --install-option="--no-cython-compile" -t .python_packages
 python3 -m pip install setuptools -t .python_packages
 
-wget 'https://github.com/cms-DQM/dqmgui/archive/refs/tags/1.0.15.tar.gz'
+wget "https://github.com/cms-DQM/dqmgui/archive/refs/tags/${DQM_GUI_RELEASE_VERSION}.tar.gz"
 
 # moving python pacakeges to DQM GUI dir
-tar -xzvf 1.0.15.tar.gz
-mv .python_packages  dqmgui-1.0.15/python/
-tar -czvf 1.0.15.tar.gz dqmgui-1.0.15
+tar -xzvf "${DQM_GUI_RELEASE_VERSION}.tar.gz"
+mv .python_packages  "dqmgui-${DQM_GUI_RELEASE_VERSION}/python/"
+tar -czvf "${DQM_GUI_RELEASE_VERSION}.tar.gz" "dqmgui-${DQM_GUI_RELEASE_VERSION}"
 mkdir dqmgui
-mv 1.0.15.tar.gz dqmgui
+mv "${DQM_GUI_RELEASE_VERSION}.tar.gz" dqmgui
 #cleaning dir
-rm -rf dqmgui-1.0.15
+rm -rf "dqmgui-${DQM_GUI_RELEASE_VERSION}"
 
 
 cat > dqmgui-lib.spec <<EOF
 Name: DQM_GUI
 Version: 1.0.0
-Release: 1.0.15
+Release: ${DQM_GUI_RELEASE_VERSION}
 Summary: DQM GUI software
 License: gpl
 Group: Core DQM
 Packager: Ernesta Petraityte
-Source0: 1.0.15.tar.gz
+Source0: "${DQM_GUI_RELEASE_VERSION}.tar.gz"
 %define _tmppath %{getenv:PWD}/dqmgui_rpm
 BuildRoot:  %{_tmppath}
 BuildArch: x86_64
@@ -57,11 +74,11 @@ tar -C %{getenv:PWD}  -c dqmgui  | tar -xC \$RPM_BUILD_ROOT
 #### extracting tar, moving older release to old_release folder
 
 cd /dqmgui
-tar -xzvf 1.0.15.tar.gz
-mv ./dqmgui-1.0.15/* .
-rm -rf ./dqmgui-1.0.15
+tar -xzvf ${DQM_GUI_RELEASE_VERSION}.tar.gz
+mv ./dqmgui-${DQM_GUI_RELEASE_VERSION}/* .
+rm -rf ./dqmgui-${DQM_GUI_RELEASE_VERSION}
 
-# if [ -d "/dqmgui/old_releases" ]
+# if [[ -d "/dqmgui/old_releases" ]]
 # then 
 #     echo "cannot create directory ‘old_releases’: File exists"
 # else
@@ -100,4 +117,5 @@ export \$PYTHONPATH=/dqmgui/python/.python_packages
 EOF
 mkdir -p RPMBUILD/{RPMS/{noarch},SPECS,BUILD,SOURCES,SRPMS}
 rpmbuild --define "_topdir `pwd`/RPMBUILD" -bb dqmgui-lib.spec
+
 

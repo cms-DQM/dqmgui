@@ -399,6 +399,11 @@ async def latest_runs(request, notOlderThan):
     return web.json_response({'runs': data})
 
 
+async def get_host(request):
+    """ Returns a host name, where DQM GUI is running """
+    host = args.h
+    return web.json_response({'host': host})
+
 # ###################################################################################################### #
 # ================================== Server middleware configuration =================================== #
 # ###################################################################################################### #
@@ -458,7 +463,8 @@ def config_and_start_webserver(port):
                     web.get(r'/api/v1/lumis/{run}/{dataset:.+}', available_lumis_v1),
                     web.post('/api/v1/register', register),
                     web.get('/api/v1/datasets', dataset_search),
-                    web.get('/api/v1/latest_runs', latest_runs)])
+                    web.get('/api/v1/latest_runs', latest_runs),
+                    web.get('/api/v1/host', get_host)])
 
     # Routes for HTML files
     app.add_routes([web.get('/', index), web.static('/', get_absolute_path('../frontend/'), show_index=True)])
@@ -479,6 +485,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', dest='workdir', type=str, default='../data/', 
         help='''Directory where SQLite file and logs will be placed. If it starts with / the full absolute directory will be used. 
         If it does not start with /, it will be used as a directory relative to DQMServices/DQMGUI/python/.''')
+    parser.add_argument('-h', dest='host', type=str, default='Not specified', help='Host wehere DQM GUI is running')
     args = parser.parse_args()
 
     # Make sure workdir is an absolute path and that it exists

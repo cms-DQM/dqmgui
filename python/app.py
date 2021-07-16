@@ -401,7 +401,7 @@ async def latest_runs(request, notOlderThan):
 
 async def get_host(request):
     """ Returns a host name, where DQM GUI is running """
-    host = args.h
+    host = args.host
     return web.json_response({'host': host})
 
 # ###################################################################################################### #
@@ -485,7 +485,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', dest='workdir', type=str, default='../data/', 
         help='''Directory where SQLite file and logs will be placed. If it starts with / the full absolute directory will be used. 
         If it does not start with /, it will be used as a directory relative to DQMServices/DQMGUI/python/.''')
-    parser.add_argument('-h', dest='host', type=str, default='Not specified', help='Host wehere DQM GUI is running')
+    parser.add_argument('-host', dest='host', type=str, default='Not specified', help='Host wehere DQM GUI is running')
     args = parser.parse_args()
 
     # Make sure workdir is an absolute path and that it exists

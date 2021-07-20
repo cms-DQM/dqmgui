@@ -62,7 +62,6 @@ DQM GUI and required python dependecies
 
 %prep
 echo  %{_tmppath}
-rm -rf /dqmgui
 
 %build
 
@@ -76,7 +75,7 @@ tar -C %{getenv:PWD}  -c dqmgui  | tar -xC \$RPM_BUILD_ROOT
 
 cd /dqmgui
 tar -xzvf ${DQM_GUI_RELEASE_VERSION}.tar.gz
-cp -r ./dqmgui-${DQM_GUI_RELEASE_VERSION}/* .
+mv ./dqmgui-${DQM_GUI_RELEASE_VERSION}/* .
 rm -rf ./dqmgui-${DQM_GUI_RELEASE_VERSION}
 
 # if [[ -d "/dqmgui/old_releases" ]]
@@ -118,5 +117,4 @@ export \$PYTHONPATH=/dqmgui/python/.python_packages
 EOF
 mkdir -p RPMBUILD/{RPMS/{noarch},SPECS,BUILD,SOURCES,SRPMS}
 rpmbuild --define "_topdir `pwd`/RPMBUILD" -bb dqmgui-lib.spec
-
 

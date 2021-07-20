@@ -62,6 +62,7 @@ DQM GUI and required python dependecies
 
 %prep
 echo  %{_tmppath}
+rm -rf /dqmgui
 
 %build
 

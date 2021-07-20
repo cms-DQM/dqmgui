@@ -7,4 +7,4 @@ pushd $(scram -a $SCRAM_ARCH list -c $CMSSW_VERSION | tail -1 | sed 's|.* ||') >
   eval `scram run -sh`
 popd > /dev/null
 
-python3 $BASE/python/app.py "$@"
+python3 $BASE/../python/app.py "$@"

@@ -76,7 +76,7 @@ tar -C %{getenv:PWD}  -c dqmgui  | tar -xC \$RPM_BUILD_ROOT
 
 cd /dqmgui
 tar -xzvf ${DQM_GUI_RELEASE_VERSION}.tar.gz
-mv ./dqmgui-${DQM_GUI_RELEASE_VERSION}/* .
+cp -r ./dqmgui-${DQM_GUI_RELEASE_VERSION}/* .
 rm -rf ./dqmgui-${DQM_GUI_RELEASE_VERSION}
 
 # if [[ -d "/dqmgui/old_releases" ]]

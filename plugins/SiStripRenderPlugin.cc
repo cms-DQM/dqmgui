@@ -1,4 +1,4 @@
-$CORRECT_PATH
+/*!
   \file SiStripRenderPlugin
   \brief Display Plugin for SiStrip DQM Histograms
   \author S. Dutta

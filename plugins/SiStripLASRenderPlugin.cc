@@ -1,4 +1,4 @@
-$CORRECT_PATH
+/*!
   \file SiStripLASRenderPlugin
   \brief Display Plugin for Pixel DQM Histograms
   \author A. Perieanu

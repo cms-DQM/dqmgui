@@ -1,4 +1,4 @@
-$CORRECT_PATH
+/*!
   \file SiPixelRenderPlugin
   \brief Display Plugin for Pixel DQM Histograms
   \author P.Merkel

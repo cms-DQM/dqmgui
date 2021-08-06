@@ -1,4 +1,4 @@
-$CORRECT_PATH
+/*!
   \file SiPixelPhase1OnlineRenderPlugin
   \brief RenderPlugin for histograms showing some history in online
 

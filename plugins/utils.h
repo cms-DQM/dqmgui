@@ -1,4 +1,4 @@
-$CORRECT_PATH
+#ifndef dqm_utils_H
 #define dqm_utils_H
 
 // $Id: utils.h,v 1.5 2009/12/15 22:56:08 ameyer Exp $

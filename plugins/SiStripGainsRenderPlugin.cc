@@ -1,4 +1,4 @@
-$CORRECT_PATH
+/*!
   \file SiStripGainsRenderPlugin
   \brief Display Plugin for SiStrip Particle Gain DQM Histograms
   \author A. Di Mattia

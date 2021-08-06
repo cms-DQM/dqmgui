@@ -1,4 +1,4 @@
-$CORRECT_PATH
+/*!
   \file SiPixelMapsRenderPlugin
   \brief RenderPlugin for plots based on SiPixelCoordinates
 

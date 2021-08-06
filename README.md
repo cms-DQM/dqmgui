@@ -739,6 +739,7 @@ Backend related task list.
 * ~~Make sure to zlib uncompress only strings when importing PB files~~
 * Fix the deadlock after this:
   * The root cause of this has already been eliminated but the deadlock might still occur on multiple renderer crashes.
+* During live mode, current run is not always visible, we're getting 'No Information', which means that data is not coming. 
 ```
 2021-01-22 18:18:47,949 - INFO - helpers.logged - 47  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 122) [OK 13.8ms]
 2021-01-22 18:18:47,949 - INFO - helpers.logged - 48  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 3) [OK 8.1ms]

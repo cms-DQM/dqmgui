@@ -4,7 +4,7 @@
  */
 
 //	DQM includes
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 
 //	User includes
 #include "HcalObjectCustomizer.h"

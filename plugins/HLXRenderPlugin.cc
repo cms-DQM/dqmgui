@@ -12,7 +12,7 @@
 //
 
 // user include files
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 
 #include "TH1F.h"

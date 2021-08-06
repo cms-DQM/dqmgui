@@ -9,7 +9,7 @@
 #include <TColor.h>
 #include <TText.h>
 
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 
 class FastTimerServiceRenderPlugin : public DQMRenderPlugin {

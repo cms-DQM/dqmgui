@@ -1,4 +1,4 @@
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 #include "TPaveStats.h"
 #include "TLegend.h"

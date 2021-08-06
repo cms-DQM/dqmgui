@@ -1,4 +1,4 @@
-/*!
+$CORRECT_PATH
   \file SiStripRenderPlugin
   \brief Display Plugin for SiStrip DQM Histograms
   \author S. Dutta
@@ -6,7 +6,7 @@
   \date $Date: 2011/11/16 17:35:55 $
 */
 
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 
 #include "TProfile2D.h"

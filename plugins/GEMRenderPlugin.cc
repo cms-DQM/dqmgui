@@ -1,4 +1,4 @@
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
  
 #include "GEMRenderPlugin_SummaryChamber.h"
 

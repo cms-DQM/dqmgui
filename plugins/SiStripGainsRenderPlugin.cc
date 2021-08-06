@@ -1,4 +1,4 @@
-/*!
+$CORRECT_PATH
   \file SiStripGainsRenderPlugin
   \brief Display Plugin for SiStrip Particle Gain DQM Histograms
   \author A. Di Mattia
@@ -6,7 +6,7 @@
   \date $Date: 2017/06/01 10:51:56 $
 */
 
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 
 #include "TProfile2D.h"

@@ -1,4 +1,4 @@
-// $Id: utils.cc,v 1.6 2009/12/15 22:56:08 ameyer Exp $
+$CORRECT_PATH
 
 /*!
   \file utils.cc

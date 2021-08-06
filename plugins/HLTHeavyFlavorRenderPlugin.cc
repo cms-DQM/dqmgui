@@ -1,7 +1,7 @@
 // Render Plugin for Heavy Flavor HLT validation
 // author: Zoltan Gecse
 
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 
 #include "TProfile2D.h"

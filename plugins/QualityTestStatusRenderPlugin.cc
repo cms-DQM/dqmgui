@@ -24,7 +24,7 @@
 #include "TColor.h"
 #include "TROOT.h"
 
-# include "DQM/DQMDefinitions.h"
+#include "../src/DQMRenderPlugin.h"
 
 void dqm::QualityTestStatusRenderPlugin::reportSummaryMapPalette(TH2* obj) {
 

@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "CSCRenderPlugin_ChamberMap.h"
 #include "CSCRenderPlugin_SummaryMap.h"
 #include "CSCRenderPlugin_EventDisplay.h"

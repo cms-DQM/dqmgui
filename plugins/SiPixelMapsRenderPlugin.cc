@@ -1,4 +1,4 @@
-/*!
+$CORRECT_PATH
   \file SiPixelMapsRenderPlugin
   \brief RenderPlugin for plots based on SiPixelCoordinates
 
@@ -12,7 +12,7 @@ Based on code by Janos Karancsi (Janos.Karancsi@cern.ch)
   \author Marcel Schneider
 */
 
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 
 #include "TProfile2D.h"

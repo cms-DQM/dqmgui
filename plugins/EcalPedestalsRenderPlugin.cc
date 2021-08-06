@@ -1,4 +1,4 @@
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TH2.h"

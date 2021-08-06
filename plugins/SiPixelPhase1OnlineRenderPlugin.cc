@@ -1,4 +1,4 @@
-/*!
+$CORRECT_PATH
   \file SiPixelPhase1OnlineRenderPlugin
   \brief RenderPlugin for histograms showing some history in online
 
@@ -38,7 +38,7 @@ logic for the Legend.
   \author Marcel Schneider
 */
 
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 
 #include "TProfile2D.h"

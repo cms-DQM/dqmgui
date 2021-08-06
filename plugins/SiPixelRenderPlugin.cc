@@ -1,4 +1,4 @@
-/*!
+$CORRECT_PATH
   \file SiPixelRenderPlugin
   \brief Display Plugin for Pixel DQM Histograms
   \author P.Merkel
@@ -6,7 +6,7 @@
   \date $Date: 2012/04/10 09:44:09 $
 */
 
-#include "DQM/DQMRenderPlugin.h"
+#include "../src/DQMRenderPlugin.h"
 #include "utils.h"
 
 #include "TProfile2D.h"

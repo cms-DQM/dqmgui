@@ -6,7 +6,7 @@
   \date $Date: 2011/09/09 11:53:42 $
 */
 
-#include "../src/DQMRenderPlugin.h"
+#include "DQM/DQMRenderPlugin.h"
 #include "utils.h"
 #include "TCanvas.h"
 #include "TH1F.h"
@@ -15,109 +15,120 @@
 #include "TPad.h"
 #include <cassert>
 
-class DQMMessageLoggerRenderPlugin : public DQMRenderPlugin {
+class DQMMessageLoggerRenderPlugin : public DQMRenderPlugin{
+
 public:
-  bool applies(const VisDQMObject &o, const VisDQMImgInfo &) override {
-    if (o.name.find("MessageLogger") != std::string::npos) {
-      if (o.name.find("Errors") != std::string::npos) {
-        if (o.name.find("categoriesErrorsFound") != std::string::npos) {
-          return true;
-        } else if (o.name.find("categories_errors") != std::string::npos) {
-          return true;
-        } else if (o.name.find("modulesErrorsFound") != std::string::npos) {
-          return true;
-        } else if (o.name.find("modules_errors") != std::string::npos) {
-          return true;
-        } else if (o.name.find("total_errors") != std::string::npos) {
-          return true;
-        }
-      }
-      if (o.name.find("Warnings") != std::string::npos) {
-        if (o.name.find("modulesWarningsFound") != std::string::npos) {
-          return true;
-        } else if (o.name.find("modules_warnings") != std::string::npos) {
-          return true;
-        } else if (o.name.find("categoriesWarningsFound") != std::string::npos) {
-          return true;
-        } else if (o.name.find("categories_warnings") != std::string::npos) {
-          return true;
-        } else if (o.name.find("total warnings") != std::string::npos) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+  virtual bool applies( const VisDQMObject &o, const VisDQMImgInfo &)
+    {
 
-  void preDraw(TCanvas *c, const VisDQMObject &o, const VisDQMImgInfo &, VisDQMRenderInfo &) override {
-    if (dynamic_cast<TH1F *>(o.object)) {
-      preDrawTH1(c, o);
-    }
-  }
+      if(o.name.find("MessageLogger") != std::string::npos){
+        if(o.name.find ("Errors") != std::string::npos){
+          if(o.name.find("categoriesErrorsFound")!=std::string::npos){
+            return true;
+          }else if(o.name.find("categories_errors")!=std::string::npos){
+            return true;
+          }else if(o.name.find("modulesErrorsFound")!=std::string::npos){
+            return true;
+          }else if(o.name.find("modules_errors")!=std::string::npos){
+            return true;
+          }else if(o.name.find("total_errors")!=std::string::npos){
+	    return true;
+	  }
+        }
+        if (o.name.find("Warnings") != std::string::npos){
+          if(o.name.find("modulesWarningsFound") != std::string::npos){
+            return true;
+          }else if(o.name.find("modules_warnings")!=std::string::npos){
+            return true;
+          }else if(o.name.find("categoriesWarningsFound")!=std::string::npos){
+            return true;
+          }else if(o.name.find("categories_warnings")!=std::string::npos){
+            return true;
+          }else if(o.name.find("total warnings")!=std::string::npos){
+	    return true;
+	  }
+        }
 
-  void postDraw(TCanvas *, const VisDQMObject &, const VisDQMImgInfo &) override{};
+      }
+      return false;
+    }
+
+  virtual void preDraw(TCanvas *c, const VisDQMObject &o, const VisDQMImgInfo &, VisDQMRenderInfo &)
+    {
+
+      if (dynamic_cast<TH1F*>(o.object)){
+        preDrawTH1(c, o);
+      }
+
+    }
+
+  virtual void postDraw(TCanvas *, const VisDQMObject &, const VisDQMImgInfo &){};
 
 private:
-  void preDrawTH1(TCanvas *c, const VisDQMObject &o) {
-    TH1F *obj = dynamic_cast<TH1F *>(o.object);
+  void preDrawTH1(TCanvas *c, const VisDQMObject &o)
+    {
 
-    assert(obj);
+      TH1F *obj = dynamic_cast<TH1F*>(o.object);
 
-    c->cd();
+      assert(obj);
 
-    //obj->SetTitle(kFALSE);
+      c->cd();
 
-    Double_t bm = 0.4;
+      //obj->SetTitle(kFALSE);
 
-    if (o.name.find("categoriesErrorsFound") != std::string::npos) {
-      if (obj->ComputeIntegral() > 0.5) {
-        gPad->SetBottomMargin(bm);
-      }
-      gStyle->SetOptStat("e");
-    } else if (o.name.find("categoriesWarningsFound") != std::string::npos) {
-      if (obj->ComputeIntegral() > 0.5) {
-        gPad->SetBottomMargin(bm);
-      }
-      gStyle->SetOptStat("e");
-    } else if (o.name.find("modulesErrorsFound") != std::string::npos) {
-      if (obj->ComputeIntegral() > 0.5) {
-        gPad->SetBottomMargin(bm);
-      }
-      gStyle->SetOptStat("e");
-    } else if (o.name.find("modulesWarningsFound") != std::string::npos) {
-      if (obj->ComputeIntegral() > 0.5) {
-        gPad->SetBottomMargin(bm);
-      }
-      gStyle->SetOptStat("e");
-    } else if (o.name.find("categories_errors") != std::string::npos) {
-      if (obj->ComputeIntegral() > 0.5) {
-        gPad->SetBottomMargin(bm);
+      Double_t bm = 0.4;
+
+      if(o.name.find("categoriesErrorsFound")!=std::string::npos){
+	if(obj->ComputeIntegral() > 0.5){
+	  gPad->SetBottomMargin(bm);
+	}
+	gStyle->SetOptStat("e");
+      }else if(o.name.find("categoriesWarningsFound")!=std::string::npos){
+
+	if(obj->ComputeIntegral() > 0.5){
+	  gPad->SetBottomMargin(bm);
+	}
+	gStyle->SetOptStat("e");
+      }else if(o.name.find("modulesErrorsFound")!=std::string::npos){
+	if(obj->ComputeIntegral() > 0.5){
+	  gPad->SetBottomMargin(bm);
+	}
+	gStyle->SetOptStat("e");
+      }else if(o.name.find("modulesWarningsFound")!=std::string::npos){
+	if(obj->ComputeIntegral() > 0.5){
+	  gPad->SetBottomMargin(bm);
+	}
+	gStyle->SetOptStat("e" );
+      }else if(o.name.find("categories_errors")!=std::string::npos){
+	if(obj->ComputeIntegral() > 0.5){
+	  gPad->SetBottomMargin(bm);
+	}
+
+	gStyle->SetOptStat("e" );
+      }else if(o.name.find("categories_warnings")!=std::string::npos){
+	if(obj->ComputeIntegral() > 0.5){
+	  gPad->SetBottomMargin(bm);
+	}
+
+	gStyle->SetOptStat("e" );
+      }else if(o.name.find("modules_errors")!=std::string::npos){
+	if(obj->ComputeIntegral() > 0.5){
+	  gPad->SetBottomMargin(bm);
+	}
+
+	gStyle->SetOptStat("e" );
+      }else if(o.name.find("modules_warnings")!=std::string::npos){
+	if(obj->ComputeIntegral() > 0.5){
+	  gPad->SetBottomMargin(bm);
+	}
+	gStyle->SetOptStat("e" );
+      }else if(o.name.find("total warnings")!=std::string::npos){
+	gStyle->SetOptStat("emr");
+      }else if(o.name.find("total_errors")!=std::string::npos){
+	gStyle->SetOptStat("emr");
       }
 
-      gStyle->SetOptStat("e");
-    } else if (o.name.find("categories_warnings") != std::string::npos) {
-      if (obj->ComputeIntegral() > 0.5) {
-        gPad->SetBottomMargin(bm);
-      }
-
-      gStyle->SetOptStat("e");
-    } else if (o.name.find("modules_errors") != std::string::npos) {
-      if (obj->ComputeIntegral() > 0.5) {
-        gPad->SetBottomMargin(bm);
-      }
-
-      gStyle->SetOptStat("e");
-    } else if (o.name.find("modules_warnings") != std::string::npos) {
-      if (obj->ComputeIntegral() > 0.5) {
-        gPad->SetBottomMargin(bm);
-      }
-      gStyle->SetOptStat("e");
-    } else if (o.name.find("total warnings") != std::string::npos) {
-      gStyle->SetOptStat("emr");
-    } else if (o.name.find("total_errors") != std::string::npos) {
-      gStyle->SetOptStat("emr");
     }
-  }
 };
 
 static DQMMessageLoggerRenderPlugin instance;

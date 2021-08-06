@@ -6,7 +6,7 @@
   \date $Date: 2011/09/09 11:53:43 $
 */
 
-#include "../src/DQMRenderPlugin.h"
+#include "DQM/DQMRenderPlugin.h"
 #include "utils.h"
 
 #include "TProfile2D.h"
@@ -21,46 +21,52 @@
 
 using namespace std;
 
-class PFTauRenderPlugin : public DQMRenderPlugin {
+class PFTauRenderPlugin : public DQMRenderPlugin
+{
 public:
-  bool applies(const VisDQMObject &o, const VisDQMImgInfo &) override {
-    return ((o.name.find("RecoTauV/") != std::string::npos) &&
-            (o.name.find("Eff") != std::string::npos));  //Size and SumPt are already configured
-  }
+  virtual bool applies( const VisDQMObject & o, const VisDQMImgInfo & )
+    {
+      return ((o.name.find( "RecoTauV/" ) != std::string::npos ) && (o.name.find( "Eff" ) != std::string::npos ) ); //Size and SumPt are already configured
+    }
 
-  void preDraw(TCanvas *canvas, const VisDQMObject &o, const VisDQMImgInfo &, VisDQMRenderInfo &renderInfo) override {
-    canvas->cd();
-    TH1 *obj = dynamic_cast<TH1 *>(o.object);
-    if (!obj)
-      return;  //nothing to do for TH2
-    //general setings
-    //drawing options
-    gStyle->SetOptStat(0);
-    renderInfo.drawOptions = "E0";
-    if (o.name.find("Rejection") != std::string::npos)
-      canvas->SetLogy();
-    if (o.name.find("RealData") != std::string::npos)
-      canvas->SetLogy();
+  virtual void preDraw( TCanvas * canvas, const VisDQMObject & o, const VisDQMImgInfo & , VisDQMRenderInfo & renderInfo)
+    {
+      canvas->cd();
+      TH1* obj = dynamic_cast<TH1*>( o.object );
+      if(!obj) return; //nothing to do for TH2
+      //general setings
+      //drawing options
+      gStyle->SetOptStat(0);
+      renderInfo.drawOptions = "E0";
+      if(o.name.find( "Rejection" ) != std::string::npos ) canvas->SetLogy();
+      if(o.name.find( "RealData"  ) != std::string::npos ) canvas->SetLogy();
 
-    //titles and axis
-    string discriminator = stripDicriminator(o.name);
-    string variable = stripVar(o.name);
-    obj->SetTitle((discriminator + " fake rate vs " + variable).c_str());
-    obj->GetXaxis()->SetTitle(variable.c_str());
-    obj->GetYaxis()->SetTitle("fake rate");
-    double min = (canvas->GetLogy()) ? 0.001 : 0.;
-    double max = (canvas->GetLogy()) ? 2. : 1.2;
-    obj->GetYaxis()->SetRangeUser(min, max);
-    obj->SetMarkerStyle(20);
-  }
+      //titles and axis
+      string discriminator = stripDicriminator(o.name);
+      string variable = stripVar(o.name);
+      obj->SetTitle((discriminator+" fake rate vs "+variable).c_str());
+      obj->GetXaxis()->SetTitle(variable.c_str());
+      obj->GetYaxis()->SetTitle("fake rate");
+      double min = (canvas->GetLogy() ) ? 0.001 : 0.;
+      double max = (canvas->GetLogy() ) ? 2.    : 1.2;
+      obj->GetYaxis()->SetRangeUser(min,max);
+      obj->SetMarkerStyle(20);
+    }
 
-  void postDraw(TCanvas *, const VisDQMObject &, const VisDQMImgInfo &) override {}
+  virtual void postDraw( TCanvas *, const VisDQMObject &, const VisDQMImgInfo & )
+    {
+    }
 
 private:
-  string stripDicriminator(string name) {
-    return name.substr(name.rfind("/") + 1, name.rfind("Eff") - name.rfind("/") - 1);
+
+  string stripDicriminator(string name)
+  {
+    return name.substr(name.rfind("/")+1,name.rfind("Eff")-name.rfind("/")-1);
   }
-  string stripVar(string name) { return name.substr(name.rfind("Eff") + 3); }
+  string stripVar(string name)
+  {
+    return name.substr(name.rfind("Eff")+3);
+  }
 };
 
 static PFTauRenderPlugin instance;

@@ -19,13 +19,13 @@
 #ifndef CSCDQM_Utility_H
 #define CSCDQM_Utility_H
 
-#include <cmath>
-#include <cstdint>
+#include <string>
 #include <map>
 #include <set>
-#include <sstream>
-#include <string>
 #include <vector>
+#include <sstream>
+#include <stdint.h>
+#include <math.h>
 
 #ifndef CSC_RENDER_PLUGIN
 #include <xercesc/util/XMLString.hpp>
@@ -67,34 +67,28 @@ namespace cscdqm {
    * @brief General and CSCDQM Framework related utility routines
    */
   class Utility {
-  public:
-    static bool regexMatch(const std::string& expression, const std::string& message);
-    static bool regexMatch(const TPRegexp& re_expression, const std::string& message);
-    static void regexReplace(const std::string& expression, std::string& message, const std::string replace = "");
-    static void regexReplace(const TPRegexp& re_expression, std::string& message, const std::string replace = "");
-    static std::string regexReplaceStr(const std::string& expression,
-                                       const std::string& message,
-                                       const std::string replace = "");
-    static std::string regexReplaceStr(const TPRegexp& re_expression,
-                                       const std::string& message,
-                                       const std::string replace = "");
 
-    static int getCSCTypeBin(const std::string& cstr);
-    static const std::string getCSCTypeLabel(int endcap, int station, int ring);
-    static int tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters = " ");
-    static void trimString(std::string& str);
-    static uint32_t fastHash(const char* data, int len);
-    static uint32_t fastHash(const char* data) { return fastHash(data, strlen(data)); }
+    public:
 
-    static short checkOccupancy(const unsigned int N,
-                                const unsigned int n,
-                                const double low_threshold,
-                                const double high_threshold,
-                                const double low_sigfail,
-                                const double high_sigfail);
-    static bool checkError(const unsigned int N, const unsigned int n, const double threshold, const double sigfail);
-    static double SignificanceLevelLow(const unsigned int N, const unsigned int n, const double eps);
-    static double SignificanceLevelHigh(const unsigned int N, const unsigned int n);
+      static bool regexMatch(const std::string& expression, const std::string& message);
+      static bool regexMatch(const TPRegexp& re_expression, const std::string& message);
+      static void regexReplace(const std::string& expression, std::string& message, const std::string replace = "");
+      static void regexReplace(const TPRegexp& re_expression, std::string& message, const std::string replace = "");
+      static std::string regexReplaceStr(const std::string& expression, const std::string& message, const std::string replace = "");
+      static std::string regexReplaceStr(const TPRegexp& re_expression, const std::string& message, const std::string replace = "");
+
+      static int getCSCTypeBin(const std::string& cstr);
+      static const std::string getCSCTypeLabel(int endcap, int station, int ring);
+      static int tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters = " ");
+      static void trimString(std::string& str);
+      static uint32_t fastHash(const char * data, int len);
+      static uint32_t fastHash(const char * data) { return fastHash(data, strlen(data)); }
+
+      static short  checkOccupancy(const unsigned int N, const unsigned int n, const double low_threshold, const double high_threshold, const double low_sigfail, const double high_sigfail);
+      static bool   checkError(const unsigned int N, const unsigned int n, const double threshold, const double sigfail);
+      static double SignificanceLevelLow(const unsigned int N, const unsigned int n, const double eps);
+      static double SignificanceLevelHigh(const unsigned int N, const unsigned int n);
+
   };
 
 #ifndef CSC_RENDER_PLUGIN
@@ -107,21 +101,29 @@ namespace cscdqm {
   * efficient) trancoding of char* data to XMLCh data.
   */
   class XercesStringTranscoder {
-  public:
-    XercesStringTranscoder(const char* const toTranscode) {
-      fUnicodeForm = XERCES_CPP_NAMESPACE::XMLString::transcode(toTranscode);
-    }
 
-    ~XercesStringTranscoder() { XERCES_CPP_NAMESPACE::XMLString::release(&fUnicodeForm); }
+    public :
 
-    const XMLCh* unicodeForm() const { return fUnicodeForm; }
+      XercesStringTranscoder(const char* const toTranscode) {
+        fUnicodeForm = XERCES_CPP_NAMESPACE::XMLString::transcode(toTranscode);
+      }
 
-  private:
-    XMLCh* fUnicodeForm;
+      ~XercesStringTranscoder() {
+        XERCES_CPP_NAMESPACE::XMLString::release(&fUnicodeForm);
+      }
+
+      const XMLCh* unicodeForm() const {
+        return fUnicodeForm;
+      }
+
+    private :
+
+      XMLCh* fUnicodeForm;
+
   };
 
 #endif
 
-}  // namespace cscdqm
+}
 
 #endif

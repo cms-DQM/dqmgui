@@ -858,14 +858,6 @@ An example on how to use the layout mechanism in the new DQM GUI can be found he
 
 ## Deployment
 
-### Online
-
-We have already successfully integrated the new DQM GUI as part of CMSSW into our P5 machines. However, it is very beneficial to decouple the DQM GUI form CMSSW software suite. To make this happen, we have to find a way get the code that is in the master branch of this very repository over to our P5 machines, including the Python dependencies that are listed here: `python/requirements.txt`. 
-
-A close collaboration with P5 system administrators will ensure the smoothness of this integration process!
-
-Most of the current Online setup can be reused - we only need to change the way the code and python dependencies of the new DQM GUI are delivered to our network restricted P5 machines. A detailed description of the current P5 setup can be found [here](#Integration-into-the-Online-system).
-
 ### Offline
 
 Just like before, we host the new DQM GUI services in CMSWEB. The deployment procedure is already agreed upon with the CMSWEB administrator. There might be a long term benefit of migrating the services to run on Kubernetes container orchestration system. CMSWEB has support for this infrastructure. True benefits of containerization has to be explored further and validated before any decision to move to that direction is made. The architecture of the new DQM GUI can relatively easily be adapted to work in horizontally scaled workloads.

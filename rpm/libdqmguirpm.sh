@@ -117,4 +117,5 @@ export \$PYTHONPATH=/dqmgui/python/.python_packages
 EOF
 mkdir -p RPMBUILD/{RPMS/{noarch},SPECS,BUILD,SOURCES,SRPMS}
 rpmbuild --define "_topdir `pwd`/RPMBUILD" -bb dqmgui-lib.spec
-
+mv  ./RPMBUILD/RPMS/x86_64/DQM_GUI-1.0.0-${DQM_GUI_RELEASE_VERSION}.x86_64.rpm ./
+rm -rf dqmgui dqmgui_rpm RPMBUILD

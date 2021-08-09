@@ -74,6 +74,11 @@ async def index(request):
     return web.FileResponse(get_absolute_path('../frontend/index.html'))
 
 
+async def overlayPlotsWithDifferentNames(request):
+    return web.FileResponse(
+        get_absolute_path("../frontend/plotsLocalOverlay/index.html")
+    )
+
 @getNotOlderThanFromUrl
 async def samples_legacy(request, notOlderThan):
     """Returns a list of matching run/dataset pairs based on provided regex search."""
@@ -464,6 +469,7 @@ def config_and_start_webserver(port):
                     web.post('/api/v1/register', register),
                     web.get('/api/v1/datasets', dataset_search),
                     web.get('/api/v1/latest_runs', latest_runs),
+                    web.get("/plotsLocalOverlay/", overlayPlotsWithDifferentNames),
                     web.get('/api/v1/host', get_host)])
 
     # Routes for HTML files

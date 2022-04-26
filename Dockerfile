@@ -1,20 +1,31 @@
-FROM ubuntu
-WORKDIR /usr/src/app
-COPY ./ ./
-RUN apt-get update
-RUN apt-get install -y python3 
-RUN apt-get install -y python2.7
-RUN apt-get install -y python-dev
-RUN apt-get install -y wget
-RUN apt-get install -y git
-RUN apt-get install -y pip
-RUN apt-get install -y rpm 
-RUN apt-get install -y yum
-RUN cd /usr/src/app/python/
-RUN git clone git clone git://github.com/xrootd/xrootd-python.git
-RUN wget https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-13.noarch.rpm
-RUN RUN cd /usr/src/app/python/xrootd-python
+FROM cmscloud/cc7-cvmfs:latest
 
-RUN python3 -m pip install -r ./python/requirements.txt -t ./python/.python_packages
+# Install xrootd dependencies
+# cmake
+RUN sudo yum -y install wget
+RUN sudo wget https://cmake.org/files/v3.12/cmake-3.12.3.tar.gz && sudo tar zxvf cmake-3.* && ./cmake-3.*/bootstrap --prefix=/usr/local && sudo make -j$(nproc) && sudo make install
+# lib development
+RUN sudo yum -y install zlib-devel
+# openssl development
+RUN sudo yum -y install openssl-devel
+# python development
+RUN sudo yum -y install python3-devel
+# uuid development
+RUN sudo yum -y install libuuid-devel
+# devtoolset-7
+RUN sudo yum -y install centos-release-scl
+RUN sudo yum-config-manager --enable rhel-server-rhscl-7-rpms
+RUN sudo yum -y install devtoolset-7
+# wheel
+RUN sudo python3 -m pip install wheel
+# Install xrootd
+RUN sudo python3 -m pip install xrootd --user
 
-CMD ["/bin/bash"]
+COPY ./ ./dqmgui
+WORKDIR /home/cmsusr/dqmgui
+
+# Install python dependencies
+RUN sudo python3 -m pip install -r ./python/requirements.txt -t ./python/.python_packages
+
+# CMD ["/bin/bash"]
+CMD sudo bash ./run.sh

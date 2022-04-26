@@ -1,3 +1,3 @@
 # This file contains CMSSW_VERSION (line 2) and SCRAM_ARCH (line 3) used for building and running the DM GUI application:
-CMSSW_11_2_0_pre11
-slc7_amd64_gcc900
+CMSSW_12_3_0
+slc7_amd64_gcc10

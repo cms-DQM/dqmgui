@@ -1,20 +1,12 @@
-FROM ubuntu
-WORKDIR /usr/src/app
-COPY ./ ./
-RUN apt-get update
-RUN apt-get install -y python3 
-RUN apt-get install -y python2.7
-RUN apt-get install -y python-dev
-RUN apt-get install -y wget
-RUN apt-get install -y git
-RUN apt-get install -y pip
-RUN apt-get install -y rpm 
-RUN apt-get install -y yum
-RUN cd /usr/src/app/python/
-RUN git clone git clone git://github.com/xrootd/xrootd-python.git
-RUN wget https://download-ib01.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-13.noarch.rpm
-RUN RUN cd /usr/src/app/python/xrootd-python
+FROM cmscloud/cc7-cvmfs:latest
 
-RUN python3 -m pip install -r ./python/requirements.txt -t ./python/.python_packages
+# Install xrootd and it's dependencies
+RUN sudo yum -y install wget && sudo wget https://cmake.org/files/v3.12/cmake-3.12.3.tar.gz && sudo tar zxvf cmake-3.* && ./cmake-3.*/bootstrap --prefix=/usr/local && sudo make -j$(nproc) && sudo make install && sudo yum -y install zlib-devel  openssl-devel install python3-devel libuuid-devel centos-release-scl && sudo yum-config-manager --enable rhel-server-rhscl-7-rpms && sudo yum -y install devtoolset-7 && sudo python3 -m pip install wheel && sudo python3 -m pip install xrootd --user && sudo yum clean all && sudo rm -rf /var/cache/yum
+
+# Clone repo and install python dependencies
+RUN sudo git clone https://github.com/cms-DQM/dqmgui.git && cd dqmgui && pwd && ls -l python && sudo python3 -m pip install -r /home/cmsusr/dqmgui/dqmgui/python/requirements.txt -t /home/cmsusr/dqmgui/dqmgui/python/.python_packages && pwd && ls -l
+WORKDIR $PWD/dqmgui/
 
 CMD ["/bin/bash"]
+#CMD sudo bash ./run.sh
+CMD sudo /usr/sbin/crond -n

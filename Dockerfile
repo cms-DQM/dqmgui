@@ -9,4 +9,4 @@ WORKDIR /home/cmsusr/dqmgui/
 
 CMD ["/bin/bash"]
 # CMD sudo bash ./run.sh
-# CMD sudo /usr/sbin/crond -n
+CMD sudo /usr/sbin/crond -n

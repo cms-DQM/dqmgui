@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>DQM Sound Alarm Manager</title>
+    <style>
+        body {
+            font-family: arial, sans-serif;
+        }
+
+        h4,
+        h3,
+        h2,
+        p {
+            padding-left: 6px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            text-align: left;
+            padding: 6px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+
+        .danger {
+            color: #ff4242;
+        }
+
+        .success {
+            color: #00b30f;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Enable/disable DQM sound alarms (New GUI) at P5</h3>
+
+    <p>You can use this tool to enable/disable P5 sound alarms for certain DQM plot in the Errors folder of the DQM GUI.
+        If the alarm for a plot is <i>enabled</i>, it <i>will play a sound alarm</i> in the control room.</p>
+
+    <p>All alarms will switch to active state after the restart of the DQM GUI.</p>
+
+    </br>
+
+    <table>
+        <tr>
+            <th>Monitor element (Path)</th>
+            <th>QResult Name</th>
+            <th>QResult Status</th>
+            <th>Alarm Status</th>
+            <th>Action</th>
+        </tr>
+        {{content}}
+    </table>
+
+    <script>
+        setTimeout(() => {
+            location.reload()
+        }, /*{{execution_interval}}*/)
+
+        function disable(me) {
+            fetch('/disable?me=' + me, {
+                method: 'post',
+            }).then(function (response) {
+                location.reload()
+            })
+        }
+
+        function enable(me) {
+            fetch('/enable?me=' + me, {
+                method: 'post',
+            }).then(function (response) {
+                location.reload()
+            })
+        }
+    </script>
+
+</body>
+
+</html>

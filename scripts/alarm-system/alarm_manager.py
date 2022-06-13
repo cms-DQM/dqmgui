@@ -1,6 +1,13 @@
 import http.server
 import socketserver
+import logging
 from state import State
+
+logging.basicConfig(
+    format='%(process)s %(asctime)s %(levelname)s: %(message)s',
+    datefmt='%d/%m/%y %H:%M:%S',
+    level=logging.INFO
+)
 
 STATUSES = {
     30: 'OTHER',
@@ -71,9 +78,5 @@ def run_alarm_manager(state: State, execution_interval, port):
 
     handler_object = AlarmManagerHttpRequestHandler
     manager_server = socketserver.TCPServer(("", port), handler_object)
-    try:
-        manager_server.serve_forever()
-    except KeyboardInterrupt:
-        print('keyboard interrupt')
-        manager_server.shutdown()
-        # TODO: check shut down
+    logging.info(f'Starting Alarm Manager at port: {port}')
+    manager_server.serve_forever()

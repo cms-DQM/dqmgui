@@ -8,25 +8,25 @@ import subprocess
 import sys
 import itertools
 import traceback
-import threading
+import multiprocessing
 
 from alarm_manager import run_alarm_manager
 from state import State
 
 # Connection config
-# GUI_API_URL = 'http://localhost'
-# GUI_API_PORT = 8889
-GUI_API_URL = 'http://127.0.0.1'
-GUI_API_PORT = 5000
+GUI_API_URL = 'http://localhost'
+GUI_API_PORT = 8889
+# GUI_API_URL = 'http://127.0.0.1'
+# GUI_API_PORT = 5000
 GUI_API_ERROR_DATA_PATH = '/api/v1/archive/0/Global/Online/ALL/00%20Shift/Errors'
 SOUND_SERVER_URL = None
 SOUND_SERVER_PORT = None
-ALARM_MANAGER_PORT = 8000
+ALARM_MANAGER_PORT = 8890
 
 # Alarm system parameters
 REMINDER_REBROADCAST_COUNT = 3
-EXECUTION_INTERVAL = 5 # seconds
-INITIAL_WAIT = 0.01 # seconds
+EXECUTION_INTERVAL = 60 * 60 # seconds
+INITIAL_WAIT = 2 # seconds
 EMAIL_ADDRESSES = ['north1602@gmail.com']
 ERROR_QT_STATUS = [300]
 
@@ -72,6 +72,7 @@ def filter_alarm_plots(plot_data: dict, disalbled_alarms: Set) -> Set[str]:
     return alarm_plots
 
 def send_email_message(message: str, is_error: bool=False):
+    return False
     error_text = 'ERROR ' if is_error else ''
     participants = f'To: {", ".join(EMAIL_ADDRESSES)}\n'
     subject = f'Subject: {EMAIL_SUBJECT.format(error_text=error_text, hostname=socket.gethostname())}\n'
@@ -110,7 +111,7 @@ def format_message(plots: Set[str], previous_plots: Set[str], is_reminder: bool)
     return spoken_message, message
 
 def send_sound(spoken_message: str, message: str):
-    # return False
+    return False
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((SOUND_SERVER_URL, SOUND_SERVER_PORT))
     s.send(SOUND_MESSAGE_BODY.format(spoken_message=spoken_message, message=message))
@@ -148,36 +149,37 @@ def execute(state: State):
             logging.info('Rebroadcast reach max limit.')
         state.increase_no_iteration()
     except KeyboardInterrupt:
-        logging.info('The script was terminated by user. Exit code: 0')
-        sys.exit(0)
+        raise KeyboardInterrupt()
     except Exception as error:
         traceback.print_exc()
         logging.error(str(error))
         send_email_message(str(error), is_error=True)
     return
 
-def start_manager_gui(state: State) -> threading.Thread:
-    try:
-        thread = threading.Thread(target=run_alarm_manager, args=(state, EXECUTION_INTERVAL, ALARM_MANAGER_PORT))
-        logging.info("Starting alarm manager in separated thread")
-        thread.start()
-    except KeyboardInterrupt:
-        logging.info('Stoping alarm manager in separated thread')
-        thread.join()
-        sys.exit(0)
-    return thread
-    # TODO: check thread
+def start_manager_gui(state: State) -> multiprocessing.Process:
+    process = multiprocessing.Process(target=run_alarm_manager, args=(state, EXECUTION_INTERVAL, ALARM_MANAGER_PORT))
+    logging.info("Starting alarm manager in separated thread")
+    process.start()
+    return process
 
 def run_deamon():
-    logging.info('Starting alarm system script.')
-    state = State(REMINDER_REBROADCAST_COUNT)
-    time.sleep(INITIAL_WAIT)
-    start_manager_gui(state)
-    for iteration in itertools.count():
-        logging.info(f'Start the execution. Iteration: #{iteration}')
-        execute(state)
-        logging.info(f'Current execution finished. State: {state}')
-        time.sleep(EXECUTION_INTERVAL)
+    alarm_manager_process = None
+    try:
+        logging.info('Starting alarm system script.')
+        state = State(REMINDER_REBROADCAST_COUNT)
+        alarm_manager_process = start_manager_gui(state)
+        time.sleep(INITIAL_WAIT)
+        for iteration in itertools.count():
+            logging.info(f'Start the execution. Iteration: #{iteration}')
+            execute(state)
+            logging.info(f'Current execution finished. State: {state}')
+            time.sleep(EXECUTION_INTERVAL)
+    except KeyboardInterrupt:
+        logging.info('The script was terminated by user. Exit code: 0')
+        if alarm_manager_process:
+            logging.info('Stopping dqmgui alarm manager')
+            alarm_manager_process.terminate()
+        sys.exit(0)
 
 if __name__ == '__main__':
     run_deamon()

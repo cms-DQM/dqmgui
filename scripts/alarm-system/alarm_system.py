@@ -24,6 +24,8 @@ SOUND_SERVER_PORT = None
 ALARM_MANAGER_PORT = 8890
 
 # Alarm system parameters
+EMAIL_ENABLED = False
+SOUND_ENABLED = False
 REMINDER_REBROADCAST_COUNT = 3
 EXECUTION_INTERVAL = 60 * 60 # seconds
 INITIAL_WAIT = 2 # seconds
@@ -72,7 +74,9 @@ def filter_alarm_plots(plot_data: dict, disalbled_alarms: Set) -> Set[str]:
     return alarm_plots
 
 def send_email_message(message: str, is_error: bool=False):
-    return False
+    if not EMAIL_ENABLED:
+        logging.info('Email sending is disabled.')
+        return
     error_text = 'ERROR ' if is_error else ''
     participants = f'To: {", ".join(EMAIL_ADDRESSES)}\n'
     subject = f'Subject: {EMAIL_SUBJECT.format(error_text=error_text, hostname=socket.gethostname())}\n'
@@ -111,7 +115,9 @@ def format_message(plots: Set[str], previous_plots: Set[str], is_reminder: bool)
     return spoken_message, message
 
 def send_sound(spoken_message: str, message: str):
-    return False
+    if not SOUND_ENABLED:
+        logging.info('Sound sending is disabled.')
+        return
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((SOUND_SERVER_URL, SOUND_SERVER_PORT))
     s.send(SOUND_MESSAGE_BODY.format(spoken_message=spoken_message, message=message))

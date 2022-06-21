@@ -12,6 +12,7 @@
 #include "TList.h"
 #include "TLine.h"
 #include <cassert>
+#include <array>
 
 class PCLPixelAlignmentRenderPlugin : public DQMRenderPlugin {
   std::array<double, 6> sigCut_;

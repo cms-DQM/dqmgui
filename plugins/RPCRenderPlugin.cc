@@ -6,6 +6,7 @@
 #include "TColor.h"
 #include <iostream>
 #include <cassert>
+#include <array>
 #include "TLine.h"
 #include "TText.h"
 #include "TPaletteAxis.h"

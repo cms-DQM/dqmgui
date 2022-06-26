@@ -1,5 +1,5 @@
 from asyncio import subprocess
-from alarm_system import State, get_plot_data, filter_alarm_plots, send_email_message, format_message, send_sound, execute, run_deamon
+from alarm_system import State, get_plot_data, filter_alarm_plots, send_email_message, format_message, send_sound, execute, run_daemon
 
 import unittest
 from unittest.mock import Mock, call, patch
@@ -299,7 +299,7 @@ class TestAlarmSystem(unittest.TestCase):
     @patch('time.sleep')
     def test_run_deamon(self, mock_sleep, mock_count, mock_execute):
         mock_count.return_value = [0]
-        run_deamon()
+        run_daemon()
         mock_sleep.assert_has_calls([call(5), call(50)])
         mock_execute.assert_called_once()
 

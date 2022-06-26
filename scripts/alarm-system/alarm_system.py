@@ -8,7 +8,7 @@ import subprocess
 import sys
 import itertools
 import traceback
-import multiprocessing
+import threading
 
 from alarm_manager import run_alarm_manager
 from state import State
@@ -162,18 +162,18 @@ def execute(state: State):
         send_email_message(str(error), is_error=True)
     return
 
-def start_manager_gui(state: State) -> multiprocessing.Process:
-    process = multiprocessing.Process(target=run_alarm_manager, args=(state, EXECUTION_INTERVAL, ALARM_MANAGER_PORT))
+def start_manager_gui(state: State) -> threading.Thread:
+    thread = threading.Thread(target=run_alarm_manager, args=(state, EXECUTION_INTERVAL, ALARM_MANAGER_PORT))
     logging.info("Starting alarm manager in separated thread")
-    process.start()
-    return process
+    thread.daemon = True
+    thread.start()
+    return thread
 
-def run_deamon():
-    alarm_manager_process = None
+def run_daemon():
     try:
         logging.info('Starting alarm system script.')
         state = State(REMINDER_REBROADCAST_COUNT)
-        alarm_manager_process = start_manager_gui(state)
+        start_manager_gui(state)
         time.sleep(INITIAL_WAIT)
         for iteration in itertools.count():
             logging.info(f'Start the execution. Iteration: #{iteration}')
@@ -182,11 +182,8 @@ def run_deamon():
             time.sleep(EXECUTION_INTERVAL)
     except KeyboardInterrupt:
         logging.info('The script was terminated by user. Exit code: 0')
-        if alarm_manager_process:
-            logging.info('Stopping dqmgui alarm manager')
-            alarm_manager_process.terminate()
         sys.exit(0)
 
 if __name__ == '__main__':
-    run_deamon()
+    run_daemon()
 

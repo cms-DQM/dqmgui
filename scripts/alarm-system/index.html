@@ -67,7 +67,7 @@
         }, /*{{execution_interval}}*/)
 
         function disable(me) {
-            fetch('/disable?me=' + me, {
+            fetch(`${window.location.href}/disable?me=` + me, {
                 method: 'post',
             }).then(function (response) {
                 location.reload()
@@ -75,7 +75,7 @@
         }
 
         function enable(me) {
-            fetch('/enable?me=' + me, {
+            fetch(`${window.location.href}/enable?me=` + me, {
                 method: 'post',
             }).then(function (response) {
                 location.reload()

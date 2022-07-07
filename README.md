@@ -11,6 +11,10 @@ There are multiple relevant parts:
 - A web server.
 - A HTML frontend.
 
+## FAQ
+some more operation related info available here:
+https://github.com/cms-DQM/dqmgui/blob/master/FAQ.md
+
 ## Architecture of the backend
 
 The backend is built using service architecture. This means that there are different services chained relying on each other to provide a result of an API call.

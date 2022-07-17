@@ -6,14 +6,20 @@
     <title>DQM Sound Alarm Manager</title>
     <style>
         body {
+            padding: 0.5rem;
             font-family: arial, sans-serif;
         }
 
-        h4,
-        h3,
-        h2,
-        p {
-            padding-left: 6px;
+        h3 {
+            padding: 1rem;
+            background: #ebebeb;
+            margin: 1rem 0;
+        }
+
+        h2 {
+            padding: 1rem;
+            background: #ebebeb;
+            margin: 0 0 1rem;
         }
 
         table {
@@ -27,7 +33,13 @@
         }
 
         tr:nth-child(even) {
-            background-color: #f1f1f1;
+            background-color: #f5f5f5;
+        }
+
+        .content {
+            padding-left: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
         }
 
         .danger {
@@ -37,29 +49,73 @@
         .success {
             color: #00b30f;
         }
+
+        .danger::before {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            content: '';
+            background: #ff4242;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .success::before {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            content: '';
+            background: #00b30f;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 
 <body>
-    <h3>Enable/disable DQM sound alarms (New GUI) at P5</h3>
+    <h2>Enable/disable DQM sound alarms (New GUI) at P5</h2>
+    <div class="content">
+        <p>You can use this tool to enable/disable P5 sound alarms for certain DQM plot in the Errors folder of the DQM GUI.
+            If the alarm for a plot is <i>enabled</i>, it <i>will play a sound alarm</i> in the control room.</p>
+        <p>All alarms will switch to active state after the restart of the DQM GUI.</p>
+    </div>
 
-    <p>You can use this tool to enable/disable P5 sound alarms for certain DQM plot in the Errors folder of the DQM GUI.
-        If the alarm for a plot is <i>enabled</i>, it <i>will play a sound alarm</i> in the control room.</p>
+    <h3>Configuration</h3>
+    <div class="content">
+        <div class="content">
+            {{configuration}}
+        </div>
+        <details style="margin-top: 1rem;">
+            <summary>Default Configuration</summary>
+            <div class="content">
+                {{configuration_list}}
+            </div>
+        </details>
+    </div>
 
-    <p>All alarms will switch to active state after the restart of the DQM GUI.</p>
+    <h3>Latest Iteration</h3>
+    <div class="content">
+        <table>
+            <tr>
+                <th>Monitor element (Path)</th>
+                <th>QResult Name</th>
+                <th>QResult Status</th>
+                <th>Alarm Status</th>
+                <th>Action</th>
+            </tr>
+            {{content}}
+        </table>
+    </div>
 
-    </br>
-
-    <table>
-        <tr>
-            <th>Monitor element (Path)</th>
-            <th>QResult Name</th>
-            <th>QResult Status</th>
-            <th>Alarm Status</th>
-            <th>Action</th>
-        </tr>
-        {{content}}
-    </table>
+    <h3>Logs</h3>
+    <div class="content">
+        <details>
+            <summary>Show/hide logs</summary>
+            <div class="content">
+                {{logs}}
+            </div>
+        </details>
+    </div>
 
     <script>
         setTimeout(() => {
@@ -76,6 +132,14 @@
 
         function enable(me) {
             fetch(`${window.location.href}/enable?me=` + me, {
+                method: 'post',
+            }).then(function (response) {
+                location.reload()
+            })
+        }
+
+        function set_config(config, isEnabled) {
+            fetch(`${window.location.href}/config/${config}/${isEnabled ? 'enable' : 'disable'}`, {
                 method: 'post',
             }).then(function (response) {
                 location.reload()

@@ -2,6 +2,7 @@ import http.server
 import socketserver
 import logging
 from state import State
+from config import Config, get_config
 
 logging.basicConfig(
     format='%(process)s %(asctime)s %(levelname)s: %(message)s',
@@ -21,7 +22,23 @@ STATUSES = {
 }
 
 
-def run_alarm_manager(state: State, execution_interval, port):
+def run_alarm_manager(state: State):
+    def render_configuration():
+        content = ''
+        enable_button = lambda config, currently_enabled: f'<button onclick="set_config(\'{config}\', {"false" if currently_enabled else "true"})">{"Disable" if currently_enabled else "Enable"}</button>'
+        status = lambda currently_enabled: f'<span class="{"success" if currently_enabled else "danger"}">{"Active" if currently_enabled else "Disabled"}</span>'
+
+        content += f'<p>{enable_button("sound", state.sound_enabled)} Sound Sending Status: {status(state.sound_enabled)}</p>'
+        content += f'<p>{enable_button("email", state.email_enabled)} Email Sending Status: {status(state.email_enabled)}</p>'
+        return content
+
+    def render_configuration_list():
+        content = '<table>'
+        for key, value in get_config().items():
+            content += f'<tr><td>{key}</td><td>{value}</td></tr>'
+        content += '</table>'
+        return content
+
     def render_content():
         content = ''
         for plot in state.plot_data.get('data', []):
@@ -41,6 +58,17 @@ def run_alarm_manager(state: State, execution_interval, port):
             content += '</tr>'
         return content
 
+    def render_logs():
+        content = '<table>'
+        for log in state.logs:
+            iteration = f'#{log["no"]}'
+            datetime = log['datetime']
+            message = log['message']
+            content += f'<tr><td>{iteration}</td><td>{datetime}</td><td>{message}</td></tr>'
+        content += '</table>'
+        content += '<p>Show up to 50 recent logs</p>'
+        return content
+
     class AlarmManagerHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         def do_GET(self):
             self.send_response(200)
@@ -48,9 +76,15 @@ def run_alarm_manager(state: State, execution_interval, port):
             self.end_headers()
             with open('index.html') as f:
                 html = f.read()
+                configuration = render_configuration()
+                configuration_list = render_configuration_list()
                 content = render_content()
-                html = html.replace('/*{{execution_interval}}*/', str(execution_interval * 1000))
+                logs = render_logs()
+                html = html.replace('/*{{execution_interval}}*/', str(Config.EXECUTION_INTERVAL * 1000))
                 html = html.replace('{{content}}', content)
+                html = html.replace('{{configuration}}', configuration)
+                html = html.replace('{{configuration_list}}', configuration_list)
+                html = html.replace('{{logs}}', logs)
                 self.wfile.write(html.encode())
                 return
 
@@ -59,24 +93,40 @@ def run_alarm_manager(state: State, execution_interval, port):
             if self.path.startswith('/enable?me='):
                 path = self.path.split('/enable?me=', 1)[1]
                 state.enable_alarm(path)
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(path.encode())
-
+                state.log(f'Enable plot: {path}')
+                self.success(path)
             elif self.path.startswith('/disable?me='):
                 path = self.path.split('/disable?me=', 1)[1]
-                print(path)
                 state.disable_alarm(path)
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(path.encode())
-            
+                state.log(f'Disable plot: {path}')
+                self.success(path)
+            elif self.path.startswith('/config/sound/enable'):
+                state.enable_sound()
+                state.log(f'Set config: Sound sending: Active')
+                self.success()
+            elif self.path.startswith('/config/sound/disable'):
+                state.disable_sound()
+                state.log(f'Set config: Sound sending: Disabled')
+                self.success()
+            elif self.path.startswith('/config/email/enable'):
+                state.enable_email()
+                state.log(f'Set config: Email sending: Active')
+                self.success()
+            elif self.path.startswith('/config/email/disable'):
+                state.disable_email()
+                state.log(f'Set config: Email sending: Disabled')
+                self.success()
             else:
                 self.send_response(404)
                 self.end_headers()
                 self.wfile.write('<h1>404 Not Found</h1>'.encode())
+        
+        def success(self, response=''):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(response.encode())
 
     handler_object = AlarmManagerHttpRequestHandler
-    manager_server = socketserver.TCPServer(("", port), handler_object)
-    logging.info(f'Starting Alarm Manager at port: {port}')
+    manager_server = socketserver.TCPServer(("", Config.ALARM_MANAGER_PORT), handler_object)
+    logging.info(f'Starting Alarm Manager at port: {Config.ALARM_MANAGER_PORT}')
     manager_server.serve_forever()

@@ -1,4 +1,5 @@
 from typing import Set, Dict
+from datetime import datetime
 
 class State:
     previous_plots: Set[str]
@@ -6,14 +7,18 @@ class State:
     rebroadcast_count: int
     plot_data: Dict
     no_iteration: int
+    sound_enabled: bool
 
-    def __init__(self, reminder_rebroadcast_count) -> None:
+    def __init__(self, reminder_rebroadcast_count, default_sound_enabled, default_email_enabled) -> None:
         self.previous_plots = set()
         self.disabled_alarms = set()
         self.rebroadcast_count = reminder_rebroadcast_count
         self.initial_rebroadcast_count = reminder_rebroadcast_count
         self.plot_data = {'data': []}
         self.no_iteration = 0
+        self.sound_enabled = default_sound_enabled
+        self.email_enabled = default_email_enabled
+        self.logs = []
     
     def __str__(self) -> str:
         return f'(plot_data length: {len(self.plot_data["data"])}, previous_plots length: {len(self.previous_plots)}, rebroadcast_count: {self.rebroadcast_count}, no_iteration: {self.no_iteration})'
@@ -42,3 +47,25 @@ class State:
 
     def is_disabled_alarm(self, name) -> bool:
         return name in self.disabled_alarms
+    
+    def enable_sound(self):
+        self.sound_enabled = True
+
+    def disable_sound(self):
+        self.sound_enabled = False
+
+    def enable_email(self):
+        self.email_enabled = True
+
+    def disable_email(self):
+        self.email_enabled = False
+    
+    def log(self, message: str = ''):
+        log_data = {
+            'no': self.no_iteration,
+            'datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'message': message
+        }
+        self.logs.insert(0, log_data)
+        print(self.logs)
+        self.logs = self.logs[:50]

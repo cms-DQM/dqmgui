@@ -1,5 +1,16 @@
 import os
 
+# Configuration for alarm system
+# Most of the variable can be configured in this file.
+# The connection string of the sound server and email recipients
+# need to be configured via the environment variables.
+# The external environment variables includes:
+#   - GUI_API_URL (the main DQM GUI API URL)
+#   - GUI_API_PORT (the main DQM GUI API port)
+#   - SOUND_SERVER_URL (the CMS-WOW sound server URL)
+#   - SOUND_SERVER_PORT (the CMS-WOW sound server port)
+#   - EMAIL_ADDRESSES (the target recipients)
+
 class Config:
     # Connection config
     GUI_API_URL = os.environ.get('GUI_API_URL')
@@ -32,4 +43,7 @@ class Config:
     DATA_URL = f'{GUI_API_URL}:{str(GUI_API_PORT)}{GUI_API_ERROR_DATA_PATH}'
 
 def get_config():
+    '''
+    Get all configuration as a dictionary (for showing in the alarm manager)
+    '''
     return dict([(attribute, Config.__dict__.get(attribute)) for attribute in Config.__dict__ if not attribute.startswith('_')])

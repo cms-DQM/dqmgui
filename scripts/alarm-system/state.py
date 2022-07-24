@@ -4,6 +4,10 @@ from datetime import datetime
 from config import Config
 
 class State:
+    '''
+    The alarm system state which hold and carry the information for each iteration.
+    The alarm manager also use the same state object to manipulate the system's state.
+    '''
     previous_plots: Set[str]
     disabled_alarms: Set[str]
     rebroadcast_count: int

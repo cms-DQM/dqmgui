@@ -23,7 +23,15 @@ STATUSES = {
 
 
 def run_alarm_manager(state: State):
+    '''
+    Run alarm manager GUI.
+    Start a http server to serve HTML GUI website and handle requests from the client
+    '''
+
     def render_configuration():
+        '''
+        Render HTML configuration section including enable/disable sound and email sending functionality
+        '''
         content = ''
         enable_button = lambda config, currently_enabled: f'<button onclick="set_config(\'{config}\', {"false" if currently_enabled else "true"})">{"Disable" if currently_enabled else "Enable"}</button>'
         status = lambda currently_enabled: f'<span class="{"success" if currently_enabled else "danger"}">{"Active" if currently_enabled else "Disabled"}</span>'
@@ -33,6 +41,9 @@ def run_alarm_manager(state: State):
         return content
 
     def render_configuration_list():
+        '''
+        Render HTML configuration list that shows all the config variable
+        '''
         content = '<table>'
         for key, value in get_config().items():
             content += f'<tr><td>{key}</td><td>{value}</td></tr>'
@@ -40,6 +51,9 @@ def run_alarm_manager(state: State):
         return content
 
     def render_content():
+        '''
+        Render HTML plots table with enable/disable button for each plot
+        '''
         content = ''
         for plot in state.plot_data.get('data', []):
             path = plot['path']
@@ -59,6 +73,9 @@ def run_alarm_manager(state: State):
         return content
 
     def render_logs():
+        '''
+        Render HTML log showed on the last section
+        '''
         content = '<table>'
         for log in state.logs:
             iteration = f'#{log["no"]}'
@@ -70,7 +87,14 @@ def run_alarm_manager(state: State):
         return content
 
     class AlarmManagerHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
+        '''
+        Request handler for alarm manager for serving HTML page and handle requests
+        '''
+
         def do_GET(self):
+            '''
+            Serve HTML page content using index.html as a template
+            '''
             self.send_response(200)
             self.send_header("Content-type", "text/html")
             self.end_headers()
@@ -89,7 +113,9 @@ def run_alarm_manager(state: State):
                 return
 
         def do_POST(self):
-            print(self.path)
+            '''
+            Handle state changing logic from the client including enable/disable plot alarms and configurations
+            '''
             if self.path.startswith('/enable?me='):
                 path = self.path.split('/enable?me=', 1)[1]
                 state.enable_alarm(path)
@@ -122,6 +148,9 @@ def run_alarm_manager(state: State):
                 self.wfile.write('<h1>404 Not Found</h1>'.encode())
         
         def success(self, response=''):
+            '''
+            Success response
+            '''
             self.send_response(200)
             self.end_headers()
             self.wfile.write(response.encode())

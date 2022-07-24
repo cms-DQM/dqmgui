@@ -20,7 +20,39 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+# Entrypoint for the alarm system script.
+#
+# - Alarm System --------------------------------------------------------------
+# The dqmgui_alarm service monitors the state of alarms in histograms
+# located in GUI_API_ERROR_DATA_PATH. This location is a layout with a selection
+# of MEs that follow very closely the state of the detector. The agent
+# makes the following assumptions:
+# 1. Each ME listed in the layout will raise an alarm if its QT fails,
+# however, the ME and QT have to be done in such way that, if the
+# condition for the QT to fail ceases, the QT should be successful
+# and thus the alarm should be turned off.
+# 2. Trend plots located in this layout should *not* raise alarms, if
+# they do, they must comply with assumption 1.
+# 3. The GUI that is specified by BASEURL has a Live source.
+#
+# Once a ME raises an alarm it would be immediately broadcasted, after
+# that it gets bundled with all actives alarms so that only one
+# message is broadcasted every EXECUTION_INTERVAL seconds. An alarm
+# ceases to be broadcasted if it has been sent more than REBROADCAST
+# times. In order to generate the most efficient use of the CMS-WOW
+# system, the global clock gets reset every time we pass from 0 alarms
+# to at least 1 alarm.
+#
+# Starting this script will also start the alarm manager service in the
+# separated thread. Users can access the alarm manager GUI with the direct
+# URL on the DQM GUI (/alarm-manager).
+#
+# The configuration can be found the the config.py
+
 def get_plot_data() -> dict:
+    '''
+    Fetch plot data on the ERROR folder from the GUI API on the live mode.
+    '''
     current_timestamp = time.time()
     query_string = f'?notOlderThan={str(current_timestamp).split(".")[0]}'
     request_url = f'{Config.DATA_URL}{query_string}'
@@ -29,6 +61,9 @@ def get_plot_data() -> dict:
     return plot_data
 
 def filter_alarm_plots(plot_data: dict, disabled_alarms: Set) -> Set[str]:
+    '''
+    Filter only plots that we should send the alarm
+    '''
     if not plot_data or 'data' not in plot_data:
         logging.info('No plot data found. Skip this execution iteration.')
         return set()
@@ -44,6 +79,9 @@ def filter_alarm_plots(plot_data: dict, disabled_alarms: Set) -> Set[str]:
     return alarm_plots
 
 def send_email_message(state: State, message: str, is_error: bool=False):
+    '''
+    Send email message with the local script
+    '''
     if not state.email_enabled:
         logging.info('Email sending is disabled.')
         return
@@ -63,6 +101,9 @@ def send_email_message(state: State, message: str, is_error: bool=False):
         raise Exception(f'Sendmail exit with status {return_code}')
 
 def format_message(plots: Set[str], previous_plots: Set[str], is_reminder: bool) -> Tuple[str, str]:
+    '''
+    Format email and sound message before sending them
+    '''
     plots_length = len(plots)
     title_message = ''
     if is_reminder:
@@ -85,6 +126,9 @@ def format_message(plots: Set[str], previous_plots: Set[str], is_reminder: bool)
     return spoken_message, message
 
 def send_sound(state: State, spoken_message: str, message: str):
+    '''
+    Send XML sound message to CMS-WOW system
+    '''
     if not state.sound_enabled:
         logging.info('Sound sending is disabled.')
         return
@@ -100,6 +144,9 @@ def send_sound(state: State, spoken_message: str, message: str):
         raise Exception(f'Unexpected answer from CMS-WOW: {repr(data)}')
 
 def execute(state: State):
+    '''
+    Execute one iteration that check for alarm plots and send the alarms
+    '''
     log_message = ''
     try:
         plot_data = get_plot_data()
@@ -141,6 +188,9 @@ def execute(state: State):
     return
 
 def start_manager_gui(state: State) -> threading.Thread:
+    '''
+    Start alarm manager GUI on a separated thread
+    '''
     thread = threading.Thread(target=run_alarm_manager, args=(state, ))
     logging.info("Starting alarm manager in separated thread")
     thread.daemon = True
@@ -148,6 +198,9 @@ def start_manager_gui(state: State) -> threading.Thread:
     return thread
 
 def run_daemon():
+    '''
+    Start alarm system with alarm manager and initialize the state
+    '''
     try:
         logging.info('Starting alarm system script.')
         state = State()
@@ -164,4 +217,3 @@ def run_daemon():
 
 if __name__ == '__main__':
     run_daemon()
-

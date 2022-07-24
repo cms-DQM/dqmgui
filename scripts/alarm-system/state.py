@@ -1,6 +1,8 @@
 from typing import Set, Dict
 from datetime import datetime
 
+from config import Config
+
 class State:
     previous_plots: Set[str]
     disabled_alarms: Set[str]
@@ -9,15 +11,15 @@ class State:
     no_iteration: int
     sound_enabled: bool
 
-    def __init__(self, reminder_rebroadcast_count, default_sound_enabled, default_email_enabled) -> None:
+    def __init__(self) -> None:
         self.previous_plots = set()
         self.disabled_alarms = set()
-        self.rebroadcast_count = reminder_rebroadcast_count
-        self.initial_rebroadcast_count = reminder_rebroadcast_count
+        self.rebroadcast_count = Config.REMINDER_REBROADCAST_COUNT
+        self.initial_rebroadcast_count = Config.REMINDER_REBROADCAST_COUNT
         self.plot_data = {'data': []}
         self.no_iteration = 0
-        self.sound_enabled = default_sound_enabled
-        self.email_enabled = default_email_enabled
+        self.sound_enabled = Config.SOUND_ENABLED
+        self.email_enabled = Config.EMAIL_ENABLED
         self.logs = []
     
     def __str__(self) -> str:
@@ -68,4 +70,4 @@ class State:
         }
         self.logs.insert(0, log_data)
         print(self.logs)
-        self.logs = self.logs[:50]
+        self.logs = self.logs[:Config.NUMBER_OF_DISPLAYED_LOG]

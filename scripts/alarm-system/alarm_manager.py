@@ -66,7 +66,7 @@ def run_alarm_manager(state: State):
             message = log['message']
             content += f'<tr><td>{iteration}</td><td>{datetime}</td><td>{message}</td></tr>'
         content += '</table>'
-        content += '<p>Show up to 50 recent logs</p>'
+        content += f'<p>Show up to {Config.NUMBER_OF_DISPLAYED_LOG} recent logs</p>'
         return content
 
     class AlarmManagerHttpRequestHandler(http.server.SimpleHTTPRequestHandler):

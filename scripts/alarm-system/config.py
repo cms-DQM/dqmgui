@@ -17,6 +17,7 @@ class Config:
     INITIAL_WAIT = 2 # seconds
     EMAIL_ADDRESSES = os.environ.get('EMAIL_ADDRESSES', '').split(',')
     ERROR_QT_STATUS = [300]
+    NUMBER_OF_DISPLAYED_LOG = 200
 
     # Message content
     SOUND_MESSAGE_BODY = (

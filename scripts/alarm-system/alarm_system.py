@@ -150,7 +150,7 @@ def start_manager_gui(state: State) -> threading.Thread:
 def run_daemon():
     try:
         logging.info('Starting alarm system script.')
-        state = State(Config.REMINDER_REBROADCAST_COUNT, Config.SOUND_ENABLED, Config.EMAIL_ENABLED)
+        state = State()
         start_manager_gui(state)
         time.sleep(Config.INITIAL_WAIT)
         for iteration in itertools.count():

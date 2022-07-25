@@ -842,14 +842,25 @@ Part of the `nanoroot` framework has already been Cythonised (to speed up DQM Le
 
 A small caveat: all other Cythonised importers read the entire content of the file to memory and proceed with CPU bound importing routine. DQMIO files, however, contain data from multiple lumisections. This makes reading the entire content of the file to memory unnecessary. I would suggest to perform a (hopefully) quick async pre-importing procedure that determines what sections of the file contain the data that's being imported and proceeding to read only those sections. This may or may not actually work - it needs more careful exploration of the `python/nanoroot/ttree.pyx` code and potentially some experimentation. As a last resort, reading the entire file to memory is a bit wasteful but will surely work.
 
-### P5 Sound alarm
+### P5 Sound alarm system
 
-The old DQM GUI has a couple of daemons for managing DQM sound alarms in the control room of the CMS experiment:
+The alarm system is responsible for sending sound alarms to the CMS-WOW system when some histograms in the error folder have an active alarm. For more details about the alarm system, please follow this [TWiki Link](https://twiki.cern.ch/twiki/bin/viewauth/CMS/DQMGuiAudioAlarms).
 
-* https://github.com/cms-DQM/dqmgui_prod/blob/index128/bin/visDQMSoundAlarmDaemon
-* https://github.com/cms-DQM/dqmgui_prod/blob/index128/bin/visDQMSoundAlarmManager
+![Alarm System Diagram](data/etc/alarm-system-diagram.png)
 
-The functionality of those daemons could be easily integrated into the core of the new DQM GUI, without having to run them as separate programs. Running at least one separate process for periodic error checking will still probably be unavoidable.
+The alarm system script is located in `scripts/alarm-system`. The system is designed to be independent from the DQM GUI. When you start the main script (`alarm_system.py`), the script will execute the logic to check alarm histrograms. It also starts the alarm manager GUI in a separate thread. The alarm manager will listen on a different port from the main DQM GUI, and the DQM GUI has alarm system routes that will forward the request to the alarm manager server. The alarm manager can be accessed with the same DQM GUI host with the path `/alarm-manager` in the browser.
+
+Users can view and modify some of the configuration variables through the alarm manager GUI, such as enabling or disabling alarm sound and email. To modify the system parameters, developers can easily configure them through `scripts/alarm-system/config.py`. However, the connection string for the DQM GUI and sound server will be read from the environment variables. To configure the environment variables and the startup script, you can edit the systemd service unit file located in `/usr/lib/systemd/system/dqmgui-alarm.service`.
+
+To restart the script or apply a new change to the script, you can easily restart it using this command.
+```
+sudo systemctl restart dqmgui-alarm
+```
+
+The execution log can be found in the alarm manager GUI. To see the complete log of the system, you can use this comand.
+```
+sudo journalctl -u dqmgui-alarm.service
+```
 
 ### Layouts
 

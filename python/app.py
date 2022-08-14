@@ -48,7 +48,7 @@ if __name__ == '__main__':
     import logging
     import argparse
 
-    from aiohttp import web
+    from aiohttp import web, ClientSession
     from logging.handlers import TimedRotatingFileHandler
 
     from service import GUIService
@@ -409,6 +409,22 @@ async def get_host(request):
     host = args.host
     return web.json_response({'host': host})
 
+# Alarm System Handler
+ALARM_MANAGER_URL = 'http://localhost:8890'
+ALARM_MANAGER_PATH = '/alarm-manager'
+
+async def get_alarm_manager(request):
+    async with ClientSession() as session:
+        async with session.get(ALARM_MANAGER_URL) as response:
+            return web.Response(text=await response.text(), content_type='text/html')
+
+async def post_alarm_manager(request):
+    forward_url = f'{ALARM_MANAGER_URL}{str(request.rel_url).replace(ALARM_MANAGER_PATH, "")}'
+    print(f'FORWARD URL: {forward_url}')
+    async with ClientSession() as session:
+        async with session.post(forward_url) as response:
+            return web.Response(text=await response.text())
+
 # ###################################################################################################### #
 # ================================== Server middleware configuration =================================== #
 # ###################################################################################################### #
@@ -471,6 +487,10 @@ def config_and_start_webserver(port):
                     web.get('/api/v1/latest_runs', latest_runs),
                     web.get("/plotsLocalOverlay/", overlayPlotsWithDifferentNames),
                     web.get('/api/v1/host', get_host)])
+
+    # Routes for alarm system manager
+    app.add_routes([web.get(ALARM_MANAGER_PATH, get_alarm_manager),
+                    web.post(ALARM_MANAGER_PATH + '{tail:.*}', post_alarm_manager)])
 
     # Routes for HTML files
     app.add_routes([web.get('/', index), web.static('/', get_absolute_path('../frontend/'), show_index=True)])

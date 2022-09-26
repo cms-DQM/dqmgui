@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>DQM Sound Alarm Manager</title>
+    <style>
+        body {
+            padding: 0.5rem;
+            font-family: arial, sans-serif;
+        }
+
+        h3 {
+            padding: 1rem;
+            background: #ebebeb;
+            margin: 1rem 0;
+        }
+
+        h2 {
+            padding: 1rem;
+            background: #ebebeb;
+            margin: 0 0 1rem;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            text-align: left;
+            padding: 6px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        summary {
+            cursor: pointer;
+        }
+
+        .content {
+            padding-left: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .danger {
+            color: #ff4242;
+        }
+
+        .success {
+            color: #00b30f;
+        }
+
+        .danger::before {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            content: '';
+            background: #ff4242;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .success::before {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            content: '';
+            background: #00b30f;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Enable/disable DQM sound alarms (New GUI) at P5</h2>
+    <div class="content">
+        <p>You can use this tool to enable/disable P5 sound alarms for certain DQM plot in the Errors folder of the DQM GUI.
+            If the alarm for a plot is <i>enabled</i>, it <i>will play a sound alarm</i> in the control room.</p>
+        <p>All alarms will switch to active state after the restart of the DQM GUI.</p>
+    </div>
+
+    <h3>Configuration</h3>
+    <div class="content">
+        <div class="content">
+            {{configuration}}
+        </div>
+        <details style="margin-top: 1rem;">
+            <summary>Default Configuration</summary>
+            <div class="content">
+                {{configuration_list}}
+            </div>
+        </details>
+    </div>
+
+    <h3>Latest Iteration</h3>
+    <div class="content">
+        <table>
+            <tr>
+                <th>Monitor element (Path)</th>
+                <th>QResult Name</th>
+                <th>QResult Status</th>
+                <th>Alarm Status</th>
+                <th>Action</th>
+            </tr>
+            {{content}}
+        </table>
+    </div>
+
+    <h3>Logs</h3>
+    <div class="content">
+        <details>
+            <summary>Show/hide logs</summary>
+            <div class="content">
+                {{logs}}
+            </div>
+        </details>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            location.reload()
+        }, /*{{execution_interval}}*/)
+
+        function disable(me) {
+            fetch(`${window.location.href}/disable?me=` + me, {
+                method: 'post',
+            }).then(function (response) {
+                location.reload()
+            })
+        }
+
+        function enable(me) {
+            fetch(`${window.location.href}/enable?me=` + me, {
+                method: 'post',
+            }).then(function (response) {
+                location.reload()
+            })
+        }
+
+        function set_config(config, isEnabled) {
+            fetch(`${window.location.href}/config/${config}/${isEnabled ? 'enable' : 'disable'}`, {
+                method: 'post',
+            }).then(function (response) {
+                location.reload()
+            })
+        }
+    </script>
+
+</body>
+
+</html>

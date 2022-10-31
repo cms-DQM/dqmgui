@@ -33,5 +33,4 @@ csclayout(dqmitems,"05 Physics Efficiency - RecHits Plus",
     [{'path': "CSC/CSCOfflineMonitor/recHits/hRHGlobalp3", 'description': "Histogram shows 2D RecHits distribution in ME+3. Any unusual inhomogeneity should be reported. For more information please click <a href=\"https://twiki.cern.ch/twiki/bin/viewauth/CMS/CSCDPGDataMonitorShiftInstructions\">here</a>."},
      {'path': "CSC/CSCOfflineMonitor/recHits/hRHGlobalp4", 'description': "Histogram shows 2D RecHits distribution in ME+4. Any unusual inhomogeneity should be reported. For more information please click <a href=\"https://twiki.cern.ch/twiki/bin/viewauth/CMS/CSCDPGDataMonitorShiftInstructions\">here</a>."}])
 
-
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

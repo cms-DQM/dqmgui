@@ -1,7 +1,7 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
-def aliOfflinePVLayout(i, p, *rows): i["OfflinePV/AlignmentValidation/" + p] = rows 
+def aliOfflinePVLayout(i, p, *rows): i["OfflinePV/AlignmentValidation/" + p] = rows
 
 aliOfflinePVLayout(dqmitems, "00 - Vertex and vertex tracks quality",
                    [{ 'path': "OfflinePV/Alignment/chi2ndf",
@@ -80,6 +80,24 @@ aliOfflinePVLayout(dqmitems, "03 - Impact parameters projections (pT>10 GeV)",
                       },
                     { 'path': "OfflinePV/Alignment/dzVsEta_pt10",
                       'description': "longidutinal impact parameter vs track pseudorapidity (track momentum > 10 GeV)",
+                      'draw': { 'withref': "no" }
+                      }])
+
+aliOfflinePVLayout(dqmitems, "04 - 2D impact parameters projections",
+                   [{ 'path': "OfflinePV/Alignment/dxyVsEtaVsPhi_pt1",
+                      'description': "transverse impact parameter vs track pseudorapitidy vs track azimuth (track momentum > 1 GeV)",
+                      'draw': { 'withref': "no" }
+                      },
+                    { 'path': "OfflinePV/Alignment/dxyVsEtaVsPhi_pt10",
+                      'description': "transverse impact parameter vs track pseudorapitidy vs track azimuth (track momentum > 10 GeV)",
+                      'draw': { 'withref': "no" }
+                      }],
+                   [{ 'path': "OfflinePV/Alignment/dzVsEtaVsPhi_pt1",
+                      'description': "longidutinal impact parameter vs track pseudorapitidy vs track azimuth (track momentum > 1 GeV)",
+                      'draw': { 'withref': "no" }
+                      },
+                    { 'path': "OfflinePV/Alignment/dzVsEtaVsPhi_pt10",
+                      'description': "longidutinal impact parameter vs track pseudorapitidy vs track azimuth (track momentum > 10 GeV)",
                       'draw': { 'withref': "no" }
                       }])
 

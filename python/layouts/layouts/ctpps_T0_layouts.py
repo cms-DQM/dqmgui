@@ -8,6 +8,7 @@ dqmitems={}
 def CTPPSTrackingStripLayoutRP(i, p, *rows): i["CTPPS/TrackingStrip/Layouts/RP summary/" + p] = rows
 def CTPPSTrackingStripLayoutDiag(i, p, *rows): i["CTPPS/TrackingStrip/Layouts/diagonal summary/" + p] = rows
 def CTPPSTrackingStripLayoutAntiDiag(i, p, *rows): i["CTPPS/TrackingStrip/Layouts/antidiagonal summary/" + p] = rows
+
 strip_rows = [ "tp", "bt" ]
 strip_cols = [ "sector 45/station 220/fr", "sector 45/station 210/fr", "sector 56/station 210/fr", "sector 56/station 220/fr" ]
 
@@ -105,7 +106,7 @@ diamond_stations = [ "sector 45/station 220cyl/cyl_hr", "sector 56/station 220cy
 def CTPPSTimingDiamondLayout(i, p, *rows): i["CTPPS/TimingDiamond/Layouts/" + p] = rows
 
 # layouts with no overlays
-TimingPlots = [ "activity per BX 0 25", "active planes", "event category", "leading edge (le and te)", "time over threshold", "hits in planes", "hits in planes lumisection", "tracks", "HPTDC Errors", "MH in channels" ]
+TimingPlots = [ "activity per BX 0-25", "active planes", "event category", "leading edge (le and te)", "time over threshold", "hits in planes", "hits in planes lumisection", "tracks", "HPTDC Errors", "MH in channels" ]
 TimingDrawOpt = [{'ytype':"log"}, {'xmax':"10"}, {'drawopts':"colztext"}, {'xmax':"25"}, {'xmin':"0", 'xmax':"25"}, {'withref':"no"}, {'withref':"no"}, {'withref':"no"}, {'drawopts':"colztext"}, {'drawopts':"colztext"}]
 TimingDescription = [ "It should be similar to activity of CMS", "It should be with peaks at 0 and 4", 'Most of the event should be in "both"',
 "It should be peaked around 5 ns", "It should be a broad distribution peaked around 12 ns",
@@ -210,9 +211,9 @@ TotemTimingLayout(dqmitems, "sent digis percentage",
 
 
 
-# ####################################################################################################
-# # Pixel layouts
-# ####################################################################################################
+####################################################################################################
+# Pixel layouts
+####################################################################################################
 sectors = [ "sector 45", "sector 56" ]
 pixelstations = [ "station 210", "station 220" ]
 pixstationsf=["sector 45/station 210/","sector 45/station 220/","sector 56/station 210/","sector 56/station 220/"]
@@ -263,7 +264,7 @@ for sector in sectors:
   for station in pixelstations:
     row = list()
     row.append("CTPPS/TrackingPixel/"+sector+"/"+station+"/fr_hr/"+
-        "ROCs_hits_multiplicity_per_event vs LS")
+        "ROCs hits multiplicity per event vs LS")
     rows.append(row)
 
   CTPPSTrackingPixelLayout(dqmitems, "ROC hits per event vs LS "+sector, *rows)
@@ -293,5 +294,6 @@ for plot in ["hits position"]:
       rows.append(row)
 
       CTPPSTrackingPixelLayout(dqmitems, plot+":" +sector+" "+station+" fr_hr", *rows)
+
 
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

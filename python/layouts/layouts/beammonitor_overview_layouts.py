@@ -1,7 +1,6 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
-
 def bmoverviewlayout(i, p, *rows): i["Collisions/BeamMonitorFeedBack/" + p] = rows
 
 bmoverviewlayout(dqmitems, "00 - d0-phi0 of selected tracks",
@@ -37,5 +36,6 @@ bmoverviewlayout(dqmitems, "09 - Pixel-Vertices: Y0 vs. Lumisection",
 bmoverviewlayout(dqmitems, "10 - Pixel-Vertices: Z0 vs. Lumisection",
                  [{ 'path': "BeamPixel/muZ vs lumi",
                     'description': "Beam spot Z0 from pixel-vertices"}])
+
 
 adapt_and_register(dqmitems, scope=LayoutScope.ALL)

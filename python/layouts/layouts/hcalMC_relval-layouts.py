@@ -1,8 +1,6 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
-
-
 def hcaldigisVlayout(i, p, *rows): i[p] = rows
 hcaldigisVlayout(dqmitems, 'MCLayouts/Hcal/HcalDigisV/00 HcalDigiTask_signal_amplitude_depth2_HF',[{'path' : 'HcalDigisV/HcalDigiTask/HcalDigiTask_signal_amplitude_depth2_HF'}])
 hcaldigisVlayout(dqmitems, 'MCLayouts/Hcal/HcalDigisV/01 HcalDigiTask_signal_amplitude_depth2_HE',[{'path' : 'HcalDigisV/HcalDigiTask/HcalDigiTask_signal_amplitude_depth2_HE'}])

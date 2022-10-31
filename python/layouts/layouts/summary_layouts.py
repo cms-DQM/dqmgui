@@ -1,3 +1,6 @@
+from layouts.layout_manager import LayoutScope, adapt_and_register
+dqmitems={}
+
 from layouts.layout_manager import LayoutScope, register_layout
 
 register_layout(source='FakeBeamMonitor/EventInfo/reportSummaryMap', destination='Summary/reportSummaryMap', name='Summaries',  scope=LayoutScope.ALL)

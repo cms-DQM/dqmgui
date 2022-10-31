@@ -1,8 +1,6 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
-
-
 def hcalrechitDlayout(i, p, *rows): i[p] = rows
 hcalrechitDlayout(dqmitems, 'DataLayouts/Hcal/RecHits/00 HB Timing vs. Energy',[{'path' : 'HcalRecHitsD/HcalRecHitTask/HcalRecHitTask_timing_vs_energy_Low_HB'}])
 hcalrechitDlayout(dqmitems, 'DataLayouts/Hcal/RecHits/01 HE Timing vs. Energy',[{'path' : 'HcalRecHitsD/HcalRecHitTask/HcalRecHitTask_timing_vs_energy_Low_HE'}])
@@ -104,8 +102,6 @@ hcalnoiseratesDlayout(dqmitems, 'DataLayouts/Hcal/RBX/01 RBX energy type 2 (GeV)
 hcalnoiseratesDlayout(dqmitems, 'DataLayouts/Hcal/RBX/02 RBX energy type 1 (GeV)',[{'path' : 'HcalNoiseRatesD/HcalNoiseRatesTask/hRBXEnergyType1'}])
 hcalnoiseratesDlayout(dqmitems, 'DataLayouts/Hcal/RBX/03 RBX number of hits',[{'path' : 'HcalNoiseRatesD/HcalNoiseRatesTask/hRBXNHits'}])
 hcalnoiseratesDlayout(dqmitems, 'DataLayouts/Hcal/RBX/04 RBX energy (GeV)',[{'path' : 'HcalNoiseRatesD/HcalNoiseRatesTask/hRBXEnergy'}])
-
-
 
 
 adapt_and_register(dqmitems, scope=LayoutScope.RELVAL)

@@ -1,6 +1,8 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
+
+
 def hcallayout(i, p, *rows): i['Hcal/Layouts/' + p] = rows
 
 

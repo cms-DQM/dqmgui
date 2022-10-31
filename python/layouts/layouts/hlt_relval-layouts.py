@@ -399,7 +399,7 @@ trigvaltopelectron(dqmitems,"Electron trigger efficiencies wrt gen+reco",
 bphysPlotNumber=1
 def trigvalbphys(items, title, histogram, description):
   global bphysPlotNumber
-  items["HLT/HeavyFlavor/HLTValidationReport/" + '%02d) '%bphysPlotNumber + title] =  [[{'path':"HLT/HeavyFlavor/HLT/"+histogram, 'description':description}]]
+  items["HLT/HeavyFlavor/HLTValidationReport/" + '%02d) '%bphysPlotNumber + title] = [[{'path':"HLT/HeavyFlavor/HLT/"+histogram, 'description':description}]]
 #  items["HLT/HeavyFlavor/HLT2ValidationReport/" + '%02d) '%bphysPlotNumber + title] = DQMItem(layout=[[{'path':"HLT/HeavyFlavor/HLT2/"+histogram, 'description':description}]])
   bphysPlotNumber+=1
 

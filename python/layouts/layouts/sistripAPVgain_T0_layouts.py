@@ -3,7 +3,13 @@ dqmitems={}
 
 def sistripAPVgainLayout(i, p, *rows): i["AlCaReco/GainValidation/" + p] = rows
 
-sistripAPVgainLayout(dqmitems, "00 - Fit Error Summary",
+sistripAPVgainLayout(dqmitems, "00 - Event Statistics",
+ [{ 'path': "AlCaReco/SiStripGains/EventStats",
+    'description': "Statistics about the calibration procedure",
+    'draw': { 'withref': "no" }
+   }])
+
+sistripAPVgainLayout(dqmitems, "01 - Fit Error Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/MPVError",
     'description': "Error distribution of Landau fit made on every APV ",
     'draw': { 'withref': "no" }
@@ -21,7 +27,7 @@ sistripAPVgainLayout(dqmitems, "00 - Fit Error Summary",
     'draw': { 'withref': "no" }
   }])
 
-sistripAPVgainLayout(dqmitems, "01 - TIB Gain Summary",
+sistripAPVgainLayout(dqmitems, "02 - TIB Gain Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/DiffWRTPrevGainTIB",
     'description': "Ratio among the new gain factor and the old gain factor ",
     'draw': { 'withref': "no" }
@@ -39,7 +45,7 @@ sistripAPVgainLayout(dqmitems, "01 - TIB Gain Summary",
     'draw': { 'withref': "no" }
   }])
 
-sistripAPVgainLayout(dqmitems, "02 - TOB Gain Summary",
+sistripAPVgainLayout(dqmitems, "03 - TOB Gain Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/DiffWRTPrevGainTOB",
     'description': "Ratio among the new gain factor and the old gain factor ",
     'draw': { 'withref': "no" }
@@ -57,7 +63,7 @@ sistripAPVgainLayout(dqmitems, "02 - TOB Gain Summary",
     'draw': { 'withref': "no" }
   }])
 
-sistripAPVgainLayout(dqmitems, "03 - TID Gain Summary",
+sistripAPVgainLayout(dqmitems, "04 - TID Gain Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/DiffWRTPrevGainTID",
     'description': "Ratio among the new gain factor and the old gain factor ",
     'draw': { 'withref': "no" }
@@ -75,7 +81,7 @@ sistripAPVgainLayout(dqmitems, "03 - TID Gain Summary",
     'draw': { 'withref': "no" }
   }])
 
-sistripAPVgainLayout(dqmitems, "04 - TEC Gain Summary",
+sistripAPVgainLayout(dqmitems, "05 - TEC Gain Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/DiffWRTPrevGainTEC",
     'description': "Ratio among the new gain factor and the old gain factor ",
     'draw': { 'withref': "no" }
@@ -93,7 +99,7 @@ sistripAPVgainLayout(dqmitems, "04 - TEC Gain Summary",
     'draw': { 'withref': "no" }
   }])
 
-sistripAPVgainLayout(dqmitems, "05 - Missing APV Summary",
+sistripAPVgainLayout(dqmitems, "06 - Missing APV Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/NoMPVfit",
     'description': "Position of non-calibrated APV ",
     'draw': { 'withref': "no" }
@@ -103,61 +109,60 @@ sistripAPVgainLayout(dqmitems, "05 - Missing APV Summary",
     'draw': { 'withref': "no" },
   }])
 
-sistripAPVgainLayout(dqmitems, "06 - TIB performance Summary",
+sistripAPVgainLayout(dqmitems, "07 - TIB performance Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/TIB__newG2",
     'description': "MPV after calibration ",
     'draw': { 'withref': "no" },
     'overlays': ["AlCaReco/SiStripGainsAAG/TIB_AagBunch"]
   }])
 
-sistripAPVgainLayout(dqmitems, "07 - TIB layer 1 performance Summary",
+sistripAPVgainLayout(dqmitems, "08 - TIB layer 1 performance Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/TIB_layer_1__newG2",
     'description': "MPV after calibration ",
     'draw': { 'withref': "no" },
     'overlays': ["AlCaReco/SiStripGainsAAG/TIB_layer_1_AagBunch"]
   }])
 
-sistripAPVgainLayout(dqmitems, "08 - TOB performance Summary",
+sistripAPVgainLayout(dqmitems, "09 - TOB performance Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/TOB__newG2",
     'description': "MPV after calibration ",
     'draw': { 'withref': "no" },
     'overlays': ["AlCaReco/SiStripGainsAAG/TOB_AagBunch"]
   }])
 
-sistripAPVgainLayout(dqmitems, "09 - TOB layer 1 performance Summary",
+sistripAPVgainLayout(dqmitems, "10 - TOB layer 1 performance Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/TOB_layer_1__newG2",
     'description': "MPV after calibration ",
     'draw': { 'withref': "no" },
     'overlays': ["AlCaReco/SiStripGainsAAG/TOB_layer_1_AagBunch"]
   }])
 
-sistripAPVgainLayout(dqmitems, "10 - TID minus performance Summary",
+sistripAPVgainLayout(dqmitems, "11 - TID minus performance Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/TIDminus__newG2",
     'description': "MPV after calibration ",
     'draw': { 'withref': "no" },
     'overlays': ["AlCaReco/SiStripGainsAAG/TIDminus_AagBunch"]
   }])
 
-sistripAPVgainLayout(dqmitems, "11 - TID plus performance Summary",
+sistripAPVgainLayout(dqmitems, "12 - TID plus performance Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/TIDplus__newG2",
     'description': "MPV after calibration ",
     'draw': { 'withref': "no" },
     'overlays': ["AlCaReco/SiStripGainsAAG/TIDplus_AagBunch"]
   }])
 
-sistripAPVgainLayout(dqmitems, "12 - TEC minus performance Summary",
+sistripAPVgainLayout(dqmitems, "13 - TEC minus performance Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/TECminus__newG2",
     'description': "MPV after calibration ",
     'draw': { 'withref': "no" },
     'overlays': ["AlCaReco/SiStripGainsAAG/TECminus_AagBunch"]
   }])
 
-sistripAPVgainLayout(dqmitems, "13 - TEC plus performance Summary",
+sistripAPVgainLayout(dqmitems, "14 - TEC plus performance Summary",
  [{ 'path': "AlCaReco/SiStripGainsHarvesting/TECplus__newG2",
     'description': "MPV after calibration ",
     'draw': { 'withref': "no" },
     'overlays': ["AlCaReco/SiStripGainsAAG/TECplus_AagBunch"]
   }])
-
 
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

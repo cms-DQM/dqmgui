@@ -1,7 +1,7 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
-def GEMLayout(i, p, *rows): i["GEM/Layouts/" + p] = rows
+def GEMLayout(i, p, *rows): i["00 Shift/GEM/" + p] = rows
 
 _GEM_OFF_TWIKI = '<a href="https://twiki.cern.ch/twiki/bin/view/CMS/GEMPPDOfflineDQM">Link to TWiki</a>'
 

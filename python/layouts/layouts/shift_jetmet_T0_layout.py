@@ -41,5 +41,4 @@ shiftjetmetlayout(dqmitems, "08 PF MET Plots (for collisions)",
 
 shiftjetmetlayout(dqmitems, "09 PF candidates map", [{ 'path': "JetMET/MET/pfMet/Cleaned/h_occupancy_", 'description': "Charged hadron occupancy (<a href=https://twiki.cern.ch/twiki/bin/view/CMS/DQMShiftOfflineJetMET#h_occupancy_plot>more</a>)" }])
 
-
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

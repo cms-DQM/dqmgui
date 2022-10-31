@@ -1,7 +1,6 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
-
 ###---- GENERIC - FourVector selection goes here: ####
 ######################################################
 

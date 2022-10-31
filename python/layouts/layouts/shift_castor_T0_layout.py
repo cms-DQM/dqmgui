@@ -40,5 +40,4 @@ shiftcastorlayout(dqmitems, "06 - Tower EM vs HAD",
  'draw': { 'xtype': 'log', 'ytype':'log', 'drawopts': "COLZ" } }]
            )
 
-
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

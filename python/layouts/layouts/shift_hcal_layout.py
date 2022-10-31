@@ -2,6 +2,7 @@ from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
 
+
 def shifthcallayout(i, p, *rows): i['00 Shift/Hcal/' + p] = rows
 
 
@@ -9,6 +10,5 @@ shifthcallayout(dqmitems, '00 Run Summary', [{'path':'Hcal/TPTask/SummaryvsLS/Su
 
 shifthcallayout(dqmitems, "01 Run Summary", 
 	[{'path':'Hcal/EventInfo/runSummary', 'description':'Run Summary. Color scheme is identical to the 00 Run Summary'}])
-
 
 adapt_and_register(dqmitems, scope=LayoutScope.ONLINE)

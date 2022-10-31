@@ -49,4 +49,5 @@ info_layout("Info/CMSSWInfo/globalTag_Harvesting",
             "6 - Global Tag used for harvesting",
             "Global Tag (GT) used for the <i>harvesting</i> step, i.e. when the statistics for all the lumisections are combined into the final plots.")
 
+
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

@@ -1,6 +1,8 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
+# Dummy check of python syntax within file when run stand-alone
+
 
 def hcaloverviewlayout(i, p, *rows): i["Collisions/HcalFeedBack/"+p] = rows
 

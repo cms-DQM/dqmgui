@@ -16,6 +16,4 @@ pixellumilayout(dqmitems, "03_Ratio_HFtoPX",
                 ["PixelLumi/PixelLumiDqmZeroBias/HFDeliveredToPXByLS"],
                 ["PixelLumi/PixelLumiDqmZeroBias/HFRecordedToPXByLS"])
 
-
-
 adapt_and_register(dqmitems, scope=LayoutScope.ONLINE)

@@ -1168,4 +1168,5 @@ csclayout(dqmitems,"01 FED Data Integrity/03 FED L1A out of sync",
     [{'path':"CSC/Summary/FED_DDU_L1A_mismatch_fract", 'description':"Histogram shows the fraction of events with FED/DCC-DDUs L1A numbers mismatch errors."}]
    )
 
+
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

@@ -1,7 +1,10 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
+
+
 def hcalcaliblayout(i, p, *rows): i['HcalCalib/Layouts/' + p] = rows
+
 
 hcalcaliblayout(dqmitems, 'BadQualityvsLS/RAW', [{'path':'HcalCalib/RawTask/BadQualityvsLS/BadQualityvsLS', 'description':"""Distribution of Bad Channels vs Lumi Section <a href='https://twiki.cern.ch/twiki/bin/view/CMS/HcalDQMRun2TaskDescription#Raw_Task_Description'>Details...</a>"""}])
 

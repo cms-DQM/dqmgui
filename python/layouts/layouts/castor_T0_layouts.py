@@ -148,5 +148,4 @@ castorlayout(dqmitems, "Digi/13 - QIErms_TS=1",
 		'draw': { 'ytype':'log' } }]
            )
 
-
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

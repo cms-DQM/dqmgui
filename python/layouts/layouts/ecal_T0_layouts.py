@@ -476,6 +476,19 @@ ecallayout(dqmitems, 'Ecal/Layouts/04 Energy/20 Super Cluster Size',
 ecallayout(dqmitems, 'Ecal/Layouts/04 Energy/21 Cluster Energy vs Seed Energy',
 	   [{'path': 'EcalBarrel/EBClusterTask/EBCLT SC energy vs seed crystal energy', 'description': 'Relation between super cluster energy and its seed crystal energy.'}],
 	   [{'path': 'EcalEndcap/EEClusterTask/EECLT SC energy vs seed crystal energy', 'description': 'Relation between super cluster energy and its seed crystal energy.'}])
+
+#____________________ Layouts / 04 Energy / PiZero ____________________
+ecallayout(dqmitems, 'Ecal/Layouts/04 Energy/PiZero/00 Pi0 Invariant Mass',
+	   [{'path': 'EcalBarrel/EBPiZeroTask/EBPZT Pi0 Invariant Mass', 'description': 'Pi0 Invariant Mass in EB'}])
+ecallayout(dqmitems, 'Ecal/Layouts/04 Energy/PiZero/01 Pi0 Pt 1st most energetic photon',
+	   [{'path': 'EcalBarrel/EBPiZeroTask/EBPZT Pi0 Pt 1st most energetic photon', 'description': 'Pt 1st most energetic Pi0 photon in EB'}])
+ecallayout(dqmitems, 'Ecal/Layouts/04 Energy/PiZero/02 Pi0 Pt 2nd most energetic photon',
+	   [{'path': 'EcalBarrel/EBPiZeroTask/EBPZT Pi0 Pt 2nd most energetic photon', 'description': 'Pt 2nd most energetic Pi0 photon in EB'}])
+ecallayout(dqmitems, 'Ecal/Layouts/04 Energy/PiZero/03 Pi0 Pt',
+	   [{'path': 'EcalBarrel/EBPiZeroTask/EBPZT Pi0 Pt', 'description': 'Pi0 Pt in EB'}])
+ecallayout(dqmitems, 'Ecal/Layouts/04 Energy/PiZero/04 Pi0 Iso',
+	   [{'path': 'EcalBarrel/EBPiZeroTask/EBPZT Pi0 Iso', 'description': 'Pt 2nd most energetic Pi0 photon in EB'}])
+
 # By SuperModule _______________
 for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]: # Loop over EB,EE
   for sign in ['-', '+']: # Loop over z-side
@@ -534,7 +547,7 @@ ecallayout(dqmitems, 'Ecal/Layouts/05 Timing/10 Amplitude Correlation, BX+1',
 	   [{'path': 'EcalEndcap/EETimingTask/EETMT in-time vs BX+1 amplitude EE -', 'description': 'Correlation between in-time amplitude and BX+1 out-of-time amplitude. Only events with kGood reconstruction flag set, energy above ( EB:1, EE:3 ) GeV, and chi2 less than ( EB:16, EE:50 ) are used.'},
 	    {'path': 'EcalEndcap/EETimingTask/EETMT in-time vs BX+1 amplitude EE +', 'description': 'Correlation between in-time amplitude and BX+1 out-of-time amplitude. Only events with kGood reconstruction flag set, energy above ( EB:1, EE:3 ) GeV, and chi2 less than ( EB:16, EE:50 ) are used.'}])
 ecallayout(dqmitems, 'Ecal/Layouts/05 Timing/11 Timing vs BX',
-	   [{'path': 'EcalBarrel/EBTimingTask/EBTMT Timing vs Finely Binned BX', 'description': 'Average hit timing in EB as a finely binned function of BX number. Only events with energy above 2.02 GeV and chi2 less than 16 are used.'}])
+	   [{'path': 'EcalBarrel/EBTimingTask/EBTMT Timing vs Finely Binned BX', 'description': 'Average hit timing in EB as a finely binned function of BX number. BX ids start at 1. Only events with energy above 2.02 GeV and chi2 less than 16 are used. The Customize button can be used to zoom in.'}])
 ecallayout(dqmitems, 'Ecal/Layouts/05 Timing/12 Pulse Shape Chi2',
            [{'path': 'EcalBarrel/EBTimingTask/EBTMT EB Chi2', 'description': 'Chi2 of the pulse reconstruction.'}],
            [{'path': 'EcalEndcap/EETimingTask/EETMT EEM Chi2', 'description': 'Chi2 of the pulse reconstruction.'},
@@ -603,13 +616,13 @@ ecallayout(dqmitems, 'Ecal/Layouts/06 Trigger Primitives/06 Non Single Timing',
 	   [{'path': 'EcalEndcap/EESummaryClient/EETTT EE - Trigger Primitives Non Single Timing summary', 'description': 'Fraction of events whose emulator TP timing did not agree with the majority. Towers with entries less than 3 are not considered.'},
 	    {'path': 'EcalEndcap/EESummaryClient/EETTT EE + Trigger Primitives Non Single Timing summary', 'description': 'Fraction of events whose emulator TP timing did not agree with the majority. Towers with entries less than 3 are not considered.'}])
 ecallayout(dqmitems, 'Ecal/Layouts/06 Trigger Primitives/07 Occupancy vs BX',
-	   [{'path': 'EcalBarrel/EBTriggerTowerTask/EBTTT TP occupancy vs bx Real Digis', 'description': 'TP occupancy in different bunch crossing intervals. This plot is filled by data from physics data stream. It is normal to have very little entries in BX >= 3490.'}],
-	   [{'path': 'EcalEndcap/EETriggerTowerTask/EETTT TP occupancy vs bx Real Digis EE -', 'description': 'TP occupancy in different bunch crossing intervals. This plot is filled by data from physics data stream. It is normal to have very little entries in BX >= 3490.'},
-	    {'path': 'EcalEndcap/EETriggerTowerTask/EETTT TP occupancy vs bx Real Digis EE +', 'description': 'TP occupancy in different bunch crossing intervals. This plot is filled by data from physics data stream. It is normal to have very little entries in BX >= 3490.'}])
+	   [{'path': 'EcalBarrel/EBTriggerTowerTask/EBTTT TP occupancy vs bx Real Digis', 'description': 'TP occupancy in different bunch crossing intervals. This plot is filled by data from physics data stream. BX ids start at 1. It is normal to have very little entries in BX >= 3490. The Customize button can be used to zoom in.'}],
+	   [{'path': 'EcalEndcap/EETriggerTowerTask/EETTT TP occupancy vs bx Real Digis EE -', 'description': 'TP occupancy in different bunch crossing intervals. This plot is filled by data from physics data stream. BX ids start at 1. It is normal to have very little entries in BX >= 3490. The Customize button can be used to zoom in.'},
+	    {'path': 'EcalEndcap/EETriggerTowerTask/EETTT TP occupancy vs bx Real Digis EE +', 'description': 'TP occupancy in different bunch crossing intervals. This plot is filled by data from physics data stream. BX ids start at 1. It is normal to have very little entries in BX >= 3490. The Customize button can be used to zoom in.'}])
 ecallayout(dqmitems, 'Ecal/Layouts/06 Trigger Primitives/08 Et vs BX',
-	   [{'path': 'EcalBarrel/EBTriggerTowerTask/EBTTT Et vs bx Real Digis', 'description': 'Mean TP Et in different bunch crossing intervals. This plot is filled by data from physics data stream. It is normal to have very little entries in BX >= 3490.'}],
-	   [{'path': 'EcalEndcap/EETriggerTowerTask/EETTT Et vs bx Real Digis EE -', 'description': 'Mean TP Et in different bunch crossing intervals. This plot is filled by data from physics data stream. It is normal to have very little entries in BX >= 3490.'},
-	    {'path': 'EcalEndcap/EETriggerTowerTask/EETTT Et vs bx Real Digis EE +', 'description': 'Mean TP Et in different bunch crossing intervals. This plot is filled by data from physics data stream. It is normal to have very little entries in BX >= 3490.'}])
+	   [{'path': 'EcalBarrel/EBTriggerTowerTask/EBTTT Et vs bx Real Digis', 'description': 'Mean TP Et in different bunch crossing intervals. This plot is filled by data from physics data stream. BX ids start at 1. It is normal to have very little entries in BX >= 3490.'}],
+	   [{'path': 'EcalEndcap/EETriggerTowerTask/EETTT Et vs bx Real Digis EE -', 'description': 'Mean TP Et in different bunch crossing intervals. This plot is filled by data from physics data stream. BX ids start at 1. It is normal to have very little entries in BX >= 3490.'},
+	    {'path': 'EcalEndcap/EETriggerTowerTask/EETTT Et vs bx Real Digis EE +', 'description': 'Mean TP Et in different bunch crossing intervals. This plot is filled by data from physics data stream. BX ids start at 1. It is normal to have very little entries in BX >= 3490.'}])
 ecallayout(dqmitems, 'Ecal/Layouts/06 Trigger Primitives/09 Emulation Timing',
 	   [{'path': 'EcalBarrel/EBTriggerTowerTask/EBTTT max TP matching index', 'description': 'Distribution of the index of emulated TP with the highest Et value.'}],
 	   [{'path': 'EcalEndcap/EETriggerTowerTask/EETTT max TP matching index EE -', 'description': 'Distribution of the index of emulated TP with the highest Et value.'},

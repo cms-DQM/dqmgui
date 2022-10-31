@@ -144,5 +144,4 @@ shiftpftaulayout(
 	[{'path': 'RecoTauV/hpsPFTauProducerRealElectronsData_hpsPFTauDiscriminationByMediumElectronRejection/MediumElectronRejectionEffphi', 'description': 'MediumElectronRejection fake rate'}, {'path': 'RecoTauV/hpsPFTauProducerRealElectronsData_hpsPFTauDiscriminationByTightElectronRejection/TightElectronRejectionEffphi', 'description': 'TightElectronRejection fake rate'}]
 	)
 
-
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

@@ -52,5 +52,4 @@ l1tlayout(dqmitems,"21 - uGT # of prescaled algo accepts relative to # of all al
 l1tlayout(dqmitems,"22 - uGT # of prescaled algo accepts relative to # of all algo accepts in +-2 BX vs. BX number in event for last bunch in train",
     [{'path': "L1T/L1TStage2uGT/Ratio_Prescaled_Last_Bunch_In_Train", 'description': "uGT number of prescaled algo accepts relative to number of all prescaled algo accepts in +/-2 BX vs. BX number in event last bunch in train. x-axis: BX number in event for last bunch in a bunch train; y-axis: uGT algorithms (before prescale); z-axis: number of algo accepts relative to number of all algo accepts in +/-2 BX. "+moreInfoStr, 'draw': { 'withref': "no" }}])
 
-
 adapt_and_register(dqmitems, scope=LayoutScope.ONLINE)

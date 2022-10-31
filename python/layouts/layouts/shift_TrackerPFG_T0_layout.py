@@ -243,5 +243,4 @@ shiftTkPFGlayout(dqmitems, "11b - Tracks (Cosmic Tracking)",
   { 'path': "Tracking/TrackParameters/GeneralProperties/TrackEta_CKFTk",
     'description': " Eta distribution of Reconstructed Tracks - <a href=https://twiki.cern.ch/twiki/bin/view/CMS/DQMShiftOfflineTracking>DQMShiftOfflineTracking</a> ", 'draw': { 'withref': "no" }}])
 
-
 adapt_and_register(dqmitems, scope=LayoutScope.OFFLINE)

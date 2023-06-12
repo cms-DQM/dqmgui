@@ -37,9 +37,9 @@ ecallayout(dqmitems, 'Ecal/Layouts/00 Overview/03 Occupancy',
 	   [{'path': 'EcalEndcap/EEOccupancyTask/EEOT digi occupancy EE -', 'description': 'Digi occupancy.'},
 	    {'path': 'EcalEndcap/EEOccupancyTask/EEOT digi occupancy EE +', 'description': 'Digi occupancy.'}])
 ecallayout(dqmitems, 'Ecal/Layouts/00 Overview/04 Noise',
-	   [{'path': 'EcalBarrel/EBSummaryClient/EBPOT pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}],
-	   [{'path': 'EcalEndcap/EESummaryClient/EEPOT EE - pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'},
-	    {'path': 'EcalEndcap/EESummaryClient/EEPOT EE + pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}])
+	   [{'path': 'EcalBarrel/EBSummaryClient/EBPOT pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0), or (175.0, 300.0) for the forward region, or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}],
+	   [{'path': 'EcalEndcap/EESummaryClient/EEPOT EE - pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0), or (175.0, 300.0) for the forward region, or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'},
+	    {'path': 'EcalEndcap/EESummaryClient/EEPOT EE + pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0), or (175.0, 300.0) for the forward region, or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}])
 ecallayout(dqmitems, 'Ecal/Layouts/00 Overview/05 RecHit Energy',
 	   [{'path': 'EcalBarrel/EBSummaryClient/EBOT energy summary', 'description': '2D distribution of the mean rec hit energy.'}],
 	   [{'path': 'EcalEndcap/EESummaryClient/EEOT EE - energy summary', 'description': '2D distribution of the mean rec hit energy.'},
@@ -109,35 +109,41 @@ ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/04 Total Integrity Errors',
 ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/05 Integrity Errors in this LS',
 	   [{'path': 'EcalBarrel/EBIntegrityTask/EBIT weighted integrity errors by lumi', 'description': 'Total number of integrity errors for each FED in this lumi section.'}],
 	   [{'path': 'EcalEndcap/EEIntegrityTask/EEIT weighted integrity errors by lumi', 'description': 'Total number of integrity errors for each FED in this lumi section.'}])
-ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/06 Error Trends',
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/06 Total TTID Integrity Errors',
+           [{'path': 'EcalBarrel/EBIntegrityTask/EBIT weighted TTID errors', 'description': 'Total number of TTID integrity errors for each FED. Histogram filled per tower and each entry weighted by no.of crystals per tower to be compatible with the other integrity errors which are binned by crystals.'}],
+           [{'path': 'EcalEndcap/EEIntegrityTask/EEIT weighted TTID errors', 'description': 'Total number of TTID integrity errors for each FED. Histogram filled per tower and each entry weighted by no.of crystals per tower to be compatible with the other integrity errors which are binned by crystals.'}])
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/07 TTID Integrity Errors in this LS',
+           [{'path': 'EcalBarrel/EBIntegrityTask/EBIT weighted TTID errors by lumi', 'description': 'Total number of TTID integrity errors for each FED in this lumi section. Histogram filled per tower and each entry weighted by no.of crystals per tower to be compatible with the other integrity errors which are binned by crystals.'}],
+           [{'path': 'EcalEndcap/EEIntegrityTask/EEIT weighted TTID errors by lumi', 'description': 'Total number of TTID integrity errors for each FED in this lumi section. Histogram filled per tower and each entry weighted by no.of crystals per tower to be compatible with the other integrity errors which are binned by crystals.'}])
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/08 Error Trends',
 	   [{'path': 'Ecal/Trends/RawDataTask accumulated number of sync errors', 'description': 'Accumulated trend of the number of synchronization errors (L1A & BX mismatches) between DCC and FE in this run.'}],
 	   [{'path': 'Ecal/Trends/IntegrityTask number of integrity errors', 'description': 'Trend of the number of integrity errors.'}])
-ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/07 Event Type',
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/09 Event Type',
 	   [{'path': 'EcalBarrel/EBRawDataTask/EBRDT event type pre calibration BX', 'description': 'Event type recorded in the DCC for events in bunch crossing < 3490'}, {'path': 'EcalBarrel/EBRawDataTask/EBRDT event type calibration BX', 'description': 'Event type recorded in the DCC for events in bunch crossing == 3490. This plot is filled using data from the physics data stream during physics runs. It is normal to have very few entries in these cases.'},
 	    {'path': 'EcalBarrel/EBRawDataTask/EBRDT event type post calibration BX', 'description': 'Event type recorded in the DCC for events in bunch crossing > 3490.'}],
 	   [{'path': 'EcalEndcap/EERawDataTask/EERDT event type pre calibration BX', 'description': 'Event type recorded in the DCC for events in bunch crossing < 3490'}, {'path': 'EcalEndcap/EERawDataTask/EERDT event type calibration BX', 'description': 'Event type recorded in the DCC for events in bunch crossing == 3490. This plot is filled using data from the physics data stream during physics runs. It is normal to have very few entries in these cases.'},
 	    {'path': 'EcalEndcap/EERawDataTask/EERDT event type post calibration BX', 'description': 'Event type recorded in the DCC for events in bunch crossing > 3490.'}])
-ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/08 FED Entries',
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/10 FED Entries',
 	   [{'path': 'EcalBarrel/EBRawDataTask/EBRDT raw data entries', 'description': 'Number of events recorded by each FED.'}],
  	   [{'path': 'EcalEndcap/EERawDataTask/EERDT raw data entries', 'description': 'Number of events recorded by each FED.'}])
-ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/09 Channel Status Map',
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/11 Channel Status Map',
 	   [{'path': 'EcalBarrel/EBIntegrityClient/EBIT channel status map', 'description': 'Map of channel status as given by the Ecal Channel Status Record. LEGEND:<br/>0: Channel ok,<br/>1: DAC settings problem, pedestal not in the design range,<br/>2: Channel with no laser, ok elsewhere,<br/>3: Noisy,<br/>4: Very noisy,<br/>5-7: Reserved for more categories of noisy channels,<br/>8: Channel at fixed gain 6 (or 6 and 1),<br/>9: Channel at fixed gain 1,<br/>10: Channel at fixed gain 0 (dead of type this),<br/>11: Non-responding isolated channel (dead of type other),<br/>12: Channel and one or more neigbors not responding (e.g.: in a dead VFE 5x1 channel),<br/>13: Channel in TT with no data link, TP data ok,<br/>14: Channel in TT with no data link and no TP data.'}],
 	   [{'path': 'EcalEndcap/EEIntegrityClient/EEIT EE - channel status map', 'description': 'Map of channel status as given by the Ecal Channel Status Record. LEGEND:<br/>0: Channel ok,<br/>1: DAC settings problem, pedestal not in the design range,<br/>2: Channel with no laser, ok elsewhere,<br/>3: Noisy,<br/>4: Very noisy,<br/>5-7: Reserved for more categories of noisy channels,<br/>8: Channel at fixed gain 6 (or 6 and 1),<br/>9: Channel at fixed gain 1,<br/>10: Channel at fixed gain 0 (dead of type this),<br/>11: Non-responding isolated channel (dead of type other),<br/>12: Channel and one or more neigbors not responding (e.g.: in a dead VFE 5x1 channel),<br/>13: Channel in TT with no data link, TP data ok,<br/>14: Channel in TT with no data link and no TP data.'},
 	    {'path': 'EcalEndcap/EEIntegrityClient/EEIT EE + channel status map', 'description': 'Map of channel status as given by the Ecal Channel Status Record. LEGEND:<br/>0: Channel ok,<br/>1: DAC settings problem, pedestal not in the design range,<br/>2: Channel with no laser, ok elsewhere,<br/>3: Noisy,<br/>4: Very noisy,<br/>5-7: Reserved for more categories of noisy channels,<br/>8: Channel at fixed gain 6 (or 6 and 1),<br/>9: Channel at fixed gain 1,<br/>10: Channel at fixed gain 0 (dead of type this),<br/>11: Non-responding isolated channel (dead of type other),<br/>12: Channel and one or more neigbors not responding (e.g.: in a dead VFE 5x1 channel),<br/>13: Channel in TT with no data link, TP data ok,<br/>14: Channel in TT with no data link and no TP data.'}])
-ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/10 DCC-TCC Desync',
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/12 DCC-TCC Desync',
 	   [{'path': 'EcalBarrel/EBRawDataTask/EBRDT bunch crossing TCC errors', 'description': 'Number of bunch corssing value mismatches between DCC and TCC.'},
 	    {'path': 'EcalBarrel/EBRawDataTask/EBRDT L1A TCC errors', 'description': 'Number of L1A value mismatches between DCC and TCC.'}],
 	   [{'path': 'EcalEndcap/EERawDataTask/EERDT bunch crossing TCC errors', 'description': 'Number of bunch corssing value mismatches between DCC and TCC.'},
 	    {'path': 'EcalEndcap/EERawDataTask/EERDT L1A TCC errors', 'description': 'Number of L1A value mismatches between DCC and TCC.'}])
-ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/11 DCC-SRP Desync',
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/13 DCC-SRP Desync',
 	   [{'path': 'EcalBarrel/EBRawDataTask/EBRDT bunch crossing SRP errors', 'description': 'Number of bunch crossing value mismatches between DCC and SRP.'},
 	    {'path': 'EcalBarrel/EBRawDataTask/EBRDT L1A SRP errors', 'description': 'Number of L1A value mismatches between DCC and SRP.'}],
 	   [{'path': 'EcalEndcap/EERawDataTask/EERDT bunch crossing SRP errors', 'description': 'Number of bunch crossing value mismatches between DCC and SRP.'},
 	    {'path': 'EcalEndcap/EERawDataTask/EERDT L1A SRP errors', 'description': 'Number of L1A value mismatches between DCC and SRP.'}])
-ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/12 FE MEM Status Flags',
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/14 FE MEM Status Flags',
 	   [{'path': 'Ecal/MEM/StatusFlagsTask MEM front-end status bits',
          'description': 'Front-end (FE) status counter for MEM boxes. Each x-axis tick corresponds to one SuperModule (SM) as indexed by DCC Id and contains two bins corresponding to the MEM boxes (DCC tower Ids = 69, 70). Nominal status is SUPPRESSED. EE+/-2,3,7,8 are not connected to MEM boxes and instead appear with status DISABLED. Mapping from DCC Id to SM name appears below.<br/><pre>01:EE-07  19:EB-10  37:EB+10<br/>02:EE-08  20:EB-11  38:EB+11<br/>03:EE-09  21:EB-12  39:EB+12<br/>04:EE-01  22:EB-13  40:EB+13<br/>05:EE-02  23:EB-14  41:EB+14<br/>06:EE-03  24:EB-15  42:EB+15<br/>07:EE-04  25:EB-16  43:EB+16<br/>08:EE-05  26:EB-17  44:EB+17<br/>09:EE-06  27:EB-18  45:EB+18<br/>10:EB-01  28:EB+01  46:EE+07<br/>11:EB-02  29:EB+02  47:EE+08<br/>12:EB-03  30:EB+03  48:EE+09<br/>13:EB-04  31:EB+04  49:EE+01<br/>14:EB-05  32:EB+05  50:EE+02<br/>15:EB-06  33:EB+06  51:EE+03<br/>16:EB-07  34:EB+07  52:EE+04<br/>17:EB-08  35:EB+08  53:EE+05<br/>18:EB-09  36:EB+09  54:EE+06</pre>'}])
-ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/13 MEM Integrity Errors',
+ecallayout(dqmitems, 'Ecal/Layouts/01 Raw Data/15 MEM Integrity Errors',
 	   [{'path': 'Ecal/MEM/IntegrityTask MEMErrors',
          'description': 'Integrity error and error type counter for MEM boxes. Each x-axis tick corresponds to one SuperModule (SM) as indexed by DCC Id and contains two bins corresponding to the MEM boxes (DCC tower Ids = 69, 70). Nominally, this plot should be empty. Mapping from DCC Id to SM name appears below.<br/><pre>01:EE-07  19:EB-10  37:EB+10<br/>02:EE-08  20:EB-11  38:EB+11<br/>03:EE-09  21:EB-12  39:EB+12<br/>04:EE-01  22:EB-13  40:EB+13<br/>05:EE-02  23:EB-14  41:EB+14<br/>06:EE-03  24:EB-15  42:EB+15<br/>07:EE-04  25:EB-16  43:EB+16<br/>08:EE-05  26:EB-17  44:EB+17<br/>09:EE-06  27:EB-18  45:EB+18<br/>10:EB-01  28:EB+01  46:EE+07<br/>11:EB-02  29:EB+02  47:EE+08<br/>12:EB-03  30:EB+03  48:EE+09<br/>13:EB-04  31:EB+04  49:EE+01<br/>14:EB-05  32:EB+05  50:EE+02<br/>15:EB-06  33:EB+06  51:EE+03<br/>16:EB-07  34:EB+07  52:EE+04<br/>17:EB-08  35:EB+08  53:EE+05<br/>18:EB-09  36:EB+09  54:EE+06</pre>'}])
 
@@ -340,16 +346,16 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+           continue
       ecallayout(dqmitems,'Ecal/Layouts/02 Occupancy/By SuperModule/PN Digi/PN Digi Occupancy %s' % channellabel,
                  [{'path': 'Ecal%s/%sOccupancyTask/%sOT MEM digi occupancy %s' % (detector, label, label, channellabel),
                    'description': 'Digi occupancy.'}])
 
 #____________________ Layouts / 03 Noise ____________________
 ecallayout(dqmitems, 'Ecal/Layouts/03 Noise/00 Presample Quality',
-	   [{'path': 'EcalBarrel/EBSummaryClient/EBPOT pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}],
-	   [{'path': 'EcalEndcap/EESummaryClient/EEPOT EE - pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'},
-	    {'path': 'EcalEndcap/EESummaryClient/EEPOT EE + pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}])
+	   [{'path': 'EcalBarrel/EBSummaryClient/EBPOT pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or (175.0, 300.0) for the forward region, or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}],
+	   [{'path': 'EcalEndcap/EESummaryClient/EEPOT EE - pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or (175.0, 300.0) for the forward region, or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'},
+	    {'path': 'EcalEndcap/EESummaryClient/EEPOT EE + pedestal quality summary G12', 'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or (175.0, 300.0) for the forward region, or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}])
 ecallayout(dqmitems, 'Ecal/Layouts/03 Noise/01 RMS Map',
 	   [{'path': 'EcalBarrel/EBSummaryClient/EBPOT pedestal G12 RMS map', 'description': '2D distribution of the presample RMS. Channels with entries less than 6 are not considered.'}],
 	   [{'path': 'EcalEndcap/EESummaryClient/EEPOT EE - pedestal G12 RMS map', 'description': '2D distribution of the presample RMS. Channels with entries less than 6 are not considered.'},
@@ -384,7 +390,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       channellabel = '%s%s%02d' % (label, sign, channel) # e.g. "EE+05"
       ecallayout(dqmitems,'Ecal/Layouts/03 Noise/By SuperModule/Quality/Quality %s' % channellabel,
                  [{'path': 'Ecal%s/%sPedestalOnlineClient/%sPOT pedestal quality G12 %s' % (detector, label, label, channellabel),
-                   'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}])
+                   'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or (175.0, 300.0) for the forward region, or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}])
       ecallayout(dqmitems,'Ecal/Layouts/03 Noise/By SuperModule/Mean/Mean %s' % channellabel,
                  [{'path': 'Ecal%s/%sPedestalOnlineTask/Gain12/%sPOT pedestal %s G12' % (detector, label, label, channellabel),
                    'description': '2D distribution of mean presample value.'}],
@@ -398,7 +404,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+           continue
       ecallayout(dqmitems,'Ecal/Layouts/03 Noise/By SuperModule/PN/PN Presample %s' % channellabel,
                  [{'path': 'Ecal%s/%sPedestalOnlineTask/PN/%sPOT PN pedestal %s G16' % (detector, label, label, channellabel),
                    'description': 'Presample mean of PN signals.'}])
@@ -870,7 +876,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+           continue
       ecallayout(dqmitems,'Ecal/Layouts/08 Laser/Laser2 (Green)/PN Amplitude/Amplitude %s' % channellabel,
                  [{'path': 'Ecal%s/%sLaserTask/Laser2/PN/Gain16/%sLT PNs amplitude %s G16 L2' % (detector, label, label, channellabel),
                    'description': 'Mean laser pulse amplitude in the PN diodes. In general, a PN channel is filled only when a laser pulse was observed in the crystals that are associated to the diode. When no laser signal was observed for longer than 3 lumi sections, the channels start to get filled with 0 amplitude, causing the mean to drop.'}])
@@ -959,7 +965,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9)]: # Loop over EE
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+          continue
       ecallayout(dqmitems,'Ecal/Layouts/09 Led/Led1(Blue)/PN Amplitude/Amplitude %s' % channellabel,
                  [{'path': 'Ecal%s/%sLedTask/Led1/PN/Gain16/%sLDT PNs amplitude %s G16 L1' % (detector, label, label, channellabel),
                    'description': 'Mean led pulse amplitude in the PN diodes. In general, a PN channel is filled only when a led pulse was observed in the crystals that are associated to the diode. When no led signal was observed for longer than 3 lumi sections, the channels start to get filled with 0 amplitude, causing the mean to drop.'}])
@@ -980,7 +986,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+          continue
       ecallayout(dqmitems,'Ecal/Layouts/10 Test Pulse/PNGain16/Amplitude %s' % channellabel,
                  [{'path': 'Ecal%s/%sTestPulseTask/PN/Gain16/%sTPT PNs amplitude %s G16' % (detector, label, label, channellabel),
                    'description': 'Test pulse amplitude in the PN diodes.'}])
@@ -1040,7 +1046,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
                    'description': 'Digi occupancy.'}])
       ecallayout(dqmitems,'Ecal/Layouts/12 By SuperModule/%s/03 Presample Quality' % channellabel,
                  [{'path': 'Ecal%s/%sPedestalOnlineClient/%sPOT pedestal quality G12 %s' % (detector, label, label, channellabel),
-                   'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}])
+                   'description': 'Summary of the presample data quality. A channel is red if presample mean is outside the range (175.0, 240.0) or (175.0, 300.0) for the forward region, or RMS is greater than 3.0. RMS threshold is 6.0 in the forward region (|eta| > 2.1). Channels with entries less than 6 are not considered.'}])
       ecallayout(dqmitems,'Ecal/Layouts/12 By SuperModule/%s/04 Presample Mean' % channellabel,
                  [{'path': 'Ecal%s/%sPedestalOnlineTask/Gain12/%sPOT pedestal %s G12' % (detector, label, label, channellabel),
                    'description': '2D distribution of mean presample value.'}],
@@ -1187,7 +1193,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
                  [{'path': 'Ecal%s/%sPedestalOnlineClient/%sPOT pedestal rms G12 %s' % (detector, label, label, channellabel),
                    'description': 'Distribution of the pedestal RMS for each crystal channel. Channels with entries less than 3 are not considered.'}])
       if detector == 'Barrel':
-	      continue
+        continue
       # LED ___________
       ecallayout(dqmitems,'Ecal/Layouts/12 By SuperModule/%s/Led/00 Quality L1' % channellabel,
                  [{'path': 'Ecal%s/%sLedClient/%sLDT led quality L1 %s' % (detector, label, label, channellabel),
@@ -1234,7 +1240,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+          continue
       channellabel = '%s%s%02d' % (label, sign, channel) # e.g. "EE+05"
       ecallayout(dqmitems,'Ecal/Layouts/12 By SuperModule/%s/00 PN Digi Occupancy' % channellabel,
                  [{'path': 'Ecal%s/%sOccupancyTask/%sOT MEM digi occupancy %s' % (detector, label, label, channellabel),
@@ -1271,7 +1277,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
                  [{'path': 'Ecal%s/%sPedestalClient/%sPDT PNs pedestal rms %s G16' % (detector, label, label, channellabel),
                    'description': 'Distribution of the pedestal RMS for each PN channel. Channels with entries less than 3 are not considered.'}])
       if detector == 'Barrel':
-	      continue
+        continue
      # LED ___________
       ecallayout(dqmitems,'Ecal/Layouts/12 By SuperModule/%s/Led/00 PN Amplitude L1' % channellabel,
                  [{'path': 'Ecal%s/%sLedTask/Led1/PN/Gain16/%sLDT PNs amplitude %s G16 L1' % (detector, label, label, channellabel),
@@ -1321,5 +1327,31 @@ ecallayout(dqmitems, 'Ecal/Layouts/13 By Lumisection/09 TTF4 vs Masking Status',
 	   [{'path': 'EcalBarrel/EBTriggerTowerTask/EBTTT TTF4 vs Masking Status by lumi',      'description': 'Summarizes whether a TT was permanently masked in either the TPG TT or Strips DB record, or had an instance of TT Flag>=4 (due to link error/hamming code error/automasking of unstable link/automasking of a hot TT):<br/>GRAY: no TTF4, permanently masked in DB,<br/>BLACK: has TTF4, permanently masked in DB,<br/>BLUE: has TTF4, NOT permanently masked in DB. Updated each lumisection.'}],
 	   [{'path': 'EcalEndcap/EETriggerTowerTask/EETTT TTF4 vs Masking Status EE - by lumi', 'description': 'Summarizes whether a TT was permanently masked in either the TPG TT or Strips DB record, or had an instance of TT Flag>=4 (due to link error/hamming code error/automasking of unstable link/automasking of a hot TT):<br/>GRAY: no TTF4, permanently masked in DB,<br/>BLACK: has TTF4, permanently masked in DB,<br/>BLUE: has TTF4, NOT permanently masked in DB. Updated each lumisection.'},
 	    {'path': 'EcalEndcap/EETriggerTowerTask/EETTT TTF4 vs Masking Status EE + by lumi', 'description': 'Summarizes whether a TT was permanently masked in either the TPG TT or Strips DB record, or had an instance of TT Flag>=4 (due to link error/hamming code error/automasking of unstable link/automasking of a hot TT):<br/>GRAY: no TTF4, permanently masked in DB,<br/>BLACK: has TTF4, permanently masked in DB,<br/>BLUE: has TTF4, NOT permanently masked in DB. Updated each lumisection.'}])
+#____________________ Layouts / 14 MLDQM  ____________________
+ecallayout(dqmitems, 'Ecal/Layouts/14 MLDQM/01 ML Quality',
+           [{'path': 'EcalBarrel/EBSummaryClient/EBOT ML quality summary', 'description': 'ML quality EB.'}],
+           [{'path': 'EcalEndcap/EESummaryClient/EEOT EE - ML quality summary', 'description': 'ML quality EE-.'},
+            {'path': 'EcalEndcap/EESummaryClient/EEOT EE + ML quality summary', 'description': 'ML quality EE+.'}])
+ecallayout(dqmitems, 'Ecal/Layouts/14 MLDQM/02 ML Loss',
+           [{'path': 'EcalBarrel/EBOccupancyTask/EBOT AE Loss', 'description': 'ML AE Loss EB.'}],
+           [{'path': 'EcalEndcap/EEOccupancyTask/EEOT AE Loss EE -', 'description': 'ML AE Loss EE-.'},
+            {'path': 'EcalEndcap/EEOccupancyTask/EEOT AE Loss EE +', 'description': 'ML AE Loss EE+.'}])
+ecallayout(dqmitems, 'Ecal/Layouts/14 MLDQM/03 ML Reco',
+           [{'path': 'EcalBarrel/EBOccupancyTask/EBOT AE Reco', 'description': 'ML AE Reconstructed occupancy EB.'}],
+           [{'path': 'EcalEndcap/EEOccupancyTask/EEOT AE Reco EE -', 'description': 'ML AE Reconstructed occupancy EE-.'},
+            {'path': 'EcalEndcap/EEOccupancyTask/EEOT AE Reco EE +', 'description': 'ML AE Reconstructed occupancy EE+.'}])
+ecallayout(dqmitems, 'Ecal/Layouts/14 MLDQM/04 ML BadTowerCount Normalized',
+           [{'path': 'EcalBarrel/EBOccupancyTask/EBOT ML bad tower count normalized', 'description': 'EB ML bad tower count normalized by no.of LS'}],
+           [{'path': 'EcalEndcap/EEOccupancyTask/EEOT ML bad tower count normalized EE -', 'description': 'EE- ML bad tower count normalized by no.of LS'},
+            {'path': 'EcalEndcap/EEOccupancyTask/EEOT ML bad tower count normalized EE +', 'description': 'EE+ ML bad tower count normalized by no.of LS'}])
+ecallayout(dqmitems, 'Ecal/Layouts/14 MLDQM/05 Bad Towers per Lumisection',
+           [{'path': 'Ecal/Trends/Number of bad towers from MLDQM EB', 'description': 'Number of bad towers in EB per lumisection from MLDQM'}],
+           [{'path': 'Ecal/Trends/Number of bad towers from MLDQM EE', 'description': 'Number of bad towers in EE per lumisection from MLDQM'}])
+ecallayout(dqmitems, 'Ecal/Layouts/14 MLDQM/06 Number of Events per Lumisection',
+           [{'path': 'Ecal/Trends/Number of Events per Lumisection', 'description': 'Number of Events per Lumisection'}])
+ecallayout(dqmitems, 'Ecal/Layouts/14 MLDQM/07 Number of Events used per ML image',
+           [{'path': 'Ecal/Trends/Number of Events used per ML image', 'description': 'Number of Events used per ML image'}])
+ecallayout(dqmitems, 'Ecal/Layouts/14 MLDQM/08 PU per Lumisection',
+           [{'path': 'Ecal/Trends/PU per Lumisection', 'description': 'PU per Lumisection'}])
 
 adapt_and_register(dqmitems, scope=LayoutScope.ONLINE)

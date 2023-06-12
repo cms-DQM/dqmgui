@@ -1,8 +1,6 @@
 from layouts.layout_manager import LayoutScope, adapt_and_register
 dqmitems={}
 
-
-
 def shifthcalcaliblayout(i, p, *rows): i['00 Shift/HcalCalib/' + p] = rows
 
 

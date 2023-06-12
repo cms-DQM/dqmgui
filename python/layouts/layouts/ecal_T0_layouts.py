@@ -340,7 +340,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+           continue
       ecallayout(dqmitems,'Ecal/Layouts/02 Occupancy/By SuperModule/PN Digi/PN Digi Occupancy %s' % channellabel,
                  [{'path': 'Ecal%s/%sOccupancyTask/%sOT MEM digi occupancy %s' % (detector, label, label, channellabel),
                    'description': 'Digi occupancy.'}])
@@ -394,7 +394,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+           continue
       ecallayout(dqmitems,'Ecal/Layouts/03 Noise/By SuperModule/PN/PN Presample %s' % channellabel,
                  [{'path': 'Ecal%s/%sPedestalOnlineTask/PN/%sPOT PN pedestal %s G16' % (detector, label, label, channellabel),
                    'description': 'Presample mean of PN signals.'}])
@@ -841,7 +841,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+           continue
       ecallayout(dqmitems,'Ecal/Layouts/08 Laser/Laser2 (Green)/PN Amplitude/Amplitude %s' % channellabel,
                  [{'path': 'Ecal%s/%sLaserTask/Laser2/PN/Gain16/%sLT PNs amplitude %s G16 L2' % (detector, label, label, channellabel),
                    'description': 'Mean laser pulse amplitude in the PN diodes. In general, a PN channel is filled only when a laser pulse was observed in the crystals that are associated to the diode. When no laser signal was observed for longer than 3 lumi sections, the channels start to get filled with 0 amplitude, causing the mean to drop.'}])
@@ -930,7 +930,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9)]: # Loop over EE
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+           continue
       ecallayout(dqmitems,'Ecal/Layouts/09 Led/Led1(Blue)/PN Amplitude/Amplitude %s' % channellabel,
                  [{'path': 'Ecal%s/%sLedTask/Led1/PN/Gain16/%sLDT PNs amplitude %s G16 L1' % (detector, label, label, channellabel),
                    'description': 'Mean led pulse amplitude in the PN diodes. In general, a PN channel is filled only when a led pulse was observed in the crystals that are associated to the diode. When no led signal was observed for longer than 3 lumi sections, the channels start to get filled with 0 amplitude, causing the mean to drop.'}])
@@ -951,7 +951,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+          continue
       ecallayout(dqmitems,'Ecal/Layouts/10 Test Pulse/PNGain16/Amplitude %s' % channellabel,
                  [{'path': 'Ecal%s/%sTestPulseTask/PN/Gain16/%sTPT PNs amplitude %s G16' % (detector, label, label, channellabel),
                    'description': 'Test pulse amplitude in the PN diodes.'}])
@@ -1155,7 +1155,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
                  [{'path': 'Ecal%s/%sPedestalOnlineClient/%sPOT pedestal rms G12 %s' % (detector, label, label, channellabel),
                    'description': 'Distribution of the pedestal RMS for each crystal channel. Channels with entries less than 3 are not considered.'}])
       if detector == 'Barrel':
-	      continue
+        continue
       # LED ___________
       ecallayout(dqmitems,'Ecal/Layouts/12 By SuperModule/%s/Led/00 Quality L1' % channellabel,
                  [{'path': 'Ecal%s/%sLedClient/%sLDT led quality L1 %s' % (detector, label, label, channellabel),
@@ -1202,7 +1202,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
       # Exclude EE[+-]01,04,05,06,09
       if detector == 'Endcap':
         if channel == 1 or channel == 4 or channel == 5 or channel == 6 or channel == 9:
-	        continue
+          continue
       channellabel = '%s%s%02d' % (label, sign, channel) # e.g. "EE+05"
       ecallayout(dqmitems,'Ecal/Layouts/12 By SuperModule/%s/00 PN Digi Occupancy' % channellabel,
                  [{'path': 'Ecal%s/%sOccupancyTask/%sOT MEM digi occupancy %s' % (detector, label, label, channellabel),
@@ -1239,7 +1239,7 @@ for (detector, label, maxchannel) in [('Endcap', 'EE', 9), ('Barrel', 'EB', 18)]
                  [{'path': 'Ecal%s/%sPedestalClient/%sPDT PNs pedestal rms %s G16' % (detector, label, label, channellabel),
                    'description': 'Distribution of the pedestal RMS for each PN channel. Channels with entries less than 3 are not considered.'}])
       if detector == 'Barrel':
-	      continue
+        continue
      # LED ___________
       ecallayout(dqmitems,'Ecal/Layouts/12 By SuperModule/%s/Led/00 PN Amplitude L1' % channellabel,
                  [{'path': 'Ecal%s/%sLedTask/Led1/PN/Gain16/%sLDT PNs amplitude %s G16 L1' % (detector, label, label, channellabel),

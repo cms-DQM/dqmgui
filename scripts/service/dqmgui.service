@@ -1,0 +1,18 @@
+[Unit]
+Description=DQM GUI service
+Wants=network-online.target
+Requires=dqmgui-cleanup.service
+
+[Service]
+Type=simple
+User=dqmpro
+WorkingDirectory=/data/dqmgui/scripts/
+ExecStart=/data/dqmgui/scripts/start-gui.sh
+Restart=always
+RestartSec=10
+KillMode=control-group
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
+

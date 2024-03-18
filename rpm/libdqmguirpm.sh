@@ -1,60 +1,83 @@
-#!/bin/bash -e
+#!/bin/bash -ex
+
+# Script to build an RPM package for the new DQMGUI, targeting the P5 machines.
+# Required packages to run this script: python3, python3-pip, curl, rpmdevtools
+# Run this from the same directory where this script is.
 
 BUILD_ARCH=x86_64
-TOPDIR=$PWD
 
-#Chech is release version is provided
-echo $1
-if [[ -z "$1" ]];
-then
+# Where the RPM will install files to
+INSTALLATION_DIR=/dqmgui
+
+# Where PB and ROOT files will be expected. Will be created if it does not exist
+DQMGUI_DATA_DIR=/data/dqmgui
+
+# Installation machine's CMSSW base directory
+CMSSW_BASE_DIR=/dqmdata/dqm_cmssw
+
+# Installation machine's CMSSW env activation script
+CMSSW_ENV_SCRIPT=/opt/offline/cmsset_default.sh
+
+# TODO: Use the above paths to automatically modify the paths in the service files
+
+#Check is release version is provided
+if [[ -z "$1" ]]; then
     echo "Please provide DQM GUI version; tags can be found here: https://github.com/cms-DQM/dqmgui/tags"
-    exit
+    exit 1
 fi
 
 DQM_GUI_RELEASE_VERSION=$1
 
-#Check python version
-if [[ "$(python3 -V)" =~ "Python 3" ]];
-then
+# Cleanup before building
+rm -rf ./*.tar.gz*
+rm -rf ./*.rpm
+rm -rf ./dqmgui
+rm -rf ./dqmgui-${DQM_GUI_RELEASE_VERSION}
+
+# Check python version
+# We should probably check for a more specific version at some point.
+if [[ "$(python3 -V)" =~ "Python 3" ]]; then
     echo "Python 3 is installed"
 else
     echo "Error: Python 3 is not installed"
-    exit
+    exit 1
 fi
+# Download DQMGUI's source in the background
 
-#pip install dependecies
+curl -L "https://github.com/cms-DQM/dqmgui/archive/refs/tags/${DQM_GUI_RELEASE_VERSION}.tar.gz" -o "${DQM_GUI_RELEASE_VERSION}.tar.gz" &
 
-python3 -m pip install aiohttp==3.6.2  -t .python_packages
-python3 -m pip install aiosqlite==0.13.0  -t .python_packages
-python3 -m pip install async-lru==1.0.2  -t .python_packages
-python3 -m pip install contextvars==2.4 -t .python_packages
-python3 -m pip install Cython --install-option="--no-cython-compile" -t .python_packages
-python3 -m pip install setuptools -t .python_packages
+# Use pip to download dependecies and bundle them in the RPM
+python3 -m pip install -r ../python/requirements.txt -t .python_packages --upgrade
+# Separate file for cython, due to the need of specifying install-option,
+# which disables wheel setup, and prevents the rest of the packages to be installed.
+python3 -m pip install -r ../python/requirements_cython.txt -t .python_packages --upgrade
 
-wget "https://github.com/cms-DQM/dqmgui/archive/refs/tags/${DQM_GUI_RELEASE_VERSION}.tar.gz"
+# Wait in case curl is not done
+wait
 
-# moving python pacakeges to DQM GUI dir
-tar -xzvf "${DQM_GUI_RELEASE_VERSION}.tar.gz"
-mv .python_packages  "dqmgui-${DQM_GUI_RELEASE_VERSION}/python/"
-tar -czvf "${DQM_GUI_RELEASE_VERSION}.tar.gz" "dqmgui-${DQM_GUI_RELEASE_VERSION}"
+# Move python packages to DQM GUI dir
+tar -xzf "${DQM_GUI_RELEASE_VERSION}.tar.gz"
+mv .python_packages "dqmgui-${DQM_GUI_RELEASE_VERSION}/python/"
+tar -czf "${DQM_GUI_RELEASE_VERSION}.tar.gz" "dqmgui-${DQM_GUI_RELEASE_VERSION}"
 mkdir dqmgui
 mv "${DQM_GUI_RELEASE_VERSION}.tar.gz" dqmgui
-#cleaning dir
+
+# Cleanup
 rm -rf "dqmgui-${DQM_GUI_RELEASE_VERSION}"
 
-
-cat > dqmgui-lib.spec <<EOF
+# Create the RPM spec file
+cat >dqmgui-lib.spec <<EOF
 Name: DQM_GUI
-Version: 1.0.0
-Release: ${DQM_GUI_RELEASE_VERSION}
+Version: ${DQM_GUI_RELEASE_VERSION}
+Release: 1
 Summary: DQM GUI software
 License: gpl
-Group: Core DQM
+Group: CERN CMS DQM-DC
 Packager: Ernesta Petraityte
 Source0: "${DQM_GUI_RELEASE_VERSION}.tar.gz"
 %define _tmppath %{getenv:PWD}/dqmgui_rpm
 BuildRoot:  %{_tmppath}
-BuildArch: x86_64
+BuildArch: $BUILD_ARCH
 AutoReqProv: no
 
 %description
@@ -68,54 +91,107 @@ echo  %{_tmppath}
 %install
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT
-tar -C %{getenv:PWD}  -c dqmgui  | tar -xC \$RPM_BUILD_ROOT
+tar -C %{getenv:PWD} -c dqmgui | tar -xC \$RPM_BUILD_ROOT
 
 %post
-#### extracting tar, moving older release to old_release folder
+# This step takes place in the machine we install DQMGUI to.
+# Cleanup existing release, extract tar
+# set -x
 
-cd /dqmgui
-tar -xzvf ${DQM_GUI_RELEASE_VERSION}.tar.gz
+mkdir -p $INSTALLATION_DIR
+
+# Cleanup existing installation, but don't delete current dir or the tar.gz that
+# has already been copied there by the rpm installation.
+find $INSTALLATION_DIR -not -name "*.tar.gz" -not -path $INSTALLATION_DIR -exec rm -rf {} \;
+
+HOST=\$(hostname)
+
+# Figure out the type of installation we're doing
+# and configure the CMSSW path in the P5 NFS.
+# This should probably not be hardcoded.
+IS_PRODUCTION=0
+DQMGUI_MODE_PATH=""
+if [ "\$HOST" = "dqmsrv-c2a06-08-01" ];
+then
+    DQMGUI_MODE_PATH="$CMSSW_BASE_DIR/current_playback"
+else
+    IS_PRODUCTION=1
+    DQMGUI_MODE_PATH="$CMSSW_BASE_DIR/current_production"
+fi
+cd $INSTALLATION_DIR
+tar -xzf ${DQM_GUI_RELEASE_VERSION}.tar.gz
+
+# Move installation files and cleanup
 mv ./dqmgui-${DQM_GUI_RELEASE_VERSION}/* .
 rm -rf ./dqmgui-${DQM_GUI_RELEASE_VERSION}
 
-# if [[ -d "/dqmgui/old_releases" ]]
-# then 
-#     echo "cannot create directory ‘old_releases’: File exists"
-# else
-#     exec mkdir old_releases
-# fi
+## Writing correct CMSSW release version to cmssw_info file
+cd \$DQMGUI_MODE_PATH
 
-# mv ./1.0.15.tar.gz ./old_releases/
-
-## witting correct CMSSW release version to cmssw_info file
-HOST=\$(hostname)
-
-DQMGUI_MODE_PATH=""
-if [ "\$HOST"="srv-c2f11-29-03" ];
-then
-    DQMGUI_MODE_PATH='current_playback'
-else
-    DQMGUI_MODE_PATH='current_production'
-fi
-
-cd /dqmdata/dqm_cmssw/\$DQMGUI_MODE_PATH
-
+# Script generated by cmssw_deploy script
 file_name="cmswrapper.sh"
 CMSSW_VERSION=\$(grep -oh "\w*CMSSW_\w*" ./\$file_name)
 
-cd /dqmgui/scripts
-
+cd $INSTALLATION_DIR/scripts
 sed -i "2s/.*/\$CMSSW_VERSION/" cmssw_info
-sudo chmod -R 777 /data/dqmgui/ 
-sudo chmod -R 777 /dqmgui/ 
-export \$PYTHONPATH=/dqmgui/python/.python_packages
+
+# Update service files and scripts with appropriate variables.
+if [ \$IS_PRODUCTION -eq 1 ]; then
+   SERVICE_USER=dqmpro
+else
+   SERVICE_USER=dqmdev
+fi
+
+sed -Ei "s#User=.*#User=\$SERVICE_USER#" service/*.service
+sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts/service#" service/dqmgui-cleanup.service service/dqmgui.service
+sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts/service#" service/dqmgui-cleanup.service service/dqmgui.service
+sed -Ei "s#ExecStart=.*#ExecStart=/usr/bin/python3 $INSTALLATION_DIR/scripts/alarm-system/alarm_system.py#" service/dqmgui-alarm.service
+sed -Ei "s#ExecStart=.*#ExecStart=$INSTALLATION_DIR/scripts/service/start-cleanup.sh#" service/dqmgui-cleanup.service
+sed -Ei "s#ExecStart=.*#ExecStart=$INSTALLATION_DIR/scripts/service/start-gui.sh#" service/dqmgui.service
+sed -Ei "s#ALLOWED_USER=.*#ALLOWED_USER=\$SERVICE_USER#" service/start-cleanup.sh service/start-gui.sh
+sed -Ei "s#INSTALLATION_DIR=.*#INSTALLATION_DIR=$INSTALLATION_DIR#" service/start-cleanup.sh service/start-gui.sh
+sed -Ei "s#CMSSW_BASE_DIR=.*#CMSSW_BASE_DIR=$CMSSW_BASE_DIR#" service/start-cleanup.sh service/start-gui.sh
+sed -Ei "s#DQMGUI_DATA_DIR=.*#DQMGUI_DATA_DIR=$DQMGUI_DATA_DIR#" service/start-cleanup.sh service/start-gui.sh
+
+# Move service files to the appropriate dir
+cp -r service/*.service /usr/lib/systemd/system/
+
+# Tell daemon to reload the updated files
+systemctl daemon-reload
+
+mkdir -p $DQMGUI_DATA_DIR
+# This does not look like a good idea...
+sudo chmod -R 777 $DQMGUI_DATA_DIR
+sudo chmod -R 777 $INSTALLATION_DIR
+# export PYTHONPATH=$INSTALLATION_DIR/python/.python_packages
+
+if [ ! -f $CMSSW_ENV_SCRIPT ]; then
+    echo "Could not find ${CMSSW_ENV_SCRIPT}! Unable to build DQMGUI"
+    exit
+else
+    source $CMSSW_ENV_SCRIPT
+fi
+echo "Starting build as user dqm"
+su -c 'cd $INSTALLATION_DIR && ./scripts/build.sh' dqm
+echo "Done, restarting services..."
+# Enable and start services
+for service in service/*.service; do
+    service_name=\$(echo \$service | cut -d'/' -f2 | cut -d. -f1)
+    systemctl enable \$service_name
+    systemctl restart \$service_name
+done
+echo "Done!"
 
 %files
 %defattr(755, root, root, 777)
-/dqmgui/
+$INSTALLATION_DIR
 
 EOF
+
+# Create directories for building the RPM in the current machine
 mkdir -p RPMBUILD/{RPMS/{noarch},SPECS,BUILD,SOURCES,SRPMS}
-rpmbuild --define "_topdir `pwd`/RPMBUILD" -bb dqmgui-lib.spec
-mv  ./RPMBUILD/RPMS/x86_64/DQM_GUI-1.0.0-${DQM_GUI_RELEASE_VERSION}.x86_64.rpm ./
+rpmbuild --define "_topdir $(pwd)/RPMBUILD" -bb dqmgui-lib.spec
+mv ./RPMBUILD/RPMS/x86_64/DQM_GUI-${DQM_GUI_RELEASE_VERSION}-1.x86_64.rpm ./
 rm -rf dqmgui dqmgui_rpm RPMBUILD
+
+echo "Build was successful!"

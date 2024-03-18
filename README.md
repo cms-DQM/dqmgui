@@ -126,11 +126,11 @@ In order to add new importer you have to do three things:
 
 
 """
-        Returns a list which contains dicts. Keys of the dicts are (run, lumi) 
+        Returns a list which contains dicts. Keys of the dicts are (run, lumi)
         tuples and values are lists of tuples (me_path, me_info). Full structure:
         [(run, lumi):[(me_path, me_info)]]
         me_path is normalized and represented as a binary string.
-        We can return multiple (run, lumi) pairs because some file formats might 
+        We can return multiple (run, lumi) pairs because some file formats might
         contain multiple runs/lumis in ine file.
         me_path, me_info will be saved as separete blobs in the DB.
         """
@@ -145,7 +145,7 @@ class MyFormatImporter:
     # Actual reading of a file removed for brevity
     return {
       (run, lumi): [
-        (b'/normalized/path/to/ME1', MEInfo(b'Float', value=float(1.23)), 
+        (b'/normalized/path/to/ME1', MEInfo(b'Float', value=float(1.23)),
         (b'/normalized/path/to/ME2', MEInfo(b'TH1D', offset=123)
     ]}
 ```
@@ -227,7 +227,7 @@ Supports `notOlderThan` parameter to bypass the cache.
 
 Run, full dataset and a path has to be provided in the URL.
 
-If `layout` is `null`, ME is not coming from a layout. Otherwise, `layout` contains the name of the layout this ME comes from. 
+If `layout` is `null`, ME is not coming from a layout. Otherwise, `layout` contains the name of the layout this ME comes from.
 
 `lumi` is optional. Passing 0 or not passing it at all returns per result.
 
@@ -613,11 +613,11 @@ HLT/DAQ copies reconstructed data files (DQM streams) to this directory in our B
 
 Software that is responsible for managing and merging the files from multiple FU machines is HLTD. It works on all 4 FUs and a BU. In a FU mode it trasfers all ROOT and PB files to a respective BU and on a BU it merges the files and uploads them to the respective GUI machine(s).
 
-Every CMSSW process (i.e an online client) produces a PB (protobuf) snapshot file every lumisection containing a snapshot of all histograms from all previous lumisections. In the end of the run, every client produces a per run ROOT file containing all histograms of that run. 
+Every CMSSW process (i.e an online client) produces a PB (protobuf) snapshot file every lumisection containing a snapshot of all histograms from all previous lumisections. In the end of the run, every client produces a per run ROOT file containing all histograms of that run.
 
 ## HLTD
 
-HLTD is the software that is responsible for DQM output file transfer, concatenation and merger in all FUs, a respective BU and GUI machines. 
+HLTD is the software that is responsible for DQM output file transfer, concatenation and merger in all FUs, a respective BU and GUI machines.
 
 The repository is available here (needs permission from DAQ to access): https://gitlab.cern.ch/cms-daq/fff/hltd
 
@@ -645,7 +645,7 @@ Editable code:
 
 `/opt/hltd/python/`
 
-Each time HLTD is restared, code from the directory above is coppied here: 
+Each time HLTD is restared, code from the directory above is coppied here:
 
 `/opt/hltd/scratch/python/`
 
@@ -659,7 +659,7 @@ Exit procedure of the `anelasticDQM` process is initiated by the main HLTD progr
 
 ### HLTD (`anelastiocDQM.py`) in DQM BU mode
 
-In DQM BU mode, HLTD is responsible for concatenating the snapshot PB files, merging the per run ROOT files and uploading both of them to the respective DQM GUI machine(s). 
+In DQM BU mode, HLTD is responsible for concatenating the snapshot PB files, merging the per run ROOT files and uploading both of them to the respective DQM GUI machine(s).
 
 Files to process are found by observing this directory `/fff/output/DQMOutput/runXXXXXX` every 10 seconds. All found PB files are concatenated, the result is copied over to the GUI machine(s) and registered using the registration endpoint.
 
@@ -679,19 +679,19 @@ There are two systemd services running: `dqmgui.service` and `dqmgui-cleanup.ser
 
 The scripts that systemd will run, will navigate to appropriate CMSSW release location (`/dqmdata/dqm_cmssw/current_playback/src/` or `/dqmdata/dqm_cmssw/current_production/src/`), do `cmsenv`, find the required script whether it's in a release or checked out, and run it by adding the arguemnts that were passed to itself.
 
-Systemd configuration is located here: 
+Systemd configuration is located here:
 ``` bash
 /usr/lib/systemd/system/dqmgui.service
 /usr/lib/systemd/system/dqmgui-cleanup.service
 ```
 
-Services can be restarted like so: 
+Services can be restarted like so:
 ``` bash
-sudo systemctl restart dqmgui 
+sudo systemctl restart dqmgui
 sudo systemctl restart dqmgui-cleanup
 ```
 
-Systemd log can be viewd like so: 
+Systemd log can be viewd like so:
 ``` bash
 sudo journalctl -u dqmgui
 sudo journalctl -u dqmgui-cleanup
@@ -743,7 +743,7 @@ Backend related task list.
 * ~~Make sure to zlib uncompress only strings when importing PB files~~
 * Fix the deadlock after this:
   * The root cause of this has already been eliminated but the deadlock might still occur on multiple renderer crashes.
-* During live mode, current run is not always visible, we're getting 'No Information', which means that data is not coming. 
+* During live mode, current run is not always visible, we're getting 'No Information', which means that data is not coming.
 ```
 2021-01-22 18:18:47,949 - INFO - helpers.logged - 47  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 122) [OK 13.8ms]
 2021-01-22 18:18:47,949 - INFO - helpers.logged - 48  IOService.read_block('/afs/cern.ch/work/a/akirilov/newGuiInputData/run338761/run338761_DQMLive_concat_fc937cf9d48e908d322b5390de7cb46f.pb', 3) [OK 8.1ms]
@@ -812,7 +812,7 @@ The first (left most) data point is a clear outlier and we discard it from our c
 
 ### Target request rate
 
-Given the reasoning above, the most amount of load that the DQM GUI has ever had since the beginning of CMS, is ~15000 requests per minute. 15000 requests per minutes equals to 250 requests per second. 
+Given the reasoning above, the most amount of load that the DQM GUI has ever had since the beginning of CMS, is ~15000 requests per minute. 15000 requests per minutes equals to 250 requests per second.
 
 If we can show that the new DQM GUI can withstand that, we can conclude that performance under concurrent load of an entire collaboration is not an issue for the successor.
 
@@ -840,7 +840,7 @@ Pretty much all features that we wanted to provide with the new DQM GUI are alre
 
 ### Cython
 
-First and foremost, we most definitely need to Cythonise the only remaining DQMIO TTree based file importer to speed up the process of importing per lumisection data. More information about Cython can be found above, in this document. 
+First and foremost, we most definitely need to Cythonise the only remaining DQMIO TTree based file importer to speed up the process of importing per lumisection data. More information about Cython can be found above, in this document.
 
 Part of the `nanoroot` framework has already been Cythonised (to speed up DQM Legacy file importing) and this introduced breaking changes to the code that's responsible for DQMIO importing as well. That's why it's very important to address this issue as soon as possible.
 

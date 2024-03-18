@@ -1,0 +1,21 @@
+[Unit]
+Description=DQM GUI Alarm System
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=
+WorkingDirectory=
+ExecStart=/usr/bin/python3 ./alarm_system.py
+Restart=always
+RestartSec=10
+KillMode=control-group
+KillSignal=SIGINT
+Environment="GUI_API_URL=http://localhost"
+Environment="GUI_API_PORT=8889"
+Environment="SOUND_SERVER_URL=daq-expert.cms"
+Environment="SOUND_SERVER_PORT=50555"
+Environment="EMAIL_ADDRESSES=cms-dqm-oncall@cern.ch"
+
+[Install]
+WantedBy=multi-user.target

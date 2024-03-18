@@ -27,4 +27,5 @@ python3 -m pip install xrootd --user
 git clone https://github.com/cms-DQM/dqmgui.git
 cd dqmgui
 echo $PWD
-python3 -m pip install -r /home/cmsusr/dqmgui/python/requirements.txt -t /home/cmsusr/dqmgui/python/.python_packages
+python3 -m pip install -r /home/cmsusr/dqmgui/python/requirements.txt -t /home/cmsusr/dqmgui/python/.python_packages --upgrade
+python3 -m pip install -r /home/cmsusr/dqmgui/python/requirements_cython.txt -t /home/cmsusr/dqmgui/python/.python_packages --upgrade

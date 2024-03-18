@@ -1,0 +1,17 @@
+[Unit]
+Description=DQM GUI cleanup service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=
+WorkingDirectory=
+ExecStart=./start-cleanup.sh
+Restart=always
+RestartSec=10
+KillMode=control-group
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
+

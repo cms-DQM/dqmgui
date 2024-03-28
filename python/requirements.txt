@@ -1,6 +1,5 @@
-aiohttp==3.6.2
-aiosqlite==0.13.0
-async-lru==1.0.2
-contextvars==2.4
-Cython
+aiohttp<3.7.0
+aiosqlite<0.14.0
+async-lru<2.0.0
+contextvars<3.0
 setuptools

@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-# Script to build an RPM package for the new DQMGUI
+# Script to build an RPM package for the new DQMGUI, targeting the P5 machines.
 # Required packages to run this script: python3, python3-pip, curl, rpmdevtools
 # Run this from the same directory where this script is.
 
@@ -21,7 +21,7 @@ CMSSW_BASE_DIR=/dqmdata/dqm_cmssw
 #Check is release version is provided
 if [[ -z "$1" ]]; then
     echo "Please provide DQM GUI version; tags can be found here: https://github.com/cms-DQM/dqmgui/tags"
-    exit
+    exit 1
 fi
 
 DQM_GUI_RELEASE_VERSION=$1
@@ -45,17 +45,18 @@ fi
 curl -L "https://github.com/cms-DQM/dqmgui/archive/refs/tags/${DQM_GUI_RELEASE_VERSION}.tar.gz" -o "${DQM_GUI_RELEASE_VERSION}.tar.gz" &
 
 # Use pip to download dependecies and bundle them in the RPM
-# This should probably be a requirements.txt file
-python3 -m pip install contextvars==2.4 async-lru==1.0.2 aiosqlite==0.13.0 aiohttp==3.6.2 setuptools -t .python_packages
-python3 -m pip install Cython --install-option="--no-cython-compile" -t .python_packages
+python3 -m pip install -r ../python/requirements.txt -t .python_packages --upgrade
+# Separate file for cython, due to the need of specifying install-option,
+# which disables wheel setup, and prevents the rest of the packages to be installed.
+python3 -m pip install -r ../python/requirements_cython.txt -t .python_packages --upgrade
 
 # Wait in case curl is not done
 wait
 
 # Move python packages to DQM GUI dir
-tar -xzvf "${DQM_GUI_RELEASE_VERSION}.tar.gz"
+tar -xzf "${DQM_GUI_RELEASE_VERSION}.tar.gz"
 mv .python_packages "dqmgui-${DQM_GUI_RELEASE_VERSION}/python/"
-tar -czvf "${DQM_GUI_RELEASE_VERSION}.tar.gz" "dqmgui-${DQM_GUI_RELEASE_VERSION}"
+tar -czf "${DQM_GUI_RELEASE_VERSION}.tar.gz" "dqmgui-${DQM_GUI_RELEASE_VERSION}"
 mkdir dqmgui
 mv "${DQM_GUI_RELEASE_VERSION}.tar.gz" dqmgui
 
@@ -74,7 +75,7 @@ Packager: Ernesta Petraityte
 Source0: "${DQM_GUI_RELEASE_VERSION}.tar.gz"
 %define _tmppath %{getenv:PWD}/dqmgui_rpm
 BuildRoot:  %{_tmppath}
-BuildArch: x86_64
+BuildArch: $BUILD_ARCH
 AutoReqProv: no
 
 %description
@@ -91,9 +92,10 @@ mkdir -p \$RPM_BUILD_ROOT
 tar -C %{getenv:PWD} -c dqmgui | tar -xC \$RPM_BUILD_ROOT
 
 %post
-#### extracting tar, moving older release to old_release folder
-#### This is meant to be run on P5 machines.
+# Remove existing installation dir
+rm -rf $INSTALLATION_DIR
 
+#### extracting tar, moving older release to old_release folder
 set -x
 
 HOST=\$(hostname)
@@ -101,12 +103,14 @@ HOST=\$(hostname)
 # Figure out the type of installation we're doing
 # and configure the CMSSW path in the P5 NFS.
 # This should probably not be hardcoded.
+IS_PRODUCTION=0
 DQMGUI_MODE_PATH=""
 if [ "\$HOST"="dqmsrv-c2a06-08-01" ];
 then
     DQMGUI_MODE_PATH="$CMSSW_BASE_DIR/current_playback"
 elif [ "\$HOST" = "dqmsrv-c2a06-07-01" ];
 then
+    IS_PRODUCTION=1
     DQMGUI_MODE_PATH="$CMSSW_BASE_DIR/current_production"
 else
     echo "This RPM is only meant to be installed in DQMGUI machines!"

@@ -4,8 +4,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=dqmdev
-WorkingDirectory=/dqmgui/scripts/alarm-system
+User=
+WorkingDirectory=
 ExecStart=/usr/bin/python3 ./alarm_system.py
 Restart=always
 RestartSec=10

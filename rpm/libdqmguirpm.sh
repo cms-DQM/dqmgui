@@ -140,8 +140,32 @@ file_name="cmswrapper.sh"
 CMSSW_VERSION=\$(grep -oh "\w*CMSSW_\w*" ./\$file_name)
 
 cd $INSTALLATION_DIR/scripts
-
 sed -i "2s/.*/\$CMSSW_VERSION/" cmssw_info
+
+# Update service files and scripts with appropriate variables.
+if [ \$IS_PRODUCTION -eq 1 ]; then
+   SERVICE_USER=dqmpro
+else
+   SERVICE_USER=dqmdev
+fi
+
+sed -Ei "s#User=.*#User=\$SERVICE_USER#" service/*.service
+sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts#" service/dqmgui-cleanup.service service/dqmgui.service
+sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts/alarm-system#" service/dqmgui-alarm.service service/dqmgui.service
+sed -Ei "s#ALLOWED_USER=.*#ALLOWED_USER=\$SERVICE_USER#" service/start-cleanup.sh service/start-gui.sh
+sed -Ei "s#INSTALLATION_DIR=.*#INSTALLATION_DIR=$INSTALLATION_DIR#" service/start-cleanup.sh service/start-gui.sh
+sed -Ei "s#CMSSW_BASE_DIR=.*#CMSSW_BASE_DIR=$CMSSW_BASE_DIR#" service/start-cleanup.sh service/start-gui.sh
+sed -Ei "s#DQMGUI_DATA_DIR=.*#DQMGUI_DATA_DIR=$DQMGUI_DATA_DIR#" service/start-cleanup.sh service/start-gui.sh
+
+# Move service files to the appropriate dir
+cp -r service/*.service /usr/lib/systemd/system/
+
+# Enable and start services
+for service in service/*.service; do
+    service_name=\$(echo \$service | cut -d. -f1)
+    systemctl enable \$service_name
+    systemctl start \$service_name
+done
 
 mkdir -p $DQMGUI_DATA_DIR
 # This does not look like a good idea...

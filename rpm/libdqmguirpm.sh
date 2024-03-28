@@ -5,7 +5,6 @@
 # Run this from the same directory where this script is.
 
 BUILD_ARCH=x86_64
-TOPDIR=$PWD
 
 # Where the RPM will install files to
 INSTALLATION_DIR=/dqmgui
@@ -92,8 +91,6 @@ mkdir -p \$RPM_BUILD_ROOT
 tar -C %{getenv:PWD} -c dqmgui | tar -xC \$RPM_BUILD_ROOT
 
 %post
-# Remove existing installation dir
-rm -rf $INSTALLATION_DIR
 
 #### extracting tar, moving older release to old_release folder
 set -x
@@ -105,19 +102,15 @@ HOST=\$(hostname)
 # This should probably not be hardcoded.
 IS_PRODUCTION=0
 DQMGUI_MODE_PATH=""
-if [ "\$HOST"="dqmsrv-c2a06-08-01" ];
+if [ "\$HOST" = "dqmsrv-c2a06-08-01" ];
 then
     DQMGUI_MODE_PATH="$CMSSW_BASE_DIR/current_playback"
-elif [ "\$HOST" = "dqmsrv-c2a06-07-01" ];
-then
+else
     IS_PRODUCTION=1
     DQMGUI_MODE_PATH="$CMSSW_BASE_DIR/current_production"
-else
-    echo "This RPM is only meant to be installed in DQMGUI machines!"
-    exit 1
 fi
 cd $INSTALLATION_DIR
-tar -xzvf ${DQM_GUI_RELEASE_VERSION}.tar.gz
+tar -xzf ${DQM_GUI_RELEASE_VERSION}.tar.gz
 
 # Overwrite existing installation files
 mv ./dqmgui-${DQM_GUI_RELEASE_VERSION}/* .
@@ -151,7 +144,7 @@ fi
 
 sed -Ei "s#User=.*#User=\$SERVICE_USER#" service/*.service
 sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts#" service/dqmgui-cleanup.service service/dqmgui.service
-sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts/alarm-system#" service/dqmgui-alarm.service service/dqmgui.service
+sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts/alarm-system#" service/dqmgui-alarm.service
 sed -Ei "s#ALLOWED_USER=.*#ALLOWED_USER=\$SERVICE_USER#" service/start-cleanup.sh service/start-gui.sh
 sed -Ei "s#INSTALLATION_DIR=.*#INSTALLATION_DIR=$INSTALLATION_DIR#" service/start-cleanup.sh service/start-gui.sh
 sed -Ei "s#CMSSW_BASE_DIR=.*#CMSSW_BASE_DIR=$CMSSW_BASE_DIR#" service/start-cleanup.sh service/start-gui.sh
@@ -159,6 +152,9 @@ sed -Ei "s#DQMGUI_DATA_DIR=.*#DQMGUI_DATA_DIR=$DQMGUI_DATA_DIR#" service/start-c
 
 # Move service files to the appropriate dir
 cp -r service/*.service /usr/lib/systemd/system/
+
+# Tell daemon to reload the updated files
+systemctl daemon-reload
 
 # Enable and start services
 for service in service/*.service; do

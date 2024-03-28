@@ -143,8 +143,11 @@ else
 fi
 
 sed -Ei "s#User=.*#User=\$SERVICE_USER#" service/*.service
-sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts#" service/dqmgui-cleanup.service service/dqmgui.service
-sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts/alarm-system#" service/dqmgui-alarm.service
+sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts/service#" service/dqmgui-cleanup.service service/dqmgui.service
+sed -Ei "s#WorkingDirectory=.*#WorkingDirectory=$INSTALLATION_DIR/scripts/service#" service/dqmgui-cleanup.service service/dqmgui.service
+sed -Ei "s#ExecStart=.*#ExecStart=/usr/bin/python3 $INSTALLATION_DIR/scripts/alarm-system/alarm_system.py#" service/dqmgui-alarm.service
+sed -Ei "s#ExecStart=.*#ExecStart=$INSTALLATION_DIR/scripts/service/start-cleanup.sh#" service/dqmgui-cleanup.service
+sed -Ei "s#ExecStart=.*#ExecStart=$INSTALLATION_DIR/scripts/service/start-gui.sh#" service/dqmgui.service
 sed -Ei "s#ALLOWED_USER=.*#ALLOWED_USER=\$SERVICE_USER#" service/start-cleanup.sh service/start-gui.sh
 sed -Ei "s#INSTALLATION_DIR=.*#INSTALLATION_DIR=$INSTALLATION_DIR#" service/start-cleanup.sh service/start-gui.sh
 sed -Ei "s#CMSSW_BASE_DIR=.*#CMSSW_BASE_DIR=$CMSSW_BASE_DIR#" service/start-cleanup.sh service/start-gui.sh

@@ -1,5 +1,8 @@
 # The DQM GUI
 
+> [!WARNING]
+> This project will no longer be maintained and is, therefore, archived.
+
 _Note: This is not the production DQMGUI yet._
 
 This package contains code for a DQMGUI similar to https://cmsweb.cern.ch/dqm/offline/
